@@ -37,6 +37,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
     { value: "adblue", label: "AdBlue" },
     { value: "other", label: "Other" },
     { value: "toll", label: "Toll", adminOnly: true },
+    { value: "top_up", label: "Top Up", isRevenue: true },
   ];
 
   // Filter categories based on user role
