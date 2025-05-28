@@ -242,48 +242,353 @@ export default function ActiveJourney() {
             </CardContent>
           </Card>
 
-          {/* Expense Tracker */}
+          {/* Journey Expenses */}
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <DollarSign className="text-green-600 mr-2" size={20} />
-                  Journey Expenses
-                </h3>
-                <Button 
-                  onClick={() => setShowExpenseModal(true)}
-                  variant="outline"
-                  size="sm"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Expense
-                </Button>
-              </div>
+              <h3 className="text-lg font-semibold mb-6 flex items-center">
+                <DollarSign className="text-green-600 mr-2" size={20} />
+                Journey Expenses
+              </h3>
               
-              {/* Expense List */}
-              <div className="space-y-3">
-                {expenses.length === 0 ? (
-                  <div className="text-center py-4 text-gray-500">
-                    <p>No expenses recorded yet</p>
-                  </div>
-                ) : (
-                  expenses.map((expense: any) => (
-                    <div key={expense.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center">
-                        {expense.category === 'fuel' && <Fuel className="text-orange-500 mr-3" size={16} />}
-                        {expense.category === 'food' && <Utensils className="text-blue-500 mr-3" size={16} />}
-                        {!['fuel', 'food'].includes(expense.category) && <DollarSign className="text-gray-500 mr-3" size={16} />}
-                        <div>
-                          <p className="font-medium capitalize">{expense.category}</p>
-                          <p className="text-sm text-gray-500">
-                            {new Date(expense.timestamp).toLocaleTimeString()}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="font-semibold loss-red">-₹{parseFloat(expense.amount).toLocaleString()}</span>
+              {/* Income Section */}
+              <div className="mb-6">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-green-800">HYD Inward Income</h4>
+                      <p className="text-sm text-green-600">(This is an income item)</p>
                     </div>
-                  ))
-                )}
+                    <div className="flex items-center space-x-3">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-3 py-2 w-32"
+                      />
+                      <button className="bg-green-600 text-white px-4 py-2 rounded flex items-center">
+                        Add <Plus className="w-4 h-4 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Expense Categories Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Row 1 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Loading</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Rope</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 2 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Fuel</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Food</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 3 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Toll</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Maintenance</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 4 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">RTO</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">NZB Unloading</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 5 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">HYD Unloading</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Miscellaneous</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 6 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Mechanical</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Electrical</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 7 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Body Works</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Tires Air</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 8 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Tire Change</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Tire Greasing</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 9 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Weighment</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">AdBlue</span>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                      />
+                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
+                        Add <Plus className="w-3 h-3 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Up Section */}
+              <div className="mt-6">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-green-800">Top Up</span>
+                    <div className="flex items-center space-x-3">
+                      <input 
+                        type="text" 
+                        placeholder="₹ Amount" 
+                        className="border border-gray-300 rounded px-3 py-2 w-32"
+                      />
+                      <button className="bg-green-600 text-white px-4 py-2 rounded flex items-center">
+                        Top Up <Plus className="w-4 h-4 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
