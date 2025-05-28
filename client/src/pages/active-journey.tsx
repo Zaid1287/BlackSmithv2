@@ -130,7 +130,7 @@ export default function ActiveJourney() {
   }
 
   const totalExpenses = expenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
-  const currentBalance = parseFloat(userActiveJourney.pouch) + parseFloat(userActiveJourney.security) - totalExpenses;
+  const currentBalance = parseFloat(userActiveJourney.pouch) - totalExpenses;
 
   return (
     <div className="p-6">
