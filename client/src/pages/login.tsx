@@ -114,13 +114,18 @@ export default function Login() {
             
             {/* Premium Logo */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-white text-gray-900 rounded-lg mb-6 shadow-xl">
-                <span className="font-serif font-bold text-xl">BS</span>
+              <div className="mb-6">
+                {/* Large B|S Logo */}
+                <div className="flex items-center justify-center mb-4">
+                  <span className="text-6xl font-serif font-bold text-white">B</span>
+                  <div className="w-0.5 h-16 bg-white mx-4"></div>
+                  <span className="text-6xl font-serif font-bold text-white">S</span>
+                </div>
+                {/* Company Name */}
+                <div className="text-white text-lg font-light tracking-[0.3em] uppercase">
+                  BLACKSMITH TRADERS
+                </div>
               </div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-100 bg-clip-text text-transparent mb-2 tracking-wide">
-                BLACKSMITH TRADERS
-              </h2>
-              <div className="w-12 h-0.5 bg-gradient-to-r from-gray-400 to-white mx-auto mb-3"></div>
               <h3 className="text-lg font-light text-gray-100 tracking-widest uppercase">Login Portal</h3>
             </div>
 
