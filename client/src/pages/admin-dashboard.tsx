@@ -189,12 +189,12 @@ export default function AdminDashboard() {
                         <div className="flex items-center space-x-4">
                           <div>
                             <h4 className="font-semibold">{journey.destination}</h4>
-                            <p className="text-sm text-gray-500">{journey.licensePlate} • Driver ID: {journey.driverId}</p>
+                            <p className="text-sm text-gray-500">License Plate: {journey.licensePlate}</p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-6">
                           <div className="text-right">
-                            <p className="text-sm text-gray-500">Balance:</p>
+                            <p className="text-sm text-gray-500">Current Balance:</p>
                             <p className={`font-semibold ${
                               parseFloat(journey.balance) >= 0 ? 'profit-green' : 'loss-red'
                             }`}>

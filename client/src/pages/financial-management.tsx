@@ -201,8 +201,8 @@ export default function FinancialManagement() {
                     }`}>
                       {journey.status.charAt(0).toUpperCase() + journey.status.slice(1)}
                     </Badge>
-                    <span className="text-sm text-gray-500">
-                      {journey.licensePlate}
+                    <span className={`text-sm font-medium ${parseFloat(journey.balance || "0") >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      ₹{parseFloat(journey.balance || "0").toLocaleString()}
                     </span>
                   </div>
                   <h3 className="font-semibold text-gray-900 mb-1">
@@ -213,8 +213,8 @@ export default function FinancialManagement() {
                   </p>
                   <div className="text-sm">
                     <div>
-                      <span className="text-gray-500">Driver:</span>
-                      <span className="font-medium ml-1">Aleem</span>
+                      <span className="text-gray-500">License Plate:</span>
+                      <span className="font-medium ml-1">{journey.licensePlate}</span>
                     </div>
                   </div>
                   <div className="mt-2 text-xs text-blue-600">
