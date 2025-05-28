@@ -52,46 +52,7 @@ export default function Login() {
     }
   };
 
-  // Demo login functions
-  const loginAsAdmin = async () => {
-    setIsLoading(true);
-    try {
-      await login("admin", "admin123");
-      toast({
-        title: "Login Successful",
-        description: "Welcome back, Admin!",
-      });
-      setLocation("/financial-management");
-    } catch (error: any) {
-      toast({
-        title: "Login Failed",
-        description: error.message || "Invalid credentials",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const loginAsDriver = async () => {
-    setIsLoading(true);
-    try {
-      await login("driver", "driver123");
-      toast({
-        title: "Login Successful",
-        description: "Welcome back, Driver!",
-      });
-      setLocation("/active-journeys");
-    } catch (error: any) {
-      toast({
-        title: "Login Failed",
-        description: error.message || "Invalid credentials",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800 flex relative overflow-hidden">
@@ -158,7 +119,7 @@ export default function Login() {
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 text-white border-0 rounded-xl font-semibold text-base tracking-wide shadow-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl"
+                className="w-full h-12 bg-gradient-to-r from-gray-700/80 to-gray-900/80 hover:from-gray-800 hover:to-black text-white border border-gray-400/30 rounded-xl font-semibold text-base tracking-wide shadow-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl backdrop-blur-sm"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -168,35 +129,6 @@ export default function Login() {
                   </div>
                 ) : "Login"}
               </Button>
-              
-              <div className="space-y-3 pt-3">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-white/20"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-3 bg-transparent text-gray-200/70 font-light tracking-widest uppercase">Demo Access</span>
-                  </div>
-                </div>
-
-                <Button 
-                  type="button" 
-                  onClick={loginAsAdmin}
-                  className="w-full h-10 bg-gradient-to-r from-gray-700/80 to-gray-900/80 hover:from-gray-800 hover:to-black text-white border border-gray-400/30 rounded-lg font-medium tracking-wide transition-all duration-300 backdrop-blur-sm"
-                  disabled={isLoading}
-                >
-                  Executive Access
-                </Button>
-                
-                <Button 
-                  type="button" 
-                  onClick={loginAsDriver}
-                  className="w-full h-10 bg-white/10 hover:bg-white/20 text-white border border-white/30 rounded-lg font-medium tracking-wide transition-all duration-300 backdrop-blur-sm"
-                  disabled={isLoading}
-                >
-                  Driver Access
-                </Button>
-              </div>
             </form>
 
             <div className="text-center mt-8 pt-6 border-t border-white/10">
