@@ -17,6 +17,7 @@ import JourneyHistory from "@/pages/journey-history";
 import Salaries from "@/pages/salaries";
 import FinancialManagement from "@/pages/financial-management";
 import ActiveJourney from "@/pages/active-journey";
+import MobileDriver from "@/pages/mobile-driver";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/sidebar";
 
@@ -132,6 +133,12 @@ function Router() {
       <Route path="/salaries">
         <ProtectedRoute allowedRoles={["admin"]}>
           <Salaries />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/mobile-driver">
+        <ProtectedRoute allowedRoles={["driver"]}>
+          <MobileDriver />
         </ProtectedRoute>
       </Route>
 

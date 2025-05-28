@@ -21,6 +21,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["admin", "driver"] },
   { name: "Active Journeys", href: "/active-journeys", icon: Route, roles: ["driver"] },
   { name: "Journey History", href: "/journey-history", icon: History, roles: ["driver"] },
+  { name: "Mobile Driver App", href: "/mobile-driver", icon: Globe, roles: ["driver"] },
   { name: "Manage Users", href: "/manage-users", icon: Users, roles: ["admin"] },
   { name: "Manage Vehicles", href: "/manage-vehicles", icon: Truck, roles: ["admin"] },
   { name: "Financial Management", href: "/financial-management", icon: BarChart3, roles: ["admin"] },
