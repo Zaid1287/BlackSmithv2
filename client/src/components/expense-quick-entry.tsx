@@ -69,7 +69,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
       return response.json();
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/journeys", journeyId, "expenses"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/journeys/${journeyId}/expenses`] });
       queryClient.invalidateQueries({ queryKey: ["/api/journeys/active"] });
       
       // Clear the amount for this category
@@ -79,8 +79,8 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
       }));
       
       toast({
-        title: "Expense Added",
-        description: `₹${variables.amount.toLocaleString()} added to ${variables.category.replace('_', ' ')}`,
+        title: "Added expense",
+        description: `₹${variables.amount.toLocaleString()}`,
       });
     },
     onError: (error: any) => {
