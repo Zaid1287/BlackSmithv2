@@ -88,6 +88,13 @@ export default function FinancialManagement() {
   const totalExpenses = parseFloat(financialStats?.expenses || "0");
   const netProfit = totalRevenue - totalExpenses;
 
+  // Calculate HYD Inward and Top-up amounts for selected journey
+  const hydInwardAmount = journeyExpenses?.filter((expense: any) => expense.category === 'hyd_inward')
+    .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0) || 0;
+  
+  const topUpAmount = journeyExpenses?.filter((expense: any) => expense.category === 'top_up')
+    .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0) || 0;
+
   return (
     <div className="p-6">
       {/* Tab Navigation */}
@@ -304,7 +311,9 @@ export default function FinancialManagement() {
                     <div className="grid grid-cols-2 gap-6">
                       <div>
                         <p className="text-sm text-gray-500 mb-1">HYD Inward</p>
-                        <p className="text-lg font-semibold">N/A</p>
+                        <p className="text-lg font-semibold">
+                          {hydInwardAmount > 0 ? `₹${hydInwardAmount.toLocaleString()}` : 'N/A'}
+                        </p>
                       </div>
                       
                       <div>
@@ -316,7 +325,7 @@ export default function FinancialManagement() {
                     <div className="grid grid-cols-2 gap-6">
                       <div>
                         <p className="text-sm text-gray-500 mb-1">Total Top-ups</p>
-                        <p className="text-lg font-semibold text-green-600">+₹0</p>
+                        <p className="text-lg font-semibold text-green-600">+₹{topUpAmount.toLocaleString()}</p>
                       </div>
                       
                       <div>
