@@ -18,8 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/hooks/use-auth";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["admin", "driver"] },
-  { name: "Active Journeys", href: "/active-journeys", icon: Route, roles: ["driver"] },
+  { name: "Dashboard", href: "/active-journeys", icon: LayoutDashboard, roles: ["driver"] },
+  { name: "Dashboard", href: "/financial-management", icon: LayoutDashboard, roles: ["admin"] },
   { name: "Journey History", href: "/journey-history", icon: History, roles: ["driver"] },
   { name: "Mobile Driver App", href: "/mobile-driver", icon: Globe, roles: ["driver"] },
   { name: "Manage Users", href: "/manage-users", icon: Users, roles: ["admin"] },

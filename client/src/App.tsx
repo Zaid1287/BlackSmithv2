@@ -91,14 +91,12 @@ function Router() {
   return (
     <Switch>
       <Route path="/login">
-        {user ? <Redirect to="/dashboard" /> : <Login />}
+        {user ? (
+          user.role === "admin" ? <Redirect to="/financial-management" /> : <Redirect to="/active-journeys" />
+        ) : <Login />}
       </Route>
       
-      <Route path="/dashboard">
-        <ProtectedRoute>
-          {user?.role === "admin" ? <FinancialManagement /> : <AdminDashboard />}
-        </ProtectedRoute>
-      </Route>
+
 
       <Route path="/active-journeys">
         <ProtectedRoute allowedRoles={["driver"]}>
@@ -143,7 +141,9 @@ function Router() {
       </Route>
 
       <Route path="/">
-        {user ? <Redirect to="/dashboard" /> : <Redirect to="/login" />}
+        {user ? (
+          user.role === "admin" ? <Redirect to="/financial-management" /> : <Redirect to="/active-journeys" />
+        ) : <Redirect to="/login" />}
       </Route>
 
       <Route component={NotFound} />

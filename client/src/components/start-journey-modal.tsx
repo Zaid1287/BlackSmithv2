@@ -108,60 +108,30 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
     createJourneyMutation.mutate(data);
   };
 
-  const takePhoto = async () => {
-    try {
-      // Check if camera is available
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        toast({
-          title: "Camera not available",
-          description: "Camera access is not supported on this device",
-          variant: "destructive"
-        });
-        return;
+  const handlePhotoCapture = () => {
+    // Create a file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment'; // Prefer camera on mobile
+    
+    input.onchange = (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          setPhotos(prev => [...prev, result]);
+          toast({
+            title: "Photo added",
+            description: "Photo uploaded successfully"
+          });
+        };
+        reader.readAsDataURL(file);
       }
-
-      // Request camera permission
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } // Use back camera on mobile
-      });
-
-      // Create video element to capture photo
-      const video = document.createElement('video');
-      video.srcObject = stream;
-      video.play();
-
-      // Wait for video to load
-      video.onloadedmetadata = () => {
-        // Create canvas to capture frame
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(video, 0, 0);
-        
-        // Convert to base64
-        const photoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        
-        // Add photo to list
-        setPhotos(prev => [...prev, photoDataUrl]);
-        
-        // Stop camera stream
-        stream.getTracks().forEach(track => track.stop());
-        
-        toast({
-          title: "Photo captured",
-          description: "Photo added successfully"
-        });
-      };
-    } catch (error) {
-      console.error('Camera error:', error);
-      toast({
-        title: "Camera access denied",
-        description: "Please enable camera permissions to take photos",
-        variant: "destructive"
-      });
-    }
+    };
+    
+    input.click();
   };
 
   const handleVehicleSelect = (vehicleId: string) => {
@@ -283,7 +253,7 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700">Document Photos</label>
-                <Button type="button" variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800" onClick={takePhoto}>
+                <Button type="button" variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800" onClick={handlePhotoCapture}>
                   <Camera className="w-4 h-4 mr-1" />
                   Take Photo
                 </Button>
