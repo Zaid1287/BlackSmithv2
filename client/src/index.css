@@ -13,8 +13,8 @@
   --card-foreground: 20 14.3% 4.1%;
   --border: 20 5.9% 90%;
   --input: 20 5.9% 90%;
-  --primary: 207 90% 54%;
-  --primary-foreground: 211 100% 99%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 210 40% 98%;
   --secondary: 60 4.8% 95.9%;
   --secondary-foreground: 24 9.8% 10%;
   --accent: 60 4.8% 95.9%;
@@ -24,9 +24,11 @@
   --ring: 20 14.3% 4.1%;
   --radius: 0.5rem;
   
-  /* Custom colors for BlackSmith Traders */
-  --bs-dark: 31 41% 12%; /* #1F2937 */
-  --bs-blue: 207 90% 54%; /* #3B82F6 */
+  /* Custom colors for BlackSmith Traders - Dark Blue Theme */
+  --bs-dark: 220 39% 11%; /* #1E293B - Dark blue instead of brown */
+  --bs-primary: 217 91% 60%; /* #3B82F6 - Blue */
+  --bs-secondary: 221 83% 53%; /* #3730A3 - Deeper blue */
+  --bs-accent: 213 94% 68%; /* #60A5FA - Light blue */
   --bs-green: 142 71% 45%; /* #10B981 */
   --bs-orange: 38 92% 50%; /* #F59E0B */
   --bs-red: 0 84% 60%; /* #EF4444 */
@@ -46,8 +48,8 @@
   --card-foreground: 0 0% 98%;
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
-  --primary: 207 90% 54%;
-  --primary-foreground: 211 100% 99%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 210 40% 98%;
   --secondary: 240 3.7% 15.9%;
   --secondary-foreground: 0 0% 98%;
   --accent: 240 3.7% 15.9%;
@@ -78,7 +80,7 @@
 }
 
 .bs-gradient-blue {
-  background: linear-gradient(135deg, hsl(var(--bs-blue)), hsl(207 90% 64%));
+  background: linear-gradient(135deg, hsl(var(--bs-primary)), hsl(217 91% 70%));
 }
 
 .bs-gradient-green {
