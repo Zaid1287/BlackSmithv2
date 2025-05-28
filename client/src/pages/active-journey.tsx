@@ -63,7 +63,15 @@ export default function ActiveJourney() {
 
   const completeJourneyMutation = useMutation({
     mutationFn: async (journeyId: number) => {
-      const response = await apiRequest("PATCH", `/api/journeys/${journeyId}/complete`);
+      const response = await fetch(`/api/journeys/${journeyId}/complete`, {
+        method: "PATCH",
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to complete journey");
       return response.json();
     },
     onSuccess: () => {
