@@ -46,15 +46,21 @@ interface AddExpenseModalProps {
 }
 
 const allExpenseCategories = [
+  { value: "loading", label: "Loading" },
+  { value: "rope", label: "Rope" },
   { value: "fuel", label: "Fuel" },
   { value: "food", label: "Food" },
   { value: "toll", label: "Toll", adminOnly: true },
   { value: "maintenance", label: "Maintenance" },
-  { value: "hyd_inward", label: "HYD Inward", adminOnly: true },
-  { value: "loading", label: "Loading" },
-  { value: "rope", label: "Rope" },
-  { value: "unloading", label: "Unloading" },
   { value: "rto", label: "RTO" },
+  { value: "unloading", label: "Unloading" },
+  { value: "hyd_inward", label: "HYD Inward", adminOnly: true },
+  { value: "miscellaneous", label: "Miscellaneous" },
+  { value: "mechanical", label: "Mechanical" },
+  { value: "body_works", label: "Body Works" },
+  { value: "tires_air", label: "Tires Air" },
+  { value: "weighment", label: "Weighment" },
+  { value: "adblue", label: "AdBlue" },
   { value: "other", label: "Other" },
 ];
 
