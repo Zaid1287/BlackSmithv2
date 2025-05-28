@@ -57,7 +57,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
         body: JSON.stringify({
           journeyId,
           category: data.category,
-          amount: data.amount,
+          amount: data.amount.toString(),
           description: "",
         }),
       });
