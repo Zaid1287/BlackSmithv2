@@ -75,6 +75,11 @@ export default function AddExpenseModal({ open, onOpenChange, journeyId }: AddEx
     return user?.role === 'admin'; // Only show admin-only categories to admins
   });
 
+  // Log the filtered categories for debugging
+  console.log('User role:', user?.role);
+  console.log('All categories:', allExpenseCategories.map(c => ({ label: c.label, adminOnly: c.adminOnly || false })));
+  console.log('Filtered categories for user:', expenseCategories.map(c => c.label));
+
 
 
   const form = useForm<ExpenseFormData>({
