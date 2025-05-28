@@ -75,57 +75,67 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          {/* Empty State */}
-          <Card className="border-2 border-dashed border-gray-200 p-12 text-center mb-8">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Truck className="text-blue-600" size={32} />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Ready to Start Your Journey?</h2>
-            <p className="text-gray-500 mb-6">You don't have any active journeys at the moment. Start a new journey to begin tracking your route, expenses, and more.</p>
-            <Button 
-              onClick={() => setShowJourneyModal(true)}
-              className="bg-gray-900 hover:bg-gray-800"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Start New Journey
-            </Button>
-          </Card>
+          {/* Main Action Area */}
+          <div className="flex justify-center mb-8">
+            <Card className="w-full max-w-2xl border-2 border-gray-200">
+              <CardContent className="p-12 text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-6">
+                  <Truck className="text-gray-600" size={32} />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">Ready to Start Your Journey?</h2>
+                <p className="text-gray-600 mb-8 max-w-md mx-auto">You don't have any active journeys at the moment. Start a new journey to begin tracking your route, expenses, and more.</p>
+                <Button 
+                  onClick={() => setShowJourneyModal(true)}
+                  className="bg-gray-900 hover:bg-gray-800 px-8 py-3"
+                  size="lg"
+                >
+                  Start New Journey
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Feature Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
               <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                    <MapPin className="text-blue-600" size={24} />
+                <div className="space-y-4">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <MapPin className="text-blue-600" size={20} />
                   </div>
-                  <h3 className="font-semibold text-gray-900">Journey Tracking</h3>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Journey Tracking</h3>
+                    <p className="text-gray-600 text-sm">Track your location and speed in real-time during your journey.</p>
+                  </div>
                 </div>
-                <p className="text-gray-600 text-sm">Track your location and speed in real-time during your journey.</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                    <Receipt className="text-green-600" size={24} />
+                <div className="space-y-4">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Receipt className="text-green-600" size={20} />
                   </div>
-                  <h3 className="font-semibold text-gray-900">Expense Management</h3>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Expense Management</h3>
+                    <p className="text-gray-600 text-sm">Easily log and track all your journey-related expenses.</p>
+                  </div>
                 </div>
-                <p className="text-gray-600 text-sm">Easily log and track all your journey-related expenses.</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
-                    <Flag className="text-orange-600" size={24} />
+                <div className="space-y-4">
+                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <Flag className="text-orange-600" size={20} />
                   </div>
-                  <h3 className="font-semibold text-gray-900">Journey Milestones</h3>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Journey Milestones</h3>
+                    <p className="text-gray-600 text-sm">Track important events and get notifications during your journey.</p>
+                  </div>
                 </div>
-                <p className="text-gray-600 text-sm">Track important events and get notifications during your journey.</p>
               </CardContent>
             </Card>
           </div>

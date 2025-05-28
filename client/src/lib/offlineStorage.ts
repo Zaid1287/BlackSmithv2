@@ -157,10 +157,13 @@ class OfflineStorageManager {
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction(['offlineActions'], 'readonly');
       const store = transaction.objectStore('offlineActions');
-      const index = store.index('synced');
-      const request = index.getAll(false);
+      const request = store.getAll();
 
-      request.onsuccess = () => resolve(request.result);
+      request.onsuccess = () => {
+        const allActions = request.result;
+        const unsyncedActions = allActions.filter(action => !action.synced);
+        resolve(unsyncedActions);
+      };
       request.onerror = () => reject(request.error);
     });
   }
@@ -181,34 +184,39 @@ class OfflineStorageManager {
   async clearSyncedData(): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
     
-    const transaction = this.db.transaction(['offlineActions', 'locationUpdates'], 'readwrite');
-    
-    // Clear synced actions
-    const actionStore = transaction.objectStore('offlineActions');
-    const actionIndex = actionStore.index('synced');
-    const actionRequest = actionIndex.openCursor(true);
-    
-    actionRequest.onsuccess = (event) => {
-      const cursor = (event.target as IDBRequest).result;
-      if (cursor) {
-        cursor.delete();
-        cursor.continue();
-      }
-    };
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction(['offlineActions', 'locationUpdates'], 'readwrite');
+      
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      
+      // Clear synced actions
+      const actionStore = transaction.objectStore('offlineActions');
+      const actionRequest = actionStore.getAll();
+      
+      actionRequest.onsuccess = () => {
+        const actions = actionRequest.result;
+        actions.forEach(action => {
+          if (action.synced) {
+            actionStore.delete(action.id);
+          }
+        });
+      };
 
-    // Clear old location updates (keep last 24 hours)
-    const locationStore = transaction.objectStore('locationUpdates');
-    const cutoffTime = Date.now() - (24 * 60 * 60 * 1000);
-    const locationIndex = locationStore.index('timestamp');
-    const locationRequest = locationIndex.openCursor(IDBKeyRange.upperBound(cutoffTime));
-    
-    locationRequest.onsuccess = (event) => {
-      const cursor = (event.target as IDBRequest).result;
-      if (cursor) {
-        cursor.delete();
-        cursor.continue();
-      }
-    };
+      // Clear old location updates (keep last 24 hours)
+      const locationStore = transaction.objectStore('locationUpdates');
+      const cutoffTime = Date.now() - (24 * 60 * 60 * 1000);
+      const locationRequest = locationStore.getAll();
+      
+      locationRequest.onsuccess = () => {
+        const locations = locationRequest.result;
+        locations.forEach(location => {
+          if (new Date(location.timestamp).getTime() < cutoffTime) {
+            locationStore.delete(location.id);
+          }
+        });
+      };
+    });
   }
 }
 
