@@ -51,7 +51,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          ...getAuthHeaders(),
         },
         credentials: "include",
         body: JSON.stringify({
