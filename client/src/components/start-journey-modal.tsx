@@ -49,6 +49,7 @@ interface StartJourneyModalProps {
 export default function StartJourneyModal({ open, onOpenChange }: StartJourneyModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const form = useForm<JourneyFormData>({
     resolver: zodResolver(journeySchema),
@@ -105,6 +106,62 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
 
   const onSubmit = (data: JourneyFormData) => {
     createJourneyMutation.mutate(data);
+  };
+
+  const takePhoto = async () => {
+    try {
+      // Check if camera is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast({
+          title: "Camera not available",
+          description: "Camera access is not supported on this device",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Request camera permission
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } // Use back camera on mobile
+      });
+
+      // Create video element to capture photo
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.play();
+
+      // Wait for video to load
+      video.onloadedmetadata = () => {
+        // Create canvas to capture frame
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(video, 0, 0);
+        
+        // Convert to base64
+        const photoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        
+        // Add photo to list
+        setPhotos(prev => [...prev, photoDataUrl]);
+        
+        // Stop camera stream
+        stream.getTracks().forEach(track => track.stop());
+        
+        toast({
+          title: "Photo captured",
+          description: "Photo added successfully"
+        });
+      };
+    } catch (error) {
+      console.error('Camera error:', error);
+      toast({
+        title: "Camera access denied",
+        description: "Please enable camera permissions to take photos",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleVehicleSelect = (vehicleId: string) => {
@@ -226,14 +283,37 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700">Document Photos</label>
-                <Button type="button" variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
+                <Button type="button" variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800" onClick={takePhoto}>
                   <Camera className="w-4 h-4 mr-1" />
                   Take Photo
                 </Button>
               </div>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <Camera className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">Upload or take photos of required documents</p>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                {photos.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    {photos.map((photo, index) => (
+                      <div key={index} className="relative">
+                        <img 
+                          src={photo} 
+                          alt={`Document ${index + 1}`}
+                          className="w-full h-24 object-cover rounded"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPhotos(prev => prev.filter((_, i) => i !== index))}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <Camera className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Upload or take photos of required documents</p>
+                  </div>
+                )}
               </div>
             </div>
 
