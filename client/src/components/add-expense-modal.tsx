@@ -28,6 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 const expenseSchema = z.object({
   journeyId: z.number(),
@@ -44,12 +45,12 @@ interface AddExpenseModalProps {
   journeyId: number;
 }
 
-const expenseCategories = [
+const allExpenseCategories = [
   { value: "fuel", label: "Fuel" },
   { value: "food", label: "Food" },
-  { value: "toll", label: "Toll" },
+  { value: "toll", label: "Toll", adminOnly: true },
   { value: "maintenance", label: "Maintenance" },
-  { value: "hyd_inward", label: "HYD Inward" },
+  { value: "hyd_inward", label: "HYD Inward", adminOnly: true },
   { value: "loading", label: "Loading" },
   { value: "rope", label: "Rope" },
   { value: "unloading", label: "Unloading" },
@@ -60,6 +61,12 @@ const expenseCategories = [
 export default function AddExpenseModal({ open, onOpenChange, journeyId }: AddExpenseModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  // Filter categories based on user role
+  const expenseCategories = allExpenseCategories.filter(category => 
+    !category.adminOnly || user?.role === 'admin'
+  );
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
