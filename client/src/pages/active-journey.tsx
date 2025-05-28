@@ -587,10 +587,6 @@ export default function ActiveJourney() {
                   <span className="text-gray-600">Total Expenses:</span>
                   <span className="font-medium loss-red">-₹{totalExpenses.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Fuel Cost (Est.):</span>
-                  <span className="font-medium text-orange-600">-₹{Math.round(mockDistance * 2.5).toLocaleString()}</span>
-                </div>
                 <hr className="my-2" />
                 <div className="flex justify-between font-semibold">
                   <span>Net Balance:</span>
