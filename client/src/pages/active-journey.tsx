@@ -21,6 +21,7 @@ import { getAuthHeaders } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
 import StartJourneyModal from "@/components/start-journey-modal";
 import AddExpenseModal from "@/components/add-expense-modal";
+import ExpenseQuickEntry from "@/components/expense-quick-entry";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
