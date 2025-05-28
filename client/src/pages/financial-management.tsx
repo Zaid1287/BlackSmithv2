@@ -86,206 +86,186 @@ export default function FinancialManagement() {
   const profitMargin = financialStats?.revenue > 0 ? (netProfit / financialStats.revenue) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-        <p className="text-gray-600">Welcome to BlackSmith Traders management console</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex">
+      {/* Left Sidebar - Controls */}
+      <div className="w-80 bg-white/10 backdrop-blur-lg border-r border-white/20 p-8">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-white mb-2">Control Panel</h2>
+          <p className="text-blue-200">Manage fleet operations</p>
+        </div>
 
-      {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* Total Fleet */}
-        <Card className="bg-white border-0 shadow-md hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
+        {/* Quick Stats */}
+        <div className="space-y-4 mb-8">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Total Fleet</p>
-                <p className="text-2xl font-bold text-gray-900">{vehicles?.length || 0}</p>
-                <div className="flex items-center mt-2">
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                    {dashboardStats?.vehicles?.available || 0} Available
-                  </Badge>
-                </div>
+                <p className="text-blue-200 text-sm">Fleet Size</p>
+                <p className="text-2xl font-bold text-white">{vehicles?.length || 0}</p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-full">
-                <Truck className="w-6 h-6 text-blue-600" />
-              </div>
+              <Truck className="w-8 h-8 text-blue-300" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Active Drivers */}
-        <Card className="bg-white border-0 shadow-md hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Active Drivers</p>
-                <p className="text-2xl font-bold text-gray-900">{users?.filter(u => u.role === 'driver')?.length || 0}</p>
-                <div className="flex items-center mt-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mr-1" />
-                  <span className="text-sm text-green-600">All Active</span>
-                </div>
+                <p className="text-blue-200 text-sm">Active Drivers</p>
+                <p className="text-2xl font-bold text-white">{users?.filter(u => u.role === 'driver')?.length || 0}</p>
               </div>
-              <div className="p-3 bg-green-100 rounded-full">
-                <Users className="w-6 h-6 text-green-600" />
-              </div>
+              <Users className="w-8 h-8 text-green-300" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Total Journeys */}
-        <Card className="bg-white border-0 shadow-md hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Total Journeys</p>
-                <p className="text-2xl font-bold text-gray-900">{journeys?.length || 0}</p>
-                <div className="flex items-center mt-2">
-                  <ArrowUpRight className="w-4 h-4 text-blue-500 mr-1" />
-                  <span className="text-sm text-blue-600">This Month</span>
-                </div>
+                <p className="text-blue-200 text-sm">Total Journeys</p>
+                <p className="text-2xl font-bold text-white">{journeys?.length || 0}</p>
               </div>
-              <div className="p-3 bg-orange-100 rounded-full">
-                <MapPin className="w-6 h-6 text-orange-600" />
-              </div>
+              <MapPin className="w-8 h-8 text-orange-300" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Net Profit */}
-        <Card className="bg-white border-0 shadow-md hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Net Profit</p>
-                <p className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <p className="text-blue-200 text-sm">Net Profit</p>
+                <p className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-300' : 'text-red-300'}`}>
                   ₹{Math.abs(netProfit).toLocaleString()}
                 </p>
-                <div className="flex items-center mt-2">
-                  {netProfit >= 0 ? (
-                    <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
-                  ) : (
-                    <ArrowDownRight className="w-4 h-4 text-red-500 mr-1" />
-                  )}
-                  <span className={`text-sm ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {profitMargin.toFixed(1)}% margin
-                  </span>
-                </div>
               </div>
-              <div className={`p-3 rounded-full ${netProfit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-                <TrendingUp className={`w-6 h-6 ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
-              </div>
+              <TrendingUp className={`w-8 h-8 ${netProfit >= 0 ? 'text-green-300' : 'text-red-300'}`} />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0 h-12">
+            <Users className="w-5 h-5 mr-2" />
+            Manage Users
+          </Button>
+          <Button className="w-full bg-green-600 hover:bg-green-700 text-white border-0 h-12">
+            <Truck className="w-5 h-5 mr-2" />
+            Fleet Management
+          </Button>
+          <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white border-0 h-12">
+            <DollarSign className="w-5 h-5 mr-2" />
+            Salary Management
+          </Button>
+          <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0 h-12">
+            <TrendingUp className="w-5 h-5 mr-2" />
+            Financial Reports
+          </Button>
+        </div>
       </div>
 
-      {/* Financial Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Revenue & Expenses */}
-        <Card className="bg-white border-0 shadow-md">
-          <div className="p-6 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900">Financial Overview</h3>
-            <p className="text-sm text-gray-600">Revenue and expenses breakdown</p>
-          </div>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+      {/* Main Content Area */}
+      <div className="flex-1 p-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <p className="text-blue-200 text-lg">BlackSmith Traders Management Console</p>
+        </div>
+
+        {/* Main Statistics Display */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Financial Overview */}
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+            <h3 className="text-2xl font-bold text-white mb-6">Financial Overview</h3>
+            
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className="p-2 bg-green-100 rounded-full mr-3">
-                    <DollarSign className="w-5 h-5 text-green-600" />
+                  <div className="p-3 bg-green-500/20 rounded-full mr-4">
+                    <DollarSign className="w-6 h-6 text-green-300" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                    <p className="text-xl font-bold text-green-600">₹{(financialStats?.revenue || 0).toLocaleString()}</p>
+                    <p className="text-green-200 text-sm">Total Revenue</p>
+                    <p className="text-3xl font-bold text-green-300">₹{(financialStats?.revenue || 0).toLocaleString()}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className="p-2 bg-red-100 rounded-full mr-3">
-                    <AlertCircle className="w-5 h-5 text-red-600" />
+                  <div className="p-3 bg-red-500/20 rounded-full mr-4">
+                    <AlertCircle className="w-6 h-6 text-red-300" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Expenses</p>
-                    <p className="text-xl font-bold text-red-600">₹{(financialStats?.expenses || 0).toLocaleString()}</p>
+                    <p className="text-red-200 text-sm">Total Expenses</p>
+                    <p className="text-3xl font-bold text-red-300">₹{(financialStats?.expenses || 0).toLocaleString()}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-gray-100">
+              <div className="pt-6 border-t border-white/20">
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-medium text-gray-900">Net Result</span>
-                  <span className={`text-xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className="text-xl font-medium text-white">Net Result</span>
+                  <span className={`text-3xl font-bold ${netProfit >= 0 ? 'text-green-300' : 'text-red-300'}`}>
                     {netProfit >= 0 ? '+' : '-'}₹{Math.abs(netProfit).toLocaleString()}
                   </span>
                 </div>
+                <p className="text-blue-200 text-sm mt-2">
+                  {profitMargin.toFixed(1)}% profit margin
+                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Fleet Status */}
-        <Card className="bg-white border-0 shadow-md">
-          <div className="p-6 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900">Fleet Status</h3>
-            <p className="text-sm text-gray-600">Current vehicle availability</p>
           </div>
-          <CardContent className="p-6">
+
+          {/* Fleet Status */}
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+            <h3 className="text-2xl font-bold text-white mb-6">Fleet Status</h3>
+            
             <div className="space-y-4">
-              {vehicles?.slice(0, 4).map((vehicle, index) => (
-                <div key={vehicle.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              {vehicles?.slice(0, 5).map((vehicle) => (
+                <div key={vehicle.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
                   <div className="flex items-center">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                    <div className="w-3 h-3 bg-green-400 rounded-full mr-4"></div>
                     <div>
-                      <p className="font-medium text-gray-900">{vehicle.licensePlate}</p>
-                      <p className="text-sm text-gray-600">{vehicle.model}</p>
+                      <p className="font-semibold text-white">{vehicle.licensePlate}</p>
+                      <p className="text-blue-200 text-sm">{vehicle.model}</p>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
                     Available
                   </Badge>
                 </div>
               )) || (
-                <div className="text-center py-8">
-                  <Truck className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p className="text-gray-500">No vehicles registered</p>
+                <div className="text-center py-12">
+                  <Truck className="w-16 h-16 mx-auto mb-4 text-white/30" />
+                  <p className="text-white/60">No vehicles registered</p>
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <Card className="bg-white border-0 shadow-md">
-        <div className="p-6 border-b border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
-          <p className="text-sm text-gray-600">Manage your fleet and operations</p>
-        </div>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Button className="h-20 flex flex-col items-center justify-center bg-blue-600 hover:bg-blue-700">
-              <Users className="w-6 h-6 mb-2" />
-              <span>Manage Users</span>
-            </Button>
-            <Button className="h-20 flex flex-col items-center justify-center bg-green-600 hover:bg-green-700">
-              <Truck className="w-6 h-6 mb-2" />
-              <span>Fleet Management</span>
-            </Button>
-            <Button className="h-20 flex flex-col items-center justify-center bg-orange-600 hover:bg-orange-700">
-              <DollarSign className="w-6 h-6 mb-2" />
-              <span>Salary Management</span>
-            </Button>
-            <Button className="h-20 flex flex-col items-center justify-center bg-purple-600 hover:bg-purple-700">
-              <TrendingUp className="w-6 h-6 mb-2" />
-              <span>Financial Reports</span>
-            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Live Metrics Bar */}
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="text-center">
+              <p className="text-blue-200 text-sm mb-2">Active Journeys</p>
+              <p className="text-3xl font-bold text-white">0</p>
+              <p className="text-blue-300 text-xs">Currently running</p>
+            </div>
+            <div className="text-center">
+              <p className="text-blue-200 text-sm mb-2">Monthly Revenue</p>
+              <p className="text-3xl font-bold text-green-300">₹{(financialStats?.revenue || 0).toLocaleString()}</p>
+              <p className="text-green-400 text-xs">This month</p>
+            </div>
+            <div className="text-center">
+              <p className="text-blue-200 text-sm mb-2">Fuel Efficiency</p>
+              <p className="text-3xl font-bold text-orange-300">24.5</p>
+              <p className="text-orange-400 text-xs">km/liter avg</p>
+            </div>
+            <div className="text-center">
+              <p className="text-blue-200 text-sm mb-2">Driver Rating</p>
+              <p className="text-3xl font-bold text-yellow-300">4.8</p>
+              <p className="text-yellow-400 text-xs">Average rating</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
