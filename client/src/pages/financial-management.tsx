@@ -3,8 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, DollarSign, Route, ArrowUpRight } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
+import { Link, useLocation } from "wouter";
 
 export default function FinancialManagement() {
+  const [location] = useLocation();
+  
   const { data: financialStats, isLoading } = useQuery({
     queryKey: ["/api/dashboard/financial"],
     queryFn: async () => {
@@ -64,16 +67,34 @@ export default function FinancialManagement() {
   return (
     <div className="p-6">
       {/* Tab Navigation */}
-      <div className="flex space-x-6 mb-8 border-b">
-        <button className="pb-3 border-b-2 border-gray-900 font-medium text-gray-900">
-          Overview
-        </button>
-        <button className="pb-3 text-gray-500 hover:text-gray-700">
-          Fleet Management
-        </button>
-        <button className="pb-3 text-gray-500 hover:text-gray-700">
-          Finances
-        </button>
+      <div className="flex space-x-6 mb-8 border-b border-gray-200">
+        <Link href="/financial-management">
+          <button className={`pb-3 font-medium transition-colors ${
+            location === '/financial-management' 
+              ? 'border-b-2 border-gray-900 text-gray-900' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}>
+            Overview
+          </button>
+        </Link>
+        <Link href="/manage-vehicles">
+          <button className={`pb-3 font-medium transition-colors ${
+            location === '/manage-vehicles' 
+              ? 'border-b-2 border-gray-900 text-gray-900' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}>
+            Fleet Management
+          </button>
+        </Link>
+        <Link href="/salaries">
+          <button className={`pb-3 font-medium transition-colors ${
+            location === '/salaries' 
+              ? 'border-b-2 border-gray-900 text-gray-900' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}>
+            Finances
+          </button>
+        </Link>
       </div>
 
       {/* Main Dashboard Cards */}

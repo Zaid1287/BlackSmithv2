@@ -19,6 +19,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { getAuthHeaders } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { Link, useLocation } from "wouter";
 
 const vehicleSchema = z.object({
   licensePlate: z.string().min(1, "License plate is required"),
@@ -28,6 +29,7 @@ const vehicleSchema = z.object({
 type VehicleFormData = z.infer<typeof vehicleSchema>;
 
 export default function ManageVehicles() {
+  const [location] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showAddModal, setShowAddModal] = useState(false);
@@ -143,6 +145,37 @@ export default function ManageVehicles() {
 
   return (
     <div className="p-6">
+      {/* Tab Navigation */}
+      <div className="flex space-x-6 mb-8 border-b border-gray-200">
+        <Link href="/financial-management">
+          <button className={`pb-3 font-medium transition-colors ${
+            location === '/financial-management' 
+              ? 'border-b-2 border-gray-900 text-gray-900' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}>
+            Overview
+          </button>
+        </Link>
+        <Link href="/manage-vehicles">
+          <button className={`pb-3 font-medium transition-colors ${
+            location === '/manage-vehicles' 
+              ? 'border-b-2 border-gray-900 text-gray-900' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}>
+            Fleet Management
+          </button>
+        </Link>
+        <Link href="/salaries">
+          <button className={`pb-3 font-medium transition-colors ${
+            location === '/salaries' 
+              ? 'border-b-2 border-gray-900 text-gray-900' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}>
+            Finances
+          </button>
+        </Link>
+      </div>
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Manage Vehicles</h1>

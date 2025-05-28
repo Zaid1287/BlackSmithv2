@@ -7,8 +7,10 @@ import { CreditCard, DollarSign, Clock, CheckCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { getAuthHeaders } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { Link, useLocation } from "wouter";
 
 export default function Salaries() {
+  const [location] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
