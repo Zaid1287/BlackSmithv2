@@ -35,14 +35,14 @@ export default function Login() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      const result = await login(data.username, data.password);
+      const user = await login(data.username, data.password);
       toast({
         title: "Login Successful",
         description: "Welcome back to BlackSmith Traders!",
       });
       
       // Redirect based on user role
-      if (result.user.role === 'admin') {
+      if (user.role === 'admin') {
         setLocation("/admin-dashboard");
       } else {
         setLocation("/active-journey");
