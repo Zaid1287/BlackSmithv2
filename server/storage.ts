@@ -142,13 +142,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createExpense(expense: InsertExpense): Promise<Expense> {
+    // Mark as company secret if category is toll or hyd_inward
+    const isSecret = expense.category === 'toll' || expense.category === 'hyd_inward';
+    
     const [newExpense] = await db
       .insert(expenses)
-      .values(expense)
+      .values({
+        ...expense,
+        isCompanySecret: isSecret
+      })
       .returning();
     
     // Update journey totals
-    await this.updateJourneyTotals(expense.journeyId);
+    await this.updateJourneyTotals(expense.journeyId!);
     
     return newExpense;
   }

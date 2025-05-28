@@ -256,10 +256,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Expense management routes
-  app.get("/api/journeys/:id/expenses", authenticateToken, async (req, res) => {
+  app.get("/api/journeys/:id/expenses", authenticateToken, async (req: any, res) => {
     try {
       const journeyId = parseInt(req.params.id);
-      const expenses = await storage.getExpensesByJourney(journeyId);
+      const expenses = await storage.getExpensesByJourneyForUser(journeyId, req.user.role);
       res.json(expenses);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch expenses" });

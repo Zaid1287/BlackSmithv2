@@ -49,6 +49,11 @@ const expenseCategories = [
   { value: "food", label: "Food" },
   { value: "toll", label: "Toll" },
   { value: "maintenance", label: "Maintenance" },
+  { value: "hyd_inward", label: "HYD Inward" },
+  { value: "loading", label: "Loading" },
+  { value: "rope", label: "Rope" },
+  { value: "unloading", label: "Unloading" },
+  { value: "rto", label: "RTO" },
   { value: "other", label: "Other" },
 ];
 

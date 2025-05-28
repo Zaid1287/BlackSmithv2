@@ -329,8 +329,8 @@ export default function FinancialManagement() {
                       <p className="text-2xl font-bold text-green-600">₹{parseFloat(selectedJourney.balance || "0").toLocaleString()}</p>
                       
                       <div className="mt-3 text-xs text-gray-500 space-y-1">
-                        <p><strong>Working Balance:</strong> ₹{selectedJourney.pouch} (pouch) + ₹0 (top-ups) - ₹{selectedJourney.totalExpenses || 0} (expenses)</p>
-                        <p><strong>Final Adjustments:</strong> ₹{selectedJourney.security} (security) (added because journey is completed)</p>
+                        <p><strong>Working Balance:</strong> ₹{selectedJourney.pouch} (pouch) - ₹{selectedJourney.totalExpenses || 0} (expenses) = ₹{selectedJourney.balance}</p>
+                        <p><strong>Security Deposit:</strong> ₹{selectedJourney.security} (separate from balance, added to profit when journey completes)</p>
                       </div>
                     </div>
                   </div>
