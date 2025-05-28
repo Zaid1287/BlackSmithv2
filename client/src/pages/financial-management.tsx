@@ -1,12 +1,21 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, DollarSign, Route, ArrowUpRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, DollarSign, Route, ArrowUpRight, X, MapPin, Clock, User } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function FinancialManagement() {
   const [location] = useLocation();
+  const [selectedJourney, setSelectedJourney] = useState<any>(null);
   
   const { data: financialStats, isLoading } = useQuery({
     queryKey: ["/api/dashboard/financial"],
@@ -42,6 +51,20 @@ export default function FinancialManagement() {
       if (!response.ok) throw new Error("Failed to fetch journeys");
       return response.json();
     },
+  });
+
+  const { data: journeyExpenses } = useQuery({
+    queryKey: [`/api/journeys/${selectedJourney?.id}/expenses`],
+    queryFn: async () => {
+      if (!selectedJourney?.id) return [];
+      const response = await fetch(`/api/journeys/${selectedJourney.id}/expenses`, {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch expenses");
+      return response.json();
+    },
+    enabled: !!selectedJourney?.id,
   });
 
   if (isLoading) {
@@ -167,7 +190,7 @@ export default function FinancialManagement() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {activeJourneys.map((journey: any) => (
-              <Card key={journey.id} className="border-l-4 border-l-blue-500">
+              <Card key={journey.id} className="border-l-4 border-l-blue-500 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setSelectedJourney(journey)}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <Badge variant="secondary" className="bg-blue-100 text-blue-700">
@@ -193,12 +216,126 @@ export default function FinancialManagement() {
                       <span className="font-medium ml-1">₹{parseFloat(journey.security || "0").toLocaleString()}</span>
                     </div>
                   </div>
+                  <div className="mt-2 text-xs text-blue-600">
+                    Click to view details →
+                  </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
       </div>
+
+      {/* Journey Details Modal */}
+      <Dialog open={!!selectedJourney} onOpenChange={() => setSelectedJourney(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Journey Details - {selectedJourney?.destination}</span>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedJourney(null)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedJourney && (
+            <div className="space-y-6">
+              {/* Journey Overview */}
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold mb-4 flex items-center">
+                    <Route className="w-5 h-5 mr-2 text-blue-600" />
+                    Journey Information
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Destination</p>
+                      <p className="font-medium">{selectedJourney.destination}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">License Plate</p>
+                      <p className="font-medium">{selectedJourney.licensePlate}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Driver ID</p>
+                      <p className="font-medium">{selectedJourney.driverId}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Status</p>
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                        {selectedJourney.status}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Start Time</p>
+                      <p className="font-medium">{new Date(selectedJourney.startTime).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Distance Covered</p>
+                      <p className="font-medium">{selectedJourney.distanceCovered || 0} km</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Financial Overview */}
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold mb-4 flex items-center">
+                    <DollarSign className="w-5 h-5 mr-2 text-green-600" />
+                    Financial Overview
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Initial Pouch</p>
+                      <p className="font-medium text-green-600">₹{parseFloat(selectedJourney.pouch || "0").toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Security Deposit</p>
+                      <p className="font-medium text-blue-600">₹{parseFloat(selectedJourney.security || "0").toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Total Expenses</p>
+                      <p className="font-medium text-red-600">₹{parseFloat(selectedJourney.totalExpenses || "0").toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Current Balance</p>
+                      <p className="font-medium">₹{parseFloat(selectedJourney.balance || "0").toLocaleString()}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Expenses List */}
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold mb-4">Journey Expenses</h3>
+                  {journeyExpenses && journeyExpenses.length > 0 ? (
+                    <div className="space-y-2">
+                      {journeyExpenses.map((expense: any) => (
+                        <div key={expense.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <p className="font-medium capitalize">{expense.category}</p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(expense.timestamp).toLocaleString()}
+                            </p>
+                            {expense.description && (
+                              <p className="text-xs text-gray-400">{expense.description}</p>
+                            )}
+                          </div>
+                          <span className="font-semibold text-red-600">₹{parseFloat(expense.amount).toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">No expenses recorded yet</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
