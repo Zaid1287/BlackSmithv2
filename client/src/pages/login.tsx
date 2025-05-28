@@ -95,130 +95,173 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 flex relative overflow-hidden">
+      {/* Luxury Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-indigo-500/10 to-cyan-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-blue-400/5 to-purple-400/5 rounded-full blur-2xl"></div>
+      </div>
+
       {/* Left Panel - Login Form */}
-      <div className="w-full lg:w-2/5 flex items-center justify-center p-12">
-        <div className="w-full max-w-md bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm text-white rounded-2xl mb-6 border border-white/30">
-              <span className="text-3xl font-bold">BS</span>
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-2">BLACKSMITH TRADERS</h2>
-            <h3 className="text-lg font-medium text-blue-200">Login</h3>
-          </div>
-
-          {/* Login Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <Label className="block text-sm font-medium text-blue-200 mb-2">Username</Label>
-              <Input 
-                {...register("username")}
-                placeholder="Enter your username" 
-                className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:border-blue-400"
-                disabled={isLoading}
-              />
-              {errors.username && (
-                <p className="text-red-300 text-sm mt-1">{errors.username.message}</p>
-              )}
-            </div>
+      <div className="w-full lg:w-2/5 flex items-center justify-center p-12 relative z-10">
+        <div className="w-full max-w-md">
+          {/* Premium Login Container */}
+          <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-2xl rounded-3xl p-10 border border-white/20 shadow-2xl relative">
+            {/* Luxury Accent Lines */}
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent rounded-full"></div>
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent rounded-full"></div>
             
-            <div>
-              <Label className="block text-sm font-medium text-blue-200 mb-2">Password</Label>
-              <Input 
-                {...register("password")}
-                type="password" 
-                placeholder="Enter your password" 
-                className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:border-blue-400"
-                disabled={isLoading}
-              />
-              {errors.password && (
-                <p className="text-red-300 text-sm mt-1">{errors.password.message}</p>
-              )}
+            {/* Premium Logo */}
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500/30 to-purple-600/30 backdrop-blur-xl text-white rounded-3xl mb-8 border-2 border-white/30 shadow-xl relative">
+                <span className="text-4xl font-bold bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">BS</span>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-purple-500/20 rounded-3xl blur-sm"></div>
+              </div>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent mb-3 tracking-wide">
+                BLACKSMITH TRADERS
+              </h2>
+              <div className="w-16 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto mb-4"></div>
+              <h3 className="text-xl font-light text-blue-100 tracking-widest uppercase">Login Portal</h3>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0 h-12 rounded-lg font-medium"
-              disabled={isLoading}
-            >
-              {isLoading ? "Logging in..." : "Log In"}
-            </Button>
-            
-            <div className="space-y-3">
+            {/* Premium Login Form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
+              <div className="space-y-2">
+                <Label className="block text-sm font-medium text-blue-100/90 mb-3 tracking-wide uppercase">Username</Label>
+                <Input 
+                  {...register("username")}
+                  placeholder="Enter your username" 
+                  className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:border-blue-400/50 focus:bg-white/15 rounded-2xl px-6 text-lg backdrop-blur-sm transition-all duration-300 shadow-inner"
+                  disabled={isLoading}
+                />
+                {errors.username && (
+                  <p className="text-red-300 text-sm mt-2 ml-2">{errors.username.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="block text-sm font-medium text-blue-100/90 mb-3 tracking-wide uppercase">Password</Label>
+                <Input 
+                  {...register("password")}
+                  type="password" 
+                  placeholder="Enter your password" 
+                  className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:border-blue-400/50 focus:bg-white/15 rounded-2xl px-6 text-lg backdrop-blur-sm transition-all duration-300 shadow-inner"
+                  disabled={isLoading}
+                />
+                {errors.password && (
+                  <p className="text-red-300 text-sm mt-2 ml-2">{errors.password.message}</p>
+                )}
+              </div>
+
               <Button 
-                type="button" 
-                onClick={loginAsAdmin}
-                className="w-full bg-green-600 hover:bg-green-700 text-white border-0 h-11 rounded-lg"
+                type="submit" 
+                className="w-full h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 rounded-2xl font-semibold text-lg tracking-wide shadow-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl"
                 disabled={isLoading}
               >
-                Login as Admin (Demo)
+                {isLoading ? (
+                  <div className="flex items-center justify-center space-x-3">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Authenticating...</span>
+                  </div>
+                ) : "Access Portal"}
               </Button>
               
-              <Button 
-                type="button" 
-                onClick={loginAsDriver}
-                className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 h-11 rounded-lg"
-                disabled={isLoading}
-              >
-                Login as Driver (Demo)
-              </Button>
-            </div>
-          </form>
+              <div className="space-y-4 pt-4">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/20"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-transparent text-blue-200/70 font-light tracking-widest uppercase">Demo Access</span>
+                  </div>
+                </div>
 
-          <p className="text-center text-sm text-blue-200/80 mt-6">
-            New users can only be added by administrators.
-          </p>
+                <Button 
+                  type="button" 
+                  onClick={loginAsAdmin}
+                  className="w-full h-12 bg-gradient-to-r from-emerald-600/80 to-green-600/80 hover:from-emerald-700 hover:to-green-700 text-white border border-emerald-400/30 rounded-xl font-medium tracking-wide transition-all duration-300 backdrop-blur-sm"
+                  disabled={isLoading}
+                >
+                  Executive Access
+                </Button>
+                
+                <Button 
+                  type="button" 
+                  onClick={loginAsDriver}
+                  className="w-full h-12 bg-white/10 hover:bg-white/20 text-white border border-white/30 rounded-xl font-medium tracking-wide transition-all duration-300 backdrop-blur-sm"
+                  disabled={isLoading}
+                >
+                  Driver Access
+                </Button>
+              </div>
+            </form>
+
+            <div className="text-center mt-8 pt-6 border-t border-white/10">
+              <p className="text-blue-200/60 text-sm font-light tracking-wide">
+                Authorized Personnel Only
+              </p>
+              <p className="text-blue-200/40 text-xs mt-1 tracking-widest">
+                Contact Administrator for New Accounts
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Right Panel - Features */}
-      <div className="hidden lg:flex lg:w-3/5 items-center justify-center p-12">
-        <div className="max-w-2xl">
-          <h1 className="text-5xl font-bold text-white mb-6">Logistics Management System</h1>
-          <p className="text-xl text-blue-200 mb-12 leading-relaxed">
-            Track vehicles, manage expenses, and monitor journeys in real-time for BlackSmith Traders
-          </p>
+      {/* Right Panel - Luxury Features */}
+      <div className="hidden lg:flex lg:w-3/5 items-center justify-center p-16 relative z-10">
+        <div className="max-w-3xl">
+          <div className="mb-12">
+            <h1 className="text-6xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent mb-8 leading-tight">
+              Elite Logistics
+              <span className="block text-5xl font-light mt-2">Management Suite</span>
+            </h1>
+            <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-400 mb-8"></div>
+            <p className="text-2xl text-blue-100/80 font-light leading-relaxed tracking-wide">
+              Precision fleet control with real-time analytics and comprehensive expense monitoring for BlackSmith Traders
+            </p>
+          </div>
           
-          {/* Feature List - No Cards */}
-          <div className="space-y-8">
-            <div className="flex items-start space-x-6">
-              <div className="p-4 bg-blue-500/20 rounded-full">
-                <Route className="w-8 h-8 text-blue-300" />
+          {/* Premium Feature List */}
+          <div className="space-y-10">
+            <div className="flex items-start space-x-8 group">
+              <div className="p-5 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl border border-blue-400/20 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+                <Route className="w-10 h-10 text-blue-300" />
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Real-time Tracking</h3>
-                <p className="text-blue-200 leading-relaxed">Monitor vehicle locations and journey progress on a live map with precise GPS coordinates</p>
-              </div>
-            </div>
-
-            <div className="flex items-start space-x-6">
-              <div className="p-4 bg-green-500/20 rounded-full">
-                <Receipt className="w-8 h-8 text-green-300" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Expense Management</h3>
-                <p className="text-blue-200 leading-relaxed">Record and categorize all journey expenses to track profitability and optimize costs</p>
+              <div className="flex-1">
+                <h3 className="text-2xl font-semibold text-white mb-3 tracking-wide">Real-time Fleet Tracking</h3>
+                <p className="text-blue-200/80 text-lg leading-relaxed font-light">Advanced GPS monitoring with precision location data, route optimization, and live journey analytics for complete fleet visibility</p>
               </div>
             </div>
 
-            <div className="flex items-start space-x-6">
-              <div className="p-4 bg-orange-500/20 rounded-full">
-                <TrendingUp className="w-8 h-8 text-orange-300" />
+            <div className="flex items-start space-x-8 group">
+              <div className="p-5 bg-gradient-to-br from-emerald-500/20 to-green-500/20 rounded-2xl border border-emerald-400/20 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+                <Receipt className="w-10 h-10 text-emerald-300" />
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Financial Overview</h3>
-                <p className="text-blue-200 leading-relaxed">View profit and loss indicators for each journey with real-time financial analytics</p>
+              <div className="flex-1">
+                <h3 className="text-2xl font-semibold text-white mb-3 tracking-wide">Intelligent Expense Control</h3>
+                <p className="text-blue-200/80 text-lg leading-relaxed font-light">Automated expense categorization with real-time profitability analysis, cost optimization insights, and detailed financial reporting</p>
               </div>
             </div>
 
-            <div className="flex items-start space-x-6">
-              <div className="p-4 bg-purple-500/20 rounded-full">
-                <Settings className="w-8 h-8 text-purple-300" />
+            <div className="flex items-start space-x-8 group">
+              <div className="p-5 bg-gradient-to-br from-orange-500/20 to-amber-500/20 rounded-2xl border border-orange-400/20 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+                <TrendingUp className="w-10 h-10 text-orange-300" />
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Advanced Reporting</h3>
-                <p className="text-blue-200 leading-relaxed">Generate comprehensive reports for completed journeys, expenses, and fleet performance</p>
+              <div className="flex-1">
+                <h3 className="text-2xl font-semibold text-white mb-3 tracking-wide">Advanced Analytics Dashboard</h3>
+                <p className="text-blue-200/80 text-lg leading-relaxed font-light">Comprehensive profit/loss indicators with predictive analytics, performance metrics, and strategic business intelligence</p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-8 group">
+              <div className="p-5 bg-gradient-to-br from-purple-500/20 to-violet-500/20 rounded-2xl border border-purple-400/20 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+                <Settings className="w-10 h-10 text-purple-300" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-semibold text-white mb-3 tracking-wide">Enterprise Reporting Suite</h3>
+                <p className="text-blue-200/80 text-lg leading-relaxed font-light">Executive-grade reports with customizable dashboards, automated insights, and comprehensive fleet performance analysis</p>
               </div>
             </div>
           </div>
