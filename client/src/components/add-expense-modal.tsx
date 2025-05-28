@@ -86,8 +86,12 @@ export default function AddExpenseModal({ open, onOpenChange, journeyId }: AddEx
         title: "Expense Added",
         description: "Your expense has been recorded successfully!",
       });
+      // Immediately refresh all relevant data for smoother experience
       queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journeys/active"] });
       queryClient.invalidateQueries({ queryKey: [`/api/journeys/${journeyId}/expenses`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
       onOpenChange(false);
       form.reset();
     },

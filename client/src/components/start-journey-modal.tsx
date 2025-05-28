@@ -104,8 +104,11 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
         title: "Journey Started",
         description: "Your journey has been started successfully!",
       });
+      // Immediately refresh all journey-related data for smoother experience
       queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journeys/active"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
       onOpenChange(false);
       form.reset();
     },

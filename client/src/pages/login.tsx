@@ -35,17 +35,12 @@ export default function Login() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      const response = await login(data.username, data.password);
+      await login(data.username, data.password);
       toast({
         title: "Login Successful",
         description: "Welcome back to BlackSmith Traders!",
       });
-      // Redirect based on user role
-      if (response.user.role === 'admin') {
-        setLocation("/financial-management");
-      } else {
-        setLocation("/active-journeys");
-      }
+      // Router will handle redirect based on user role automatically
     } catch (error: any) {
       toast({
         title: "Login Failed",
