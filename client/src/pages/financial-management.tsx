@@ -193,8 +193,12 @@ export default function FinancialManagement() {
               <Card key={journey.id} className="border-l-4 border-l-blue-500 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setSelectedJourney(journey)}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                      In Progress
+                    <Badge variant="secondary" className={`${
+                      journey.status === 'completed' ? 'bg-green-100 text-green-700' : 
+                      journey.status === 'active' ? 'bg-blue-100 text-blue-700' : 
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {journey.status.charAt(0).toUpperCase() + journey.status.slice(1)}
                     </Badge>
                     <span className="text-sm text-gray-500">
                       {journey.licensePlate}
@@ -271,8 +275,12 @@ export default function FinancialManagement() {
                     
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Status</p>
-                      <Badge className="bg-blue-100 text-blue-700 px-3 py-1">
-                        ⚪ {selectedJourney.status === 'active' ? 'Completed' : selectedJourney.status}
+                      <Badge className={`px-3 py-1 ${
+                        selectedJourney.status === 'completed' ? 'bg-green-100 text-green-700' : 
+                        selectedJourney.status === 'active' ? 'bg-blue-100 text-blue-700' : 
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        ⚪ {selectedJourney.status.charAt(0).toUpperCase() + selectedJourney.status.slice(1)}
                       </Badge>
                     </div>
                   </div>
