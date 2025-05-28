@@ -1,6 +1,6 @@
 import { users, vehicles, journeys, expenses, salaryPayments, type User, type InsertUser, type Vehicle, type InsertVehicle, type Journey, type InsertJourney, type Expense, type InsertExpense, type SalaryPayment, type InsertSalaryPayment } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, not } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -176,21 +176,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   private async updateJourneyTotals(journeyId: number): Promise<void> {
-    const [result] = await db
+    // Calculate actual expenses (excluding HYD Inward which is revenue)
+    const [expenseResult] = await db
       .select({
         totalExpenses: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
       })
       .from(expenses)
-      .where(eq(expenses.journeyId, journeyId));
+      .where(and(eq(expenses.journeyId, journeyId), not(eq(expenses.category, 'hyd_inward'))));
+
+    // Calculate HYD Inward revenue separately
+    const [revenueResult] = await db
+      .select({
+        hydInwardRevenue: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
+      })
+      .from(expenses)
+      .where(and(eq(expenses.journeyId, journeyId), eq(expenses.category, 'hyd_inward')));
 
     const [journey] = await db.select().from(journeys).where(eq(journeys.id, journeyId));
     
     if (journey) {
-      // Balance is pouch minus expenses (security is NOT included in balance - it's separate)
-      const balance = parseFloat(journey.pouch) - parseFloat(result.totalExpenses.toString());
+      // Balance = pouch - actual expenses + HYD Inward revenue
+      const balance = parseFloat(journey.pouch) - parseFloat(expenseResult.totalExpenses.toString()) + parseFloat(revenueResult.hydInwardRevenue.toString());
       
       await db.update(journeys).set({
-        totalExpenses: result.totalExpenses.toString(),
+        totalExpenses: expenseResult.totalExpenses.toString(),
         balance: balance.toString(),
       }).where(eq(journeys.id, journeyId));
     }

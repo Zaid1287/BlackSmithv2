@@ -21,6 +21,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
 
   // All expense categories with role-based filtering
   const allExpenseCategories = [
+    { value: "hyd_inward", label: "HYD Inward", adminOnly: true, isRevenue: true },
     { value: "loading", label: "Loading" },
     { value: "rope", label: "Rope" },
     { value: "fuel", label: "Fuel" },
@@ -36,7 +37,6 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
     { value: "adblue", label: "AdBlue" },
     { value: "other", label: "Other" },
     { value: "toll", label: "Toll", adminOnly: true },
-    { value: "hyd_inward", label: "HYD Inward", adminOnly: true },
   ];
 
   // Filter categories based on user role
@@ -116,20 +116,21 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {expenseCategories.map((category) => (
-        <Card key={category.value} className="p-4 border border-gray-200">
+        <Card key={category.value} className={`p-4 border ${category.isRevenue ? 'border-green-300 bg-green-50' : 'border-gray-200'}`}>
           <div className="flex items-center justify-between">
-            <div className="font-medium text-gray-700 min-w-0 flex-1">
+            <div className={`font-medium min-w-0 flex-1 ${category.isRevenue ? 'text-green-700' : 'text-gray-700'}`}>
               {category.label}
+              {category.isRevenue && <span className="text-xs text-green-600 block">+Revenue</span>}
             </div>
             <div className="flex items-center space-x-3 ml-4">
               <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
+                <span className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${category.isRevenue ? 'text-green-500' : 'text-gray-400'}`}>₹</span>
                 <Input
                   type="number"
                   placeholder="Amount"
                   value={amounts[category.value] || ""}
                   onChange={(e) => handleAmountChange(category.value, e.target.value)}
-                  className="pl-8 w-32 h-10 text-center"
+                  className={`pl-8 w-32 h-10 text-center ${category.isRevenue ? 'border-green-300 focus:border-green-500' : ''}`}
                   min="0"
                   step="0.01"
                 />
