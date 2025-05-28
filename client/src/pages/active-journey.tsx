@@ -606,7 +606,7 @@ export default function ActiveJourney() {
               <div className="space-y-3">
                 <Button 
                   onClick={handleCompleteJourney}
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="w-full bg-red-600 hover:bg-red-700"
                   disabled={completeJourneyMutation.isPending}
                 >
                   <Square className="w-4 h-4 mr-2" />
