@@ -176,24 +176,22 @@ export default function ActiveJourney() {
             </CardContent>
           </Card>
 
-          {/* Journey Expenses */}
+          {/* Quick Expense Entry */}
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <DollarSign className="text-green-600 mr-2" size={20} />
-                  Journey Expenses
-                </h3>
-                <Button 
-                  onClick={() => setShowExpenseModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Expense
-                </Button>
-              </div>
+              <h3 className="text-lg font-semibold flex items-center mb-6">
+                <DollarSign className="text-green-600 mr-2" size={20} />
+                Quick Expense Entry
+              </h3>
+              <ExpenseQuickEntry journeyId={userActiveJourney.id} />
+            </CardContent>
+          </Card>
+
+          {/* Expense History */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-6">Expense History</h3>
               
-              {/* Expenses List */}
               {expenses.length > 0 ? (
                 <div className="space-y-3">
                   {expenses.map((expense: any) => (
@@ -227,7 +225,7 @@ export default function ActiveJourney() {
                 <div className="text-center py-8 text-gray-500">
                   <DollarSign className="w-12 h-12 mx-auto mb-4 opacity-30" />
                   <p>No expenses recorded yet</p>
-                  <p className="text-sm">Click "Add Expense" to track your spending</p>
+                  <p className="text-sm">Use the quick entry above to start tracking expenses</p>
                 </div>
               )}
             </CardContent>
