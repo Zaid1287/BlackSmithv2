@@ -29,6 +29,8 @@ export function useAuth() {
   const logout = async () => {
     await authService.logout();
     setUser(null);
+    // Force page reload to redirect to login
+    window.location.href = "/login";
   };
 
   return {
