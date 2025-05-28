@@ -87,8 +87,8 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
           vehicleId: parseInt(data.vehicleId),
           licensePlate: data.licensePlate,
           destination: data.destination,
-          pouch: parseFloat(data.pouch),
-          security: parseFloat(data.security || "0"),
+          pouch: data.pouch,
+          security: data.security || "0",
         }),
       });
       
