@@ -62,7 +62,7 @@ export default function Login() {
         title: "Login Successful",
         description: "Welcome back, Admin!",
       });
-      setLocation("/dashboard");
+      setLocation("/financial-management");
     } catch (error: any) {
       toast({
         title: "Login Failed",
@@ -82,7 +82,7 @@ export default function Login() {
         title: "Login Successful",
         description: "Welcome back, Driver!",
       });
-      setLocation("/dashboard");
+      setLocation("/active-journeys");
     } catch (error: any) {
       toast({
         title: "Login Failed",
