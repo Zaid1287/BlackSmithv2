@@ -126,7 +126,6 @@ export default function Login() {
                   BLACKSMITH TRADERS
                 </div>
               </div>
-              <h3 className="text-lg font-light text-gray-100 tracking-widest uppercase">Login Portal</h3>
             </div>
 
             {/* Premium Login Form */}
@@ -168,7 +167,7 @@ export default function Login() {
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     <span>Authenticating...</span>
                   </div>
-                ) : "Access Portal"}
+                ) : "Login"}
               </Button>
               
               <div className="space-y-3 pt-3">
