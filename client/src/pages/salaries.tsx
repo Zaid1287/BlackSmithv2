@@ -96,6 +96,37 @@ export default function Salaries() {
 
   return (
     <div className="p-6">
+      {/* Tab Navigation */}
+      <div className="flex space-x-6 mb-8 border-b border-gray-200">
+        <Link href="/financial-management">
+          <button className={`pb-3 font-medium transition-colors ${
+            location === '/financial-management' 
+              ? 'border-b-2 border-gray-900 text-gray-900' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}>
+            Overview
+          </button>
+        </Link>
+        <Link href="/manage-vehicles">
+          <button className={`pb-3 font-medium transition-colors ${
+            location === '/manage-vehicles' 
+              ? 'border-b-2 border-gray-900 text-gray-900' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}>
+            Fleet Management
+          </button>
+        </Link>
+        <Link href="/salaries">
+          <button className={`pb-3 font-medium transition-colors ${
+            location === '/salaries' 
+              ? 'border-b-2 border-gray-900 text-gray-900' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}>
+            Finances
+          </button>
+        </Link>
+      </div>
+
       {/* Salary Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card className="bs-gradient-blue text-white">
