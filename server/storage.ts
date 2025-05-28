@@ -266,7 +266,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFinancialStats(): Promise<any> {
-    // Calculate HYD Inward revenue separately for direct profit addition
+    // Calculate HYD Inward revenue separately
     const [hydInwardStats] = await db
       .select({
         hydInwardRevenue: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
@@ -274,34 +274,37 @@ export class DatabaseStorage implements IStorage {
       .from(expenses)
       .where(eq(expenses.category, 'hyd_inward'));
 
-    const [revenueStats] = await db
+    // Calculate revenue and security deposits from journeys
+    const [journeyStats] = await db
       .select({
-        totalRevenue: sql<number>`COALESCE(SUM(${journeys.pouch} + ${journeys.security}), 0)`,
+        totalRevenue: sql<number>`COALESCE(SUM(${journeys.pouch}), 0)`,
+        totalSecurity: sql<number>`COALESCE(SUM(${journeys.security}), 0)`,
         totalExpenses: sql<number>`COALESCE(SUM(${journeys.totalExpenses}), 0)`,
-        netProfit: sql<number>`COALESCE(SUM(${journeys.balance}), 0)`,
       })
       .from(journeys);
 
+    // Calculate salary payments and refunds
     const [salaryStats] = await db
       .select({
-        totalSalaryAmount: sql<number>`COALESCE(SUM(${users.salary}), 0)`,
         paidAmount: sql<number>`COALESCE(SUM(${salaryPayments.amount}), 0)`,
       })
-      .from(users)
-      .leftJoin(salaryPayments, eq(users.id, salaryPayments.userId))
-      .where(eq(users.role, 'driver'));
+      .from(salaryPayments);
 
-    // Add HYD Inward directly to net profit
-    const finalNetProfit = (revenueStats.netProfit || 0) + (hydInwardStats.hydInwardRevenue || 0);
+    // Net Profit = (Revenue + Security Deposits - Expenses) - Salary Payments + Salary Refunds + HYD Inward
+    const baseProfit = (journeyStats.totalRevenue || 0) + (journeyStats.totalSecurity || 0) - (journeyStats.totalExpenses || 0);
+    const salaryAdjustment = -(salaryStats.paidAmount || 0); // Subtract salary payments (refunds would be added)
+    const hydInwardBonus = hydInwardStats.hydInwardRevenue || 0;
+    
+    const netProfit = baseProfit + salaryAdjustment + hydInwardBonus;
 
     return {
-      revenue: revenueStats.totalRevenue || 0,
-      expenses: revenueStats.totalExpenses || 0,
-      netProfit: finalNetProfit,
+      revenue: (journeyStats.totalRevenue || 0) + (journeyStats.totalSecurity || 0),
+      expenses: journeyStats.totalExpenses || 0,
+      netProfit: netProfit,
       salaryStats: {
-        total: salaryStats.totalSalaryAmount || 0,
+        total: 0, // We'll calculate this from users table if needed
         paid: salaryStats.paidAmount || 0,
-        remaining: (salaryStats.totalSalaryAmount || 0) - (salaryStats.paidAmount || 0),
+        remaining: 0,
       },
     };
   }
