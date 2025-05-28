@@ -42,22 +42,38 @@ export default function Sidebar() {
     <div className={`${isCollapsed ? 'w-16' : 'w-64'} sidebar-dark text-white flex flex-col transition-all duration-300`}>
       {/* Logo and Toggle */}
       <div className="p-6 border-b border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-white text-gray-900 rounded-lg flex items-center justify-center mr-3">
+        {isCollapsed ? (
+          <div className="flex flex-col items-center space-y-3">
+            <div className="w-10 h-10 bg-white text-gray-900 rounded-lg flex items-center justify-center">
               <span className="font-bold text-sm">BS</span>
             </div>
-            {!isCollapsed && <span className="text-sm font-semibold">BLACKSMITH TRADERS</span>}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="text-gray-300 hover:text-white hover:bg-gray-800 p-1"
+            >
+              <Menu size={18} />
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-gray-300 hover:text-white hover:bg-gray-800 p-1"
-          >
-            {isCollapsed ? <Menu size={18} /> : <ChevronLeft size={18} />}
-          </Button>
-        </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-white text-gray-900 rounded-lg flex items-center justify-center mr-3">
+                <span className="font-bold text-sm">BS</span>
+              </div>
+              <span className="text-sm font-semibold">BLACKSMITH TRADERS</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="text-gray-300 hover:text-white hover:bg-gray-800 p-1 flex-shrink-0"
+            >
+              <ChevronLeft size={18} />
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
@@ -70,14 +86,14 @@ export default function Sidebar() {
             return (
               <li key={item.name}>
                 <Link href={item.href}>
-                  <a className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                  <div className={`flex items-center px-4 py-3 rounded-lg transition-colors cursor-pointer ${
                     isActive 
                       ? "bg-gray-800 text-white" 
                       : "hover:bg-gray-800 text-gray-300 hover:text-white"
                   } ${isCollapsed ? 'justify-center' : ''}`}>
                     <Icon className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`} />
                     {!isCollapsed && <span>{item.name}</span>}
-                  </a>
+                  </div>
                 </Link>
               </li>
             );
