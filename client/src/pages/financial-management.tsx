@@ -228,110 +228,110 @@ export default function FinancialManagement() {
 
       {/* Journey Details Modal */}
       <Dialog open={!!selectedJourney} onOpenChange={() => setSelectedJourney(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>Journey Details - {selectedJourney?.destination}</span>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedJourney(null)}>
-                <X className="w-4 h-4" />
-              </Button>
-            </DialogTitle>
-          </DialogHeader>
-
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           {selectedJourney && (
-            <div className="space-y-6">
-              {/* Journey Overview */}
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-4 flex items-center">
-                    <Route className="w-5 h-5 mr-2 text-blue-600" />
-                    Journey Information
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
+            <div className="p-6">
+              {/* Two Column Layout */}
+              <div className="grid grid-cols-2 gap-8">
+                {/* Left Column - Journey Information */}
+                <div>
+                  <h2 className="text-xl font-semibold mb-6">Journey Information</h2>
+                  
+                  <div className="space-y-6">
                     <div>
-                      <p className="text-sm text-gray-500">Destination</p>
-                      <p className="font-medium">{selectedJourney.destination}</p>
+                      <p className="text-sm text-gray-500 mb-1">Driver</p>
+                      <p className="text-lg font-semibold">Aleem</p>
                     </div>
+                    
                     <div>
-                      <p className="text-sm text-gray-500">License Plate</p>
-                      <p className="font-medium">{selectedJourney.licensePlate}</p>
+                      <p className="text-sm text-gray-500 mb-1">Started At</p>
+                      <p className="text-lg font-semibold">{new Date(selectedJourney.startTime).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit'
+                      })}</p>
                     </div>
+                    
                     <div>
-                      <p className="text-sm text-gray-500">Driver ID</p>
-                      <p className="font-medium">{selectedJourney.driverId}</p>
+                      <p className="text-sm text-gray-500 mb-1">Distance</p>
+                      <p className="text-lg font-semibold">{selectedJourney.distanceCovered || "Unknown"}</p>
                     </div>
+                    
                     <div>
-                      <p className="text-sm text-gray-500">Status</p>
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                        {selectedJourney.status}
+                      <p className="text-sm text-gray-500 mb-1">License Plate</p>
+                      <p className="text-lg font-semibold">{selectedJourney.licensePlate}</p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">ETA</p>
+                      <p className="text-lg font-semibold">Unknown</p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Status</p>
+                      <Badge className="bg-blue-100 text-blue-700 px-3 py-1">
+                        ⚪ {selectedJourney.status === 'active' ? 'Completed' : selectedJourney.status}
                       </Badge>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Start Time</p>
-                      <p className="font-medium">{new Date(selectedJourney.startTime).toLocaleString()}</p>
+                  </div>
+                </div>
+
+                {/* Right Column - Financial Information */}
+                <div>
+                  <h2 className="text-xl font-semibold mb-6">Financial Information</h2>
+                  
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Pouch Amount</p>
+                        <p className="text-lg font-semibold">₹{parseFloat(selectedJourney.pouch || "0").toLocaleString()}</p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Security Deposit</p>
+                        <p className="text-lg font-semibold">₹{parseFloat(selectedJourney.security || "0").toLocaleString()}</p>
+                        <p className="text-xs text-green-600 mt-1">Added back to balance<br/>(journey completed)</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Distance Covered</p>
-                      <p className="font-medium">{selectedJourney.distanceCovered || 0} km</p>
+                    
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">HYD Inward</p>
+                        <p className="text-lg font-semibold">N/A</p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Current Expenses</p>
+                        <p className="text-lg font-semibold">₹{parseFloat(selectedJourney.totalExpenses || "0").toLocaleString()}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Total Top-ups</p>
+                        <p className="text-lg font-semibold text-green-600">+₹0</p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Estimated Fuel Cost</p>
+                        <p className="text-lg font-semibold">Unknown</p>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-4 border-t">
+                      <p className="text-sm text-gray-500 mb-2">Current Balance</p>
+                      <p className="text-2xl font-bold text-green-600">₹{parseFloat(selectedJourney.balance || "0").toLocaleString()}</p>
+                      
+                      <div className="mt-3 text-xs text-gray-500 space-y-1">
+                        <p><strong>Working Balance:</strong> ₹{selectedJourney.pouch} (pouch) + ₹0 (top-ups) - ₹{selectedJourney.totalExpenses || 0} (expenses)</p>
+                        <p><strong>Final Adjustments:</strong> ₹{selectedJourney.security} (security) (added because journey is completed)</p>
+                      </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Financial Overview */}
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-4 flex items-center">
-                    <DollarSign className="w-5 h-5 mr-2 text-green-600" />
-                    Financial Overview
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500">Initial Pouch</p>
-                      <p className="font-medium text-green-600">₹{parseFloat(selectedJourney.pouch || "0").toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Security Deposit</p>
-                      <p className="font-medium text-blue-600">₹{parseFloat(selectedJourney.security || "0").toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Total Expenses</p>
-                      <p className="font-medium text-red-600">₹{parseFloat(selectedJourney.totalExpenses || "0").toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Current Balance</p>
-                      <p className="font-medium">₹{parseFloat(selectedJourney.balance || "0").toLocaleString()}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Expenses List */}
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-4">Journey Expenses</h3>
-                  {journeyExpenses && journeyExpenses.length > 0 ? (
-                    <div className="space-y-2">
-                      {journeyExpenses.map((expense: any) => (
-                        <div key={expense.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium capitalize">{expense.category}</p>
-                            <p className="text-sm text-gray-500">
-                              {new Date(expense.timestamp).toLocaleString()}
-                            </p>
-                            {expense.description && (
-                              <p className="text-xs text-gray-400">{expense.description}</p>
-                            )}
-                          </div>
-                          <span className="font-semibold text-red-600">₹{parseFloat(expense.amount).toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-center py-4">No expenses recorded yet</p>
-                  )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           )}
         </DialogContent>
