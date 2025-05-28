@@ -43,9 +43,9 @@ export default function Login() {
       
       // Redirect based on user role
       if (user.role === 'admin') {
-        setLocation("/admin-dashboard");
+        setLocation("/financial-management");
       } else {
-        setLocation("/active-journey");
+        setLocation("/active-journeys");
       }
     } catch (error: any) {
       toast({
