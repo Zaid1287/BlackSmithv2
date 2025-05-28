@@ -107,80 +107,79 @@ export default function Login() {
       <div className="w-full lg:w-2/5 flex items-center justify-center p-12 relative z-10">
         <div className="w-full max-w-md">
           {/* Premium Login Container */}
-          <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-2xl rounded-3xl p-10 border border-white/20 shadow-2xl relative">
+          <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 shadow-2xl relative">
             {/* Luxury Accent Lines */}
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-gray-400 to-transparent rounded-full"></div>
             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-white to-transparent rounded-full"></div>
             
             {/* Premium Logo */}
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-gray-600/30 to-gray-800/30 backdrop-blur-xl text-white rounded-3xl mb-8 border-2 border-white/30 shadow-xl relative">
-                <span className="text-4xl font-bold bg-gradient-to-r from-gray-200 to-white bg-clip-text text-transparent">BS</span>
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-400/20 to-gray-600/20 rounded-3xl blur-sm"></div>
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-white text-gray-900 rounded-lg mb-6 shadow-xl">
+                <span className="font-serif font-bold text-xl">BS</span>
               </div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-100 bg-clip-text text-transparent mb-3 tracking-wide">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-100 bg-clip-text text-transparent mb-2 tracking-wide">
                 BLACKSMITH TRADERS
               </h2>
-              <div className="w-16 h-0.5 bg-gradient-to-r from-gray-400 to-white mx-auto mb-4"></div>
-              <h3 className="text-xl font-light text-gray-100 tracking-widest uppercase">Login Portal</h3>
+              <div className="w-12 h-0.5 bg-gradient-to-r from-gray-400 to-white mx-auto mb-3"></div>
+              <h3 className="text-lg font-light text-gray-100 tracking-widest uppercase">Login Portal</h3>
             </div>
 
             {/* Premium Login Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div className="space-y-2">
-                <Label className="block text-sm font-medium text-gray-100/90 mb-3 tracking-wide uppercase">Username</Label>
+                <Label className="block text-sm font-medium text-gray-100/90 mb-2 tracking-wide uppercase">Username</Label>
                 <Input 
                   {...register("username")}
                   placeholder="Enter your username" 
-                  className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:border-gray-400/50 focus:bg-white/15 rounded-2xl px-6 text-lg backdrop-blur-sm transition-all duration-300 shadow-inner"
+                  className="w-full h-12 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:border-gray-400/50 focus:bg-white/15 rounded-xl px-4 text-base backdrop-blur-sm transition-all duration-300 shadow-inner"
                   disabled={isLoading}
                 />
                 {errors.username && (
-                  <p className="text-red-300 text-sm mt-2 ml-2">{errors.username.message}</p>
+                  <p className="text-red-300 text-sm mt-1 ml-2">{errors.username.message}</p>
                 )}
               </div>
               
               <div className="space-y-2">
-                <Label className="block text-sm font-medium text-gray-100/90 mb-3 tracking-wide uppercase">Password</Label>
+                <Label className="block text-sm font-medium text-gray-100/90 mb-2 tracking-wide uppercase">Password</Label>
                 <Input 
                   {...register("password")}
                   type="password" 
                   placeholder="Enter your password" 
-                  className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:border-gray-400/50 focus:bg-white/15 rounded-2xl px-6 text-lg backdrop-blur-sm transition-all duration-300 shadow-inner"
+                  className="w-full h-12 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:border-gray-400/50 focus:bg-white/15 rounded-xl px-4 text-base backdrop-blur-sm transition-all duration-300 shadow-inner"
                   disabled={isLoading}
                 />
                 {errors.password && (
-                  <p className="text-red-300 text-sm mt-2 ml-2">{errors.password.message}</p>
+                  <p className="text-red-300 text-sm mt-1 ml-2">{errors.password.message}</p>
                 )}
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full h-14 bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 text-white border-0 rounded-2xl font-semibold text-lg tracking-wide shadow-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl"
+                className="w-full h-12 bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 text-white border-0 rounded-xl font-semibold text-base tracking-wide shadow-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <div className="flex items-center justify-center space-x-3">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     <span>Authenticating...</span>
                   </div>
                 ) : "Access Portal"}
               </Button>
               
-              <div className="space-y-4 pt-4">
+              <div className="space-y-3 pt-3">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-white/20"></div>
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-transparent text-gray-200/70 font-light tracking-widest uppercase">Demo Access</span>
+                    <span className="px-3 bg-transparent text-gray-200/70 font-light tracking-widest uppercase">Demo Access</span>
                   </div>
                 </div>
 
                 <Button 
                   type="button" 
                   onClick={loginAsAdmin}
-                  className="w-full h-12 bg-gradient-to-r from-gray-700/80 to-gray-900/80 hover:from-gray-800 hover:to-black text-white border border-gray-400/30 rounded-xl font-medium tracking-wide transition-all duration-300 backdrop-blur-sm"
+                  className="w-full h-10 bg-gradient-to-r from-gray-700/80 to-gray-900/80 hover:from-gray-800 hover:to-black text-white border border-gray-400/30 rounded-lg font-medium tracking-wide transition-all duration-300 backdrop-blur-sm"
                   disabled={isLoading}
                 >
                   Executive Access
@@ -189,7 +188,7 @@ export default function Login() {
                 <Button 
                   type="button" 
                   onClick={loginAsDriver}
-                  className="w-full h-12 bg-white/10 hover:bg-white/20 text-white border border-white/30 rounded-xl font-medium tracking-wide transition-all duration-300 backdrop-blur-sm"
+                  className="w-full h-10 bg-white/10 hover:bg-white/20 text-white border border-white/30 rounded-lg font-medium tracking-wide transition-all duration-300 backdrop-blur-sm"
                   disabled={isLoading}
                 >
                   Driver Access
