@@ -10,7 +10,7 @@ import {
   DollarSign, 
   LogOut,
   Globe,
-  Menu,
+  ChevronRight,
   ChevronLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ export default function Sidebar() {
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="text-gray-300 hover:text-white hover:bg-gray-800 p-1"
             >
-              <Menu size={18} />
+              <ChevronRight size={18} />
             </Button>
           </div>
         ) : (
@@ -86,11 +86,11 @@ export default function Sidebar() {
             return (
               <li key={item.name}>
                 <Link href={item.href}>
-                  <div className={`flex items-center px-4 py-3 rounded-lg transition-colors cursor-pointer ${
+                  <div className={`flex items-center rounded-lg transition-colors cursor-pointer ${
                     isActive 
                       ? "bg-gray-800 text-white" 
                       : "hover:bg-gray-800 text-gray-300 hover:text-white"
-                  } ${isCollapsed ? 'justify-center' : ''}`}>
+                  } ${isCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3'}`}>
                     <Icon className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`} />
                     {!isCollapsed && <span>{item.name}</span>}
                   </div>
