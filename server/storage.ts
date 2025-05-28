@@ -256,8 +256,7 @@ export class DatabaseStorage implements IStorage {
         totalExpenses: sql<number>`COALESCE(SUM(${journeys.totalExpenses}), 0)`,
         netProfit: sql<number>`COALESCE(SUM(${journeys.balance}), 0)`,
       })
-      .from(journeys)
-      .where(eq(journeys.status, 'completed'));
+      .from(journeys);
 
     const [salaryStats] = await db
       .select({
