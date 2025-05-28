@@ -1,0 +1,112 @@
+import { Link, useLocation } from "wouter";
+import { 
+  LayoutDashboard, 
+  Route, 
+  History, 
+  Users, 
+  Truck, 
+  BarChart3, 
+  DollarSign, 
+  LogOut,
+  Globe
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/hooks/use-auth";
+
+const navigation = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["admin", "driver"] },
+  { name: "Active Journeys", href: "/active-journeys", icon: Route, roles: ["driver"] },
+  { name: "Journey History", href: "/journey-history", icon: History, roles: ["driver"] },
+  { name: "Manage Users", href: "/manage-users", icon: Users, roles: ["admin"] },
+  { name: "Manage Vehicles", href: "/manage-vehicles", icon: Truck, roles: ["admin"] },
+  { name: "Financial Management", href: "/financial-management", icon: BarChart3, roles: ["admin"] },
+  { name: "Salaries", href: "/salaries", icon: DollarSign, roles: ["admin"] },
+];
+
+export default function Sidebar() {
+  const { user, logout } = useAuth();
+  const [location] = useLocation();
+
+  if (!user) return null;
+
+  const filteredNavigation = navigation.filter(item => 
+    item.roles.includes(user.role)
+  );
+
+  return (
+    <div className="w-64 sidebar-dark text-white flex flex-col">
+      {/* Logo */}
+      <div className="p-6 border-b border-gray-700">
+        <div className="flex items-center">
+          <div className="w-10 h-10 bg-white text-gray-900 rounded-lg flex items-center justify-center mr-3">
+            <span className="font-bold text-sm">BS</span>
+          </div>
+          <span className="text-sm font-semibold">BLACKSMITH TRADERS</span>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 p-4">
+        <ul className="space-y-2">
+          {filteredNavigation.map((item) => {
+            const isActive = location === item.href;
+            const Icon = item.icon;
+            
+            return (
+              <li key={item.name}>
+                <Link href={item.href}>
+                  <a className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                    isActive 
+                      ? "bg-gray-800 text-white" 
+                      : "hover:bg-gray-800 text-gray-300 hover:text-white"
+                  }`}>
+                    <Icon className="w-5 h-5 mr-3" />
+                    <span>{item.name}</span>
+                  </a>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {/* User Info */}
+      <div className="p-4 border-t border-gray-700">
+        <div className="flex items-center mb-4">
+          <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center mr-3">
+            <span className="text-sm font-semibold">
+              {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+            </span>
+          </div>
+          <div>
+            <div className="text-sm font-medium">{user.name}</div>
+            <div className="text-xs text-gray-400 capitalize">{user.role}</div>
+          </div>
+        </div>
+        
+        <div className="mb-4">
+          <Select defaultValue="english">
+            <SelectTrigger className="w-full bg-gray-800 border-gray-600">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="english">English</SelectItem>
+              <SelectItem value="hindi">Hindi</SelectItem>
+              <SelectItem value="tamil">Tamil</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <Button 
+          onClick={logout}
+          variant="ghost" 
+          className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800"
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          Log out
+        </Button>
+      </div>
+    </div>
+  );
+}

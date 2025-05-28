@@ -1,0 +1,210 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { CreditCard, DollarSign, Clock, CheckCircle } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { getAuthHeaders } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
+
+export default function Salaries() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ["/api/users"],
+    queryFn: async () => {
+      const response = await fetch("/api/users", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch users");
+      return response.json();
+    },
+  });
+
+  const { data: salaryPayments = [] } = useQuery({
+    queryKey: ["/api/salaries"],
+    queryFn: async () => {
+      const response = await fetch("/api/salaries", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch salary payments");
+      return response.json();
+    },
+  });
+
+  const payMutation = useMutation({
+    mutationFn: async ({ userId, amount }: { userId: number; amount: string }) => {
+      const currentDate = new Date();
+      const response = await apiRequest("POST", "/api/salaries/pay", {
+        userId,
+        amount,
+        month: currentDate.toLocaleString('default', { month: 'long' }),
+        year: currentDate.getFullYear(),
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Payment Successful",
+        description: "Salary payment has been processed successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/salaries"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process salary payment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handlePaySalary = (userId: number, userName: string, salary: string) => {
+    if (confirm(`Pay salary of ₹${salary} to ${userName}?`)) {
+      payMutation.mutate({ userId, amount: salary });
+    }
+  };
+
+  // Filter only drivers
+  const drivers = users.filter((user: any) => user.role === 'driver');
+  
+  // Calculate totals
+  const totalSalaryAmount = drivers.reduce((sum: number, user: any) => sum + parseFloat(user.salary || 0), 0);
+  const totalPaidAmount = salaryPayments.reduce((sum: number, payment: any) => sum + parseFloat(payment.amount || 0), 0);
+  const totalRemainingBalance = totalSalaryAmount - totalPaidAmount;
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-24 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+      {/* Salary Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card className="bs-gradient-blue text-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center mb-2">
+                  <DollarSign className="mr-2" size={20} />
+                  <h3 className="text-sm font-medium opacity-90">Total Salary Amount</h3>
+                </div>
+                <p className="text-3xl font-bold">₹{totalSalaryAmount.toLocaleString()}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bs-gradient-green text-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center mb-2">
+                  <CheckCircle className="mr-2" size={20} />
+                  <h3 className="text-sm font-medium opacity-90">Total Paid Amount</h3>
+                </div>
+                <p className="text-3xl font-bold">₹{totalPaidAmount.toLocaleString()}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bs-gradient-orange text-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center mb-2">
+                  <Clock className="mr-2" size={20} />
+                  <h3 className="text-sm font-medium opacity-90">Total Remaining Balance</h3>
+                </div>
+                <p className="text-3xl font-bold">₹{totalRemainingBalance.toLocaleString()}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Employees Section */}
+      <Card>
+        <div className="p-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900">Employees</h2>
+        </div>
+
+        <CardContent className="p-6">
+          {drivers.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <CreditCard className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <p>No drivers found. Add drivers to manage their salaries.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {drivers.map((driver: any) => {
+                // Check if salary has been paid this month
+                const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+                const currentYear = new Date().getFullYear();
+                const isPaid = salaryPayments.some((payment: any) => 
+                  payment.userId === driver.id && 
+                  payment.month === currentMonth && 
+                  payment.year === currentYear
+                );
+
+                return (
+                  <Card key={driver.id} className="border border-gray-200">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="font-semibold text-gray-900">{driver.name}</h3>
+                          <p className="text-sm text-gray-500">{driver.username}</p>
+                        </div>
+                        <Badge variant={isPaid ? "default" : "secondary"}>
+                          {isPaid ? "Paid" : "Pending"}
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-500">Salary:</span>
+                          <span className="text-sm font-medium">₹{parseFloat(driver.salary || 0).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-500">Status:</span>
+                          <span className={`text-sm font-medium ${isPaid ? 'profit-green' : 'text-orange-600'}`}>
+                            {isPaid ? 'Paid this month' : 'Pending payment'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        onClick={() => handlePaySalary(driver.id, driver.name, driver.salary)}
+                        className="w-full bg-gray-900 hover:bg-gray-800"
+                        disabled={isPaid || payMutation.isPending}
+                      >
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        {isPaid ? "Already Paid" : payMutation.isPending ? "Processing..." : "Pay Salary"}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
