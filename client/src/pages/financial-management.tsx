@@ -210,14 +210,10 @@ export default function FinancialManagement() {
                   <p className="text-sm text-gray-600 mb-3">
                     Started: {new Date(journey.startTime).toLocaleDateString()}
                   </p>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="text-sm">
                     <div>
-                      <span className="text-gray-500">Pouch:</span>
-                      <span className="font-medium ml-1">₹{parseFloat(journey.pouch || "0").toLocaleString()}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Security:</span>
-                      <span className="font-medium ml-1">₹{parseFloat(journey.security || "0").toLocaleString()}</span>
+                      <span className="text-gray-500">Driver:</span>
+                      <span className="font-medium ml-1">Aleem</span>
                     </div>
                   </div>
                   <div className="mt-2 text-xs text-blue-600">
