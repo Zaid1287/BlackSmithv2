@@ -89,28 +89,10 @@ export default function ActiveJourney() {
     }
   };
 
-  // Mock real-time data updates
-  const mockSpeed = 65 + Math.floor(Math.random() * 20);
-  const mockDistance = 245 + Math.floor(Math.random() * 100);
-
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-24 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-          </div>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg">Loading active journey...</div>
       </div>
     );
   }
@@ -118,35 +100,18 @@ export default function ActiveJourney() {
   if (!userActiveJourney) {
     return (
       <div className="p-6">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Active Journey</h1>
-            <p className="text-gray-500">Start a new journey to begin tracking</p>
-          </div>
+        <div className="text-center py-12">
+          <Route className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Active Journey</h2>
+          <p className="text-gray-500 mb-6">You don't have any active journeys at the moment.</p>
           <Button 
             onClick={() => setShowJourneyModal(true)}
-            className="bg-gray-900 hover:bg-gray-800"
+            className="bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="w-4 h-4 mr-2" />
             Start New Journey
           </Button>
         </div>
-
-        {/* Empty State */}
-        <Card className="border-2 border-dashed border-gray-200 p-12 text-center">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Route className="text-blue-600" size={32} />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Active Journey</h2>
-          <p className="text-gray-500 mb-6">You don't have any active journeys at the moment. Start a new journey to begin tracking your route, expenses, and more.</p>
-          <Button 
-            onClick={() => setShowJourneyModal(true)}
-            className="bg-gray-900 hover:bg-gray-800"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Start New Journey
-          </Button>
-        </Card>
 
         <StartJourneyModal 
           open={showJourneyModal} 
@@ -201,8 +166,6 @@ export default function ActiveJourney() {
               </div>
             </CardContent>
           </Card>
-
-
 
           {/* Journey Expenses */}
           <Card>
@@ -260,341 +223,6 @@ export default function ActiveJourney() {
               )}
             </CardContent>
           </Card>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Row 2 */}
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Fuel</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Food</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Row 3 */}
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Toll</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Maintenance</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Row 4 */}
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">RTO</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">NZB Unloading</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Row 5 */}
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">HYD Unloading</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Miscellaneous</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Row 6 */}
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Mechanical</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Electrical</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Row 7 */}
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Body Works</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Tires Air</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Row 8 */}
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Tire Change</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Tire Greasing</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Row 9 */}
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Weighment</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">AdBlue</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Top Up Section */}
-              <div className="mt-6">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-green-800">Top Up</span>
-                    <div className="flex items-center space-x-3">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-3 py-2 w-32"
-                      />
-                      <button className="bg-green-600 text-white px-4 py-2 rounded flex items-center">
-                        Top Up <Plus className="w-4 h-4 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Financial Overview Panel */}
-        <div className="space-y-6">
-          {/* Profit/Loss Indicator */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Financial Status</h3>
-              
-              {/* Live Counter */}
-              <div className="text-center mb-4">
-                <div className={`text-3xl font-bold mb-2 profit-loss-indicator ${
-                  currentBalance >= 0 ? 'profit-green' : 'loss-red'
-                }`}>
-                  {currentBalance >= 0 ? '+' : ''}₹{currentBalance.toLocaleString()}
-                </div>
-                <p className="text-sm text-gray-500">
-                  {currentBalance >= 0 ? 'Current Profit' : 'Current Loss'}
-                </p>
-              </div>
-              
-              {/* Breakdown */}
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Initial Pouch:</span>
-                  <span className="font-medium profit-green">+₹{parseFloat(userActiveJourney.pouch).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Security Deposit:</span>
-                  <span className="font-medium text-blue-600">+₹{parseFloat(userActiveJourney.security).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Total Expenses:</span>
-                  <span className="font-medium loss-red">-₹{totalExpenses.toLocaleString()}</span>
-                </div>
-                <hr className="my-2" />
-                <div className="flex justify-between font-semibold">
-                  <span>Net Balance:</span>
-                  <span className={currentBalance >= 0 ? 'profit-green' : 'loss-red'}>
-                    {currentBalance >= 0 ? '+' : ''}₹{currentBalance.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Journey Controls */}
           <Card>
@@ -614,7 +242,38 @@ export default function ActiveJourney() {
             </CardContent>
           </Card>
 
+        </div>
 
+        {/* Financial Summary Panel */}
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Financial Summary</h3>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Initial Pouch</span>
+                  <span className="font-semibold">₹{parseFloat(userActiveJourney.pouch).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Security Deposit</span>
+                  <span className="font-semibold">₹{parseFloat(userActiveJourney.security).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Expenses</span>
+                  <span className="font-semibold text-red-600">-₹{totalExpenses.toLocaleString()}</span>
+                </div>
+                <div className="border-t pt-3">
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Current Balance</span>
+                    <span className={`font-bold text-lg ${currentBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      ₹{currentBalance.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
