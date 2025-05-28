@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function Login() {
   const { login } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -38,6 +40,8 @@ export default function Login() {
         title: "Login Successful",
         description: "Welcome back to BlackSmith Traders!",
       });
+      // Force redirect to dashboard
+      setLocation("/dashboard");
     } catch (error: any) {
       toast({
         title: "Login Failed",
@@ -50,12 +54,44 @@ export default function Login() {
   };
 
   // Demo login functions
-  const loginAsAdmin = () => {
-    handleSubmit(() => onSubmit({ username: "admin", password: "admin123" }))();
+  const loginAsAdmin = async () => {
+    setIsLoading(true);
+    try {
+      await login("admin", "admin123");
+      toast({
+        title: "Login Successful",
+        description: "Welcome back, Admin!",
+      });
+      setLocation("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Login Failed",
+        description: error.message || "Invalid credentials",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const loginAsDriver = () => {
-    handleSubmit(() => onSubmit({ username: "driver", password: "driver123" }))();
+  const loginAsDriver = async () => {
+    setIsLoading(true);
+    try {
+      await login("driver", "driver123");
+      toast({
+        title: "Login Successful",
+        description: "Welcome back, Driver!",
+      });
+      setLocation("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Login Failed",
+        description: error.message || "Invalid credentials",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
