@@ -114,41 +114,69 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
     }));
   };
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {expenseCategories.map((category) => (
-        <Card key={category.value} className={`p-4 border ${category.isRevenue ? 'border-green-300 bg-green-50' : 'border-gray-200'}`}>
-          <div className="flex items-center justify-between">
-            <div className={`font-medium min-w-0 flex-1 ${category.isRevenue ? 'text-green-700' : 'text-gray-700'}`}>
-              {category.label}
-              {category.isRevenue && <span className="text-xs text-green-600 block">+Revenue</span>}
-            </div>
-            <div className="flex items-center space-x-3 ml-4">
-              <div className="relative">
-                <span className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${category.isRevenue ? 'text-green-500' : 'text-gray-400'}`}>₹</span>
-                <Input
-                  type="number"
-                  placeholder="Amount"
-                  value={amounts[category.value] || ""}
-                  onChange={(e) => handleAmountChange(category.value, e.target.value)}
-                  className={`pl-8 w-32 h-10 text-center ${category.isRevenue ? 'border-green-300 focus:border-green-500' : ''}`}
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-              <Button
-                onClick={() => handleAddExpense(category.value)}
-                disabled={!amounts[category.value] || parseFloat(amounts[category.value] || "0") <= 0 || addExpenseMutation.isPending}
-                size="sm"
-                className="bg-green-600 hover:bg-green-700 h-10 px-4"
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                Add
-              </Button>
-            </div>
+  // Separate categories for layout
+  const hydInwardCategory = expenseCategories.find(cat => cat.value === 'hyd_inward');
+  const topUpCategory = expenseCategories.find(cat => cat.value === 'top_up');
+  const regularCategories = expenseCategories.filter(cat => cat.value !== 'hyd_inward' && cat.value !== 'top_up');
+
+  const renderCategoryCard = (category: any, isFullWidth = false) => (
+    <Card key={category.value} className={`p-4 border ${category.isRevenue ? 'border-green-300 bg-green-50' : 'border-gray-200'} ${isFullWidth ? 'col-span-full' : ''}`}>
+      <div className="flex items-center justify-between">
+        <div className={`font-medium min-w-0 flex-1 ${category.isRevenue ? 'text-green-700' : 'text-gray-700'}`}>
+          {category.label}
+          {category.isRevenue && <span className="text-xs text-green-600 block">+Revenue</span>}
+        </div>
+        <div className="flex items-center space-x-3 ml-4">
+          <div className="relative">
+            <span className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${category.isRevenue ? 'text-green-500' : 'text-gray-400'}`}>₹</span>
+            <Input
+              type="number"
+              placeholder="Amount"
+              value={amounts[category.value] || ""}
+              onChange={(e) => handleAmountChange(category.value, e.target.value)}
+              className={`pl-8 w-32 h-10 text-center ${category.isRevenue ? 'border-green-300 focus:border-green-500' : ''}`}
+              min="0"
+              step="0.01"
+            />
           </div>
-        </Card>
-      ))}
+          <Button
+            onClick={() => handleAddExpense(category.value)}
+            disabled={!amounts[category.value] || parseFloat(amounts[category.value] || "0") <= 0 || addExpenseMutation.isPending}
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 h-10 px-4"
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Add
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* HYD Inward at top - centered full width */}
+      {hydInwardCategory && (
+        <div className="flex justify-center">
+          <div className="w-full max-w-md">
+            {renderCategoryCard(hydInwardCategory)}
+          </div>
+        </div>
+      )}
+
+      {/* Regular expense categories in grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {regularCategories.map((category) => renderCategoryCard(category))}
+      </div>
+
+      {/* Top Up at bottom - centered full width */}
+      {topUpCategory && (
+        <div className="flex justify-center">
+          <div className="w-full max-w-md">
+            {renderCategoryCard(topUpCategory)}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
