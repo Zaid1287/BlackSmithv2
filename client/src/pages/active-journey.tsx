@@ -207,63 +207,59 @@ export default function ActiveJourney() {
           {/* Journey Expenses */}
           <Card>
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-6 flex items-center">
-                <DollarSign className="text-green-600 mr-2" size={20} />
-                Journey Expenses
-              </h3>
-              
-              {/* Income Section */}
-              <div className="mb-6">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-green-800">HYD Inward Income</h4>
-                      <p className="text-sm text-green-600">(This is an income item)</p>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-3 py-2 w-32"
-                      />
-                      <button className="bg-green-600 text-white px-4 py-2 rounded flex items-center">
-                        Add <Plus className="w-4 h-4 ml-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <DollarSign className="text-green-600 mr-2" size={20} />
+                  Journey Expenses
+                </h3>
+                <Button 
+                  onClick={() => setShowExpenseModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Expense
+                </Button>
               </div>
-
-              {/* Expense Categories Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Row 1 */}
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Loading</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
-                      </button>
+              
+              {/* Expenses List */}
+              {expenses.length > 0 ? (
+                <div className="space-y-3">
+                  {expenses.map((expense: any) => (
+                    <div key={expense.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium capitalize">{expense.category.replace('_', ' ')}</h4>
+                          {expense.description && (
+                            <p className="text-sm text-gray-500">{expense.description}</p>
+                          )}
+                          <p className="text-xs text-gray-400">
+                            {new Date(expense.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-semibold text-lg">₹{parseFloat(expense.amount).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Total */}
+                  <div className="border-t border-gray-200 pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">Total Expenses</span>
+                      <span className="font-bold text-xl">₹{totalExpenses.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
-                
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Rope</span>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="text" 
-                        placeholder="₹ Amount" 
-                        className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
-                      />
-                      <button className="border border-gray-300 rounded px-2 py-1 text-sm flex items-center">
-                        Add <Plus className="w-3 h-3 ml-1" />
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <DollarSign className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                  <p>No expenses recorded yet</p>
+                  <p className="text-sm">Click "Add Expense" to track your spending</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
                       </button>
                     </div>
                   </div>
