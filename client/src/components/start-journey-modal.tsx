@@ -76,13 +76,27 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
 
   const createJourneyMutation = useMutation({
     mutationFn: async (data: JourneyFormData) => {
-      const response = await apiRequest("POST", "/api/journeys", {
-        vehicleId: parseInt(data.vehicleId),
-        licensePlate: data.licensePlate,
-        destination: data.destination,
-        pouch: data.pouch,
-        security: data.security,
+      const response = await fetch("/api/journeys", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          vehicleId: parseInt(data.vehicleId),
+          licensePlate: data.licensePlate,
+          destination: data.destination,
+          pouch: data.pouch,
+          security: data.security,
+        }),
       });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create journey");
+      }
+      
       return response.json();
     },
     onSuccess: () => {
