@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { useState } from "react";
 import { 
   LayoutDashboard, 
   Route, 
@@ -8,7 +9,9 @@ import {
   BarChart3, 
   DollarSign, 
   LogOut,
-  Globe
+  Globe,
+  Menu,
+  ChevronLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -27,6 +30,7 @@ const navigation = [
 export default function Sidebar() {
   const { user, logout } = useAuth();
   const [location] = useLocation();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   if (!user) return null;
 
@@ -35,14 +39,24 @@ export default function Sidebar() {
   );
 
   return (
-    <div className="w-64 sidebar-dark text-white flex flex-col">
-      {/* Logo */}
+    <div className={`${isCollapsed ? 'w-16' : 'w-64'} sidebar-dark text-white flex flex-col transition-all duration-300`}>
+      {/* Logo and Toggle */}
       <div className="p-6 border-b border-gray-700">
-        <div className="flex items-center">
-          <div className="w-10 h-10 bg-white text-gray-900 rounded-lg flex items-center justify-center mr-3">
-            <span className="font-bold text-sm">BS</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="w-10 h-10 bg-white text-gray-900 rounded-lg flex items-center justify-center mr-3">
+              <span className="font-bold text-sm">BS</span>
+            </div>
+            {!isCollapsed && <span className="text-sm font-semibold">BLACKSMITH TRADERS</span>}
           </div>
-          <span className="text-sm font-semibold">BLACKSMITH TRADERS</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="text-gray-300 hover:text-white hover:bg-gray-800 p-1"
+          >
+            {isCollapsed ? <Menu size={18} /> : <ChevronLeft size={18} />}
+          </Button>
         </div>
       </div>
 
@@ -60,9 +74,9 @@ export default function Sidebar() {
                     isActive 
                       ? "bg-gray-800 text-white" 
                       : "hover:bg-gray-800 text-gray-300 hover:text-white"
-                  }`}>
-                    <Icon className="w-5 h-5 mr-3" />
-                    <span>{item.name}</span>
+                  } ${isCollapsed ? 'justify-center' : ''}`}>
+                    <Icon className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`} />
+                    {!isCollapsed && <span>{item.name}</span>}
                   </a>
                 </Link>
               </li>
@@ -73,39 +87,59 @@ export default function Sidebar() {
 
       {/* User Info */}
       <div className="p-4 border-t border-gray-700">
-        <div className="flex items-center mb-4">
-          <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center mr-3">
-            <span className="text-sm font-semibold">
-              {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-            </span>
+        {!isCollapsed ? (
+          <>
+            <div className="flex items-center mb-4">
+              <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center mr-3">
+                <span className="text-sm font-semibold">
+                  {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <div className="text-sm font-medium">{user.name}</div>
+                <div className="text-xs text-gray-400 capitalize">{user.role}</div>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <Select defaultValue="english">
+                <SelectTrigger className="w-full bg-gray-800 border-gray-600">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="english">English</SelectItem>
+                  <SelectItem value="hindi">Hindi</SelectItem>
+                  <SelectItem value="tamil">Tamil</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button 
+              onClick={logout}
+              variant="ghost" 
+              className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Log out
+            </Button>
+          </>
+        ) : (
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+              <span className="text-sm font-semibold">
+                {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+              </span>
+            </div>
+            <Button 
+              onClick={logout}
+              variant="ghost" 
+              size="sm"
+              className="text-gray-300 hover:text-white hover:bg-gray-800 p-2"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
           </div>
-          <div>
-            <div className="text-sm font-medium">{user.name}</div>
-            <div className="text-xs text-gray-400 capitalize">{user.role}</div>
-          </div>
-        </div>
-        
-        <div className="mb-4">
-          <Select defaultValue="english">
-            <SelectTrigger className="w-full bg-gray-800 border-gray-600">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="english">English</SelectItem>
-              <SelectItem value="hindi">Hindi</SelectItem>
-              <SelectItem value="tamil">Tamil</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <Button 
-          onClick={logout}
-          variant="ghost" 
-          className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800"
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Log out
-        </Button>
+        )}
       </div>
     </div>
   );
