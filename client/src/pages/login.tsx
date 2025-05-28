@@ -35,13 +35,17 @@ export default function Login() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      await login(data.username, data.password);
+      const response = await login(data.username, data.password);
       toast({
         title: "Login Successful",
         description: "Welcome back to BlackSmith Traders!",
       });
-      // Force redirect to dashboard
-      setLocation("/dashboard");
+      // Redirect based on user role
+      if (response.user.role === 'admin') {
+        setLocation("/financial-management");
+      } else {
+        setLocation("/active-journeys");
+      }
     } catch (error: any) {
       toast({
         title: "Login Failed",
