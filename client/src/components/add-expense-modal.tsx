@@ -64,9 +64,14 @@ export default function AddExpenseModal({ open, onOpenChange, journeyId }: AddEx
   const { user } = useAuth();
 
   // Filter categories based on user role
-  const expenseCategories = allExpenseCategories.filter(category => 
-    !category.adminOnly || user?.role === 'admin'
-  );
+  const expenseCategories = allExpenseCategories.filter(category => {
+    if (!category.adminOnly) return true; // Show regular categories to everyone
+    return user?.role === 'admin'; // Only show admin-only categories to admins
+  });
+
+  // Debug logging
+  console.log('User role:', user?.role);
+  console.log('Available categories:', expenseCategories.map(c => c.label));
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
