@@ -226,10 +226,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const journey = await storage.createJourney(journeyData);
       res.json(journey);
     } catch (error) {
+      console.error("Journey creation error:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid journey data", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to create journey" });
+      res.status(500).json({ message: "Failed to create journey", error: error.message });
     }
   });
 
