@@ -45,7 +45,7 @@ export default function Sidebar() {
         {isCollapsed ? (
           <div className="flex flex-col items-center space-y-3">
             <div className="w-10 h-10 bg-white text-gray-900 rounded-lg flex items-center justify-center">
-              <span className="font-bold text-sm">BS</span>
+              <span className="font-serif font-bold text-lg">BS</span>
             </div>
             <Button
               variant="ghost"
@@ -60,9 +60,9 @@ export default function Sidebar() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-10 h-10 bg-white text-gray-900 rounded-lg flex items-center justify-center mr-3">
-                <span className="font-bold text-sm">BS</span>
+                <span className="font-serif font-bold text-lg">BS</span>
               </div>
-              <span className="text-sm font-semibold">BLACKSMITH TRADERS</span>
+              <span className="text-xs font-medium tracking-wider">BLACKSMITH TRADERS</span>
             </div>
             <Button
               variant="ghost"
