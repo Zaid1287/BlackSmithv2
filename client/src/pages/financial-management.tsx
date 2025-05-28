@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import ExpenseQuickEntry from "@/components/expense-quick-entry";
 
 export default function FinancialManagement() {
   const [location] = useLocation();
@@ -335,6 +336,12 @@ export default function FinancialManagement() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Expense Management Section */}
+              <div className="mt-8 pt-8 border-t">
+                <h2 className="text-xl font-semibold mb-6">Add Expenses</h2>
+                <ExpenseQuickEntry journeyId={selectedJourney.id} />
               </div>
             </div>
           )}
