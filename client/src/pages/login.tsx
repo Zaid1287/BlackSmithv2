@@ -103,8 +103,8 @@ export default function Login() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-gray-400/5 to-white/5 rounded-full blur-2xl"></div>
       </div>
 
-      {/* Left Panel - Login Form */}
-      <div className="w-full lg:w-2/5 flex items-center justify-center p-12 relative z-10">
+      {/* Centered Login Form */}
+      <div className="w-full flex items-center justify-center p-12 relative z-10">
         <div className="w-full max-w-md">
           {/* Premium Login Container */}
           <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 shadow-2xl relative">
@@ -207,65 +207,6 @@ export default function Login() {
               <p className="text-gray-200/40 text-xs mt-1 tracking-widest">
                 Contact Administrator for New Accounts
               </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Panel - Luxury Features */}
-      <div className="hidden lg:flex lg:w-3/5 items-center justify-center p-16 relative z-10">
-        <div className="max-w-3xl">
-          <div className="mb-12">
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-200 bg-clip-text text-transparent mb-8 leading-tight">
-              Elite Logistics
-              <span className="block text-5xl font-light mt-2">Management Suite</span>
-            </h1>
-            <div className="w-24 h-1 bg-gradient-to-r from-gray-400 to-white mb-8"></div>
-            <p className="text-2xl text-gray-100/80 font-light leading-relaxed tracking-wide">
-              Precision fleet control with real-time analytics and comprehensive expense monitoring for BlackSmith Traders
-            </p>
-          </div>
-          
-          {/* Premium Feature List */}
-          <div className="space-y-10">
-            <div className="flex items-start space-x-8 group">
-              <div className="p-5 bg-gradient-to-br from-gray-600/20 to-gray-800/20 rounded-2xl border border-gray-400/20 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
-                <Route className="w-10 h-10 text-gray-300" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-white mb-3 tracking-wide">Real-time Fleet Tracking</h3>
-                <p className="text-gray-200/80 text-lg leading-relaxed font-light">Advanced GPS monitoring with precision location data, route optimization, and live journey analytics for complete fleet visibility</p>
-              </div>
-            </div>
-
-            <div className="flex items-start space-x-8 group">
-              <div className="p-5 bg-gradient-to-br from-gray-500/20 to-gray-700/20 rounded-2xl border border-gray-400/20 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
-                <Receipt className="w-10 h-10 text-gray-300" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-white mb-3 tracking-wide">Intelligent Expense Control</h3>
-                <p className="text-gray-200/80 text-lg leading-relaxed font-light">Automated expense categorization with real-time profitability analysis, cost optimization insights, and detailed financial reporting</p>
-              </div>
-            </div>
-
-            <div className="flex items-start space-x-8 group">
-              <div className="p-5 bg-gradient-to-br from-gray-700/20 to-gray-900/20 rounded-2xl border border-gray-400/20 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
-                <TrendingUp className="w-10 h-10 text-gray-300" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-white mb-3 tracking-wide">Advanced Analytics Dashboard</h3>
-                <p className="text-gray-200/80 text-lg leading-relaxed font-light">Comprehensive profit/loss indicators with predictive analytics, performance metrics, and strategic business intelligence</p>
-              </div>
-            </div>
-
-            <div className="flex items-start space-x-8 group">
-              <div className="p-5 bg-gradient-to-br from-gray-600/20 to-black/20 rounded-2xl border border-gray-400/20 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
-                <Settings className="w-10 h-10 text-gray-300" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-white mb-3 tracking-wide">Enterprise Reporting Suite</h3>
-                <p className="text-gray-200/80 text-lg leading-relaxed font-light">Executive-grade reports with customizable dashboards, automated insights, and comprehensive fleet performance analysis</p>
-              </div>
             </div>
           </div>
         </div>
