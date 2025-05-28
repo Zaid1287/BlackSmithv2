@@ -608,10 +608,6 @@ export default function ActiveJourney() {
               <h3 className="text-lg font-semibold mb-4">Journey Controls</h3>
               
               <div className="space-y-3">
-                <Button className="w-full bg-orange-600 hover:bg-orange-700" disabled>
-                  <Pause className="w-4 h-4 mr-2" />
-                  Pause Journey
-                </Button>
                 <Button 
                   onClick={handleCompleteJourney}
                   className="w-full bg-green-600 hover:bg-green-700"
@@ -619,10 +615,6 @@ export default function ActiveJourney() {
                 >
                   <Square className="w-4 h-4 mr-2" />
                   {completeJourneyMutation.isPending ? "Completing..." : "Complete Journey"}
-                </Button>
-                <Button className="w-full bg-red-600 hover:bg-red-700" disabled>
-                  <Square className="w-4 h-4 mr-2" />
-                  Cancel Journey
                 </Button>
               </div>
             </CardContent>
