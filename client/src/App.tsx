@@ -95,7 +95,7 @@ function Router() {
       
       <Route path="/dashboard">
         <ProtectedRoute>
-          {user?.role === "admin" ? <AdminDashboard /> : <Dashboard />}
+          {user?.role === "admin" ? <FinancialManagement /> : <AdminDashboard />}
         </ProtectedRoute>
       </Route>
 
