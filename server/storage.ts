@@ -29,6 +29,7 @@ export interface IStorage {
   // Expense methods
   createExpense(expense: InsertExpense): Promise<Expense>;
   getExpensesByJourney(journeyId: number): Promise<Expense[]>;
+  getExpensesByJourneyForUser(journeyId: number, userRole: string): Promise<Expense[]>;
   
   // Salary methods
   createSalaryPayment(payment: InsertSalaryPayment): Promise<SalaryPayment>;
@@ -156,6 +157,18 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(expenses).where(eq(expenses.journeyId, journeyId)).orderBy(desc(expenses.timestamp));
   }
 
+  async getExpensesByJourneyForUser(journeyId: number, userRole: string): Promise<Expense[]> {
+    if (userRole === 'admin') {
+      // Admin sees all expenses
+      return await db.select().from(expenses).where(eq(expenses.journeyId, journeyId)).orderBy(desc(expenses.timestamp));
+    } else {
+      // Drivers don't see company secrets (toll and hyd_inward)
+      return await db.select().from(expenses)
+        .where(and(eq(expenses.journeyId, journeyId), eq(expenses.isCompanySecret, false)))
+        .orderBy(desc(expenses.timestamp));
+    }
+  }
+
   private async updateJourneyTotals(journeyId: number): Promise<void> {
     const [result] = await db
       .select({
@@ -167,7 +180,8 @@ export class DatabaseStorage implements IStorage {
     const [journey] = await db.select().from(journeys).where(eq(journeys.id, journeyId));
     
     if (journey) {
-      const balance = parseFloat(journey.pouch) + parseFloat(journey.security || "0") - parseFloat(result.totalExpenses.toString());
+      // Balance is pouch minus expenses (security is NOT included in balance - it's separate)
+      const balance = parseFloat(journey.pouch) - parseFloat(result.totalExpenses.toString());
       
       await db.update(journeys).set({
         totalExpenses: result.totalExpenses.toString(),

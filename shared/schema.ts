@@ -42,9 +42,10 @@ export const journeys = pgTable("journeys", {
 export const expenses = pgTable("expenses", {
   id: serial("id").primaryKey(),
   journeyId: integer("journey_id").references(() => journeys.id),
-  category: text("category").notNull(), // "fuel", "food", "toll", "maintenance", "other"
+  category: text("category").notNull(), // "fuel", "food", "toll", "maintenance", "hyd_inward", "other"
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   description: text("description"),
+  isCompanySecret: boolean("is_company_secret").default(false), // true for HYD Inward and Toll
   timestamp: timestamp("timestamp").defaultNow(),
 });
 
