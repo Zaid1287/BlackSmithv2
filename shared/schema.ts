@@ -27,23 +27,23 @@ export const journeys = pgTable("journeys", {
   vehicleId: integer("vehicle_id").references(() => vehicles.id),
   licensePlate: text("license_plate").notNull(),
   destination: text("destination").notNull(),
-  pouch: decimal("pouch", { precision: 10, scale: 2 }).notNull(),
-  security: decimal("security", { precision: 10, scale: 2 }).default("0"),
+  pouch: decimal("pouch", { precision: 15, scale: 2 }).notNull(),
+  security: decimal("security", { precision: 15, scale: 2 }).default("0"),
   status: text("status").notNull().default("active"), // "active", "completed", "cancelled"
   startTime: timestamp("start_time").defaultNow(),
   endTime: timestamp("end_time"),
   currentLocation: jsonb("current_location"), // {lat, lng, address}
   speed: integer("speed").default(0),
-  distanceCovered: decimal("distance_covered", { precision: 10, scale: 2 }).default("0"),
-  totalExpenses: decimal("total_expenses", { precision: 10, scale: 2 }).default("0"),
-  balance: decimal("balance", { precision: 10, scale: 2 }).default("0"),
+  distanceCovered: decimal("distance_covered", { precision: 15, scale: 2 }).default("0"),
+  totalExpenses: decimal("total_expenses", { precision: 15, scale: 2 }).default("0"),
+  balance: decimal("balance", { precision: 15, scale: 2 }).default("0"),
 });
 
 export const expenses = pgTable("expenses", {
   id: serial("id").primaryKey(),
   journeyId: integer("journey_id").references(() => journeys.id),
   category: text("category").notNull(), // "fuel", "food", "toll", "maintenance", "hyd_inward", "other"
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
   description: text("description"),
   isCompanySecret: boolean("is_company_secret").default(false), // true for HYD Inward and Toll
   timestamp: timestamp("timestamp").defaultNow(),
@@ -52,7 +52,7 @@ export const expenses = pgTable("expenses", {
 export const salaryPayments = pgTable("salary_payments", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
   paidAt: timestamp("paid_at").defaultNow(),
   month: text("month").notNull(),
   year: integer("year").notNull(),
