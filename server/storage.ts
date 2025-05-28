@@ -188,22 +188,22 @@ export class DatabaseStorage implements IStorage {
         not(eq(expenses.category, 'top_up'))
       ));
 
-    // Calculate revenue (HYD Inward + Top Up) separately
-    const [revenueResult] = await db
+    // Calculate Top Up separately (this adds to balance)
+    const [topUpResult] = await db
       .select({
-        totalRevenue: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
+        topUpAmount: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
       })
       .from(expenses)
       .where(and(
         eq(expenses.journeyId, journeyId), 
-        sql`${expenses.category} IN ('hyd_inward', 'top_up')`
+        eq(expenses.category, 'top_up')
       ));
 
     const [journey] = await db.select().from(journeys).where(eq(journeys.id, journeyId));
     
     if (journey) {
-      // Balance = pouch - actual expenses + revenue (HYD Inward + Top Up)
-      const balance = parseFloat(journey.pouch) - parseFloat(expenseResult.totalExpenses.toString()) + parseFloat(revenueResult.totalRevenue.toString());
+      // Balance = pouch - actual expenses + top up (HYD Inward goes directly to profit, not balance)
+      const balance = parseFloat(journey.pouch) - parseFloat(expenseResult.totalExpenses.toString()) + parseFloat(topUpResult.topUpAmount.toString());
       
       await db.update(journeys).set({
         totalExpenses: expenseResult.totalExpenses.toString(),
@@ -266,6 +266,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFinancialStats(): Promise<any> {
+    // Calculate HYD Inward revenue separately for direct profit addition
+    const [hydInwardStats] = await db
+      .select({
+        hydInwardRevenue: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
+      })
+      .from(expenses)
+      .where(eq(expenses.category, 'hyd_inward'));
+
     const [revenueStats] = await db
       .select({
         totalRevenue: sql<number>`COALESCE(SUM(${journeys.pouch} + ${journeys.security}), 0)`,
@@ -283,10 +291,13 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(salaryPayments, eq(users.id, salaryPayments.userId))
       .where(eq(users.role, 'driver'));
 
+    // Add HYD Inward directly to net profit
+    const finalNetProfit = (revenueStats.netProfit || 0) + (hydInwardStats.hydInwardRevenue || 0);
+
     return {
       revenue: revenueStats.totalRevenue || 0,
       expenses: revenueStats.totalExpenses || 0,
-      netProfit: revenueStats.netProfit || 0,
+      netProfit: finalNetProfit,
       salaryStats: {
         total: salaryStats.totalSalaryAmount || 0,
         paid: salaryStats.paidAmount || 0,
