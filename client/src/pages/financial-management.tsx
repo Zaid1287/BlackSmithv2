@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, CreditCard, TrendingUp, Download, RefreshCw, BarChart3 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Truck, Users, MapPin, TrendingUp, DollarSign, AlertCircle, CheckCircle, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
 
 export default function FinancialManagement() {
@@ -18,13 +18,61 @@ export default function FinancialManagement() {
     },
   });
 
+  const { data: dashboardStats } = useQuery({
+    queryKey: ["/api/dashboard/stats"],
+    queryFn: async () => {
+      const response = await fetch("/api/dashboard/stats", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch dashboard stats");
+      return response.json();
+    },
+  });
+
+  const { data: vehicles } = useQuery({
+    queryKey: ["/api/vehicles"],
+    queryFn: async () => {
+      const response = await fetch("/api/vehicles", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch vehicles");
+      return response.json();
+    },
+  });
+
+  const { data: users } = useQuery({
+    queryKey: ["/api/users"],
+    queryFn: async () => {
+      const response = await fetch("/api/users", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch users");
+      return response.json();
+    },
+  });
+
+  const { data: journeys } = useQuery({
+    queryKey: ["/api/journeys"],
+    queryFn: async () => {
+      const response = await fetch("/api/journeys", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch journeys");
+      return response.json();
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[...Array(3)].map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
               <div key={i} className="h-24 bg-gray-200 rounded"></div>
             ))}
           </div>
@@ -34,226 +82,210 @@ export default function FinancialManagement() {
     );
   }
 
+  const netProfit = (financialStats?.revenue || 0) - (financialStats?.expenses || 0);
+  const profitMargin = financialStats?.revenue > 0 ? (netProfit / financialStats.revenue) * 100 : 0;
+
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Financial Management</h1>
-          <p className="text-gray-500">Overview of revenue, expenses, and profitability</p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <Button variant="outline">
-            <Download className="w-4 h-4 mr-2" />
-            Export to Excel
-          </Button>
-          <Button variant="outline">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Reset Financial Data
-          </Button>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+        <p className="text-gray-600">Welcome to BlackSmith Traders management console</p>
       </div>
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="fleet">Fleet Management</TabsTrigger>
-          <TabsTrigger value="finances">Finances</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          {/* Financial Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="bs-gradient-green text-white">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center mb-2">
-                      <DollarSign className="mr-2" size={20} />
-                      <h3 className="text-sm font-medium opacity-90">Total Revenue</h3>
-                    </div>
-                    <p className="text-3xl font-bold">₹{(financialStats?.revenue || 0).toLocaleString()}</p>
-                    <div className="flex items-center text-sm mt-2 opacity-90">
-                      <span>From completed journeys</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bs-gradient-red text-white">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center mb-2">
-                      <CreditCard className="mr-2" size={20} />
-                      <h3 className="text-sm font-medium opacity-90">Total Expenses</h3>
-                    </div>
-                    <p className="text-3xl font-bold">₹{(financialStats?.expenses || 0).toLocaleString()}</p>
-                    <div className="flex items-center text-sm mt-2 opacity-90">
-                      <span>Journey-related expenses</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center mb-2">
-                      <TrendingUp className="mr-2" size={20} />
-                      <h3 className="text-sm font-medium opacity-90">Net Profit</h3>
-                    </div>
-                    <p className="text-3xl font-bold">₹{(financialStats?.netProfit || 0).toLocaleString()}</p>
-                    <div className="flex items-center text-sm mt-2 opacity-90">
-                      <span>
-                        {financialStats?.revenue > 0 
-                          ? `${((financialStats.netProfit / financialStats.revenue) * 100).toFixed(1)}% margin`
-                          : 'No revenue data'
-                        }
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Detailed Financial Breakdown */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Revenue Breakdown */}
-            <Card>
-              <div className="p-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold">Revenue Sources</h3>
-                <p className="text-sm text-gray-500">Breakdown of income sources</p>
-              </div>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Journey Payments (Pouch)</span>
-                    <span className="font-medium">₹{(financialStats?.revenue * 0.7 || 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Security Deposits</span>
-                    <span className="font-medium">₹{(financialStats?.revenue * 0.3 || 0).toLocaleString()}</span>
-                  </div>
-                  <hr className="my-2" />
-                  <div className="flex justify-between items-center font-semibold">
-                    <span>Total Revenue</span>
-                    <span className="profit-green">₹{(financialStats?.revenue || 0).toLocaleString()}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Expense Analysis */}
-            <Card>
-              <div className="p-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold">Expense Analysis</h3>
-                <div className="flex items-center space-x-4 mt-2">
-                  <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">By Category</button>
-                  <button className="px-3 py-1 text-gray-500 hover:text-gray-700 text-sm">Timeline</button>
+      {/* Key Metrics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Total Fleet */}
+        <Card className="bg-white border-0 shadow-md hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Total Fleet</p>
+                <p className="text-2xl font-bold text-gray-900">{vehicles?.length || 0}</p>
+                <div className="flex items-center mt-2">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    {dashboardStats?.vehicles?.available || 0} Available
+                  </Badge>
                 </div>
               </div>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {/* Expense Categories */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
-                      <span className="text-sm">Fuel</span>
-                    </div>
-                    <span className="text-sm font-medium">45%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: '45%' }}></div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                      <span className="text-sm">Salary</span>
-                    </div>
-                    <span className="text-sm font-medium">35%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '35%' }}></div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-orange-500 rounded-full mr-3"></div>
-                      <span className="text-sm">Maintenance</span>
-                    </div>
-                    <span className="text-sm font-medium">20%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-orange-500 h-2 rounded-full" style={{ width: '20%' }}></div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Salary Overview */}
-          <Card>
-            <div className="p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold">Salary Management Overview</h3>
+              <div className="p-3 bg-blue-100 rounded-full">
+                <Truck className="w-6 h-6 text-blue-600" />
+              </div>
             </div>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-blue-600">
-                    ₹{(financialStats?.salaryStats?.total || 0).toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-500">Total Monthly Salaries</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold profit-green">
-                    ₹{(financialStats?.salaryStats?.paid || 0).toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-500">Paid This Month</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-orange-600">
-                    ₹{(financialStats?.salaryStats?.remaining || 0).toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-500">Pending Payments</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="fleet" className="space-y-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-center py-8">
-                <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Fleet Financial Analysis</h3>
-                <p className="text-gray-500">
-                  Detailed fleet cost analysis and ROI calculations will be displayed here.
-                </p>
+        {/* Active Drivers */}
+        <Card className="bg-white border-0 shadow-md hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Active Drivers</p>
+                <p className="text-2xl font-bold text-gray-900">{users?.filter(u => u.role === 'driver')?.length || 0}</p>
+                <div className="flex items-center mt-2">
+                  <CheckCircle className="w-4 h-4 text-green-500 mr-1" />
+                  <span className="text-sm text-green-600">All Active</span>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <div className="p-3 bg-green-100 rounded-full">
+                <Users className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="finances" className="space-y-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-center py-8">
-                <TrendingUp className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Advanced Financial Reports</h3>
-                <p className="text-gray-500">
-                  Comprehensive financial reports and analytics will be available here.
-                </p>
+        {/* Total Journeys */}
+        <Card className="bg-white border-0 shadow-md hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Total Journeys</p>
+                <p className="text-2xl font-bold text-gray-900">{journeys?.length || 0}</p>
+                <div className="flex items-center mt-2">
+                  <ArrowUpRight className="w-4 h-4 text-blue-500 mr-1" />
+                  <span className="text-sm text-blue-600">This Month</span>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              <div className="p-3 bg-orange-100 rounded-full">
+                <MapPin className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Net Profit */}
+        <Card className="bg-white border-0 shadow-md hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Net Profit</p>
+                <p className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  ₹{Math.abs(netProfit).toLocaleString()}
+                </p>
+                <div className="flex items-center mt-2">
+                  {netProfit >= 0 ? (
+                    <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
+                  ) : (
+                    <ArrowDownRight className="w-4 h-4 text-red-500 mr-1" />
+                  )}
+                  <span className={`text-sm ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {profitMargin.toFixed(1)}% margin
+                  </span>
+                </div>
+              </div>
+              <div className={`p-3 rounded-full ${netProfit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                <TrendingUp className={`w-6 h-6 ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Financial Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Revenue & Expenses */}
+        <Card className="bg-white border-0 shadow-md">
+          <div className="p-6 border-b border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900">Financial Overview</h3>
+            <p className="text-sm text-gray-600">Revenue and expenses breakdown</p>
+          </div>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                <div className="flex items-center">
+                  <div className="p-2 bg-green-100 rounded-full mr-3">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                    <p className="text-xl font-bold text-green-600">₹{(financialStats?.revenue || 0).toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
+                <div className="flex items-center">
+                  <div className="p-2 bg-red-100 rounded-full mr-3">
+                    <AlertCircle className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Expenses</p>
+                    <p className="text-xl font-bold text-red-600">₹{(financialStats?.expenses || 0).toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-medium text-gray-900">Net Result</span>
+                  <span className={`text-xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {netProfit >= 0 ? '+' : '-'}₹{Math.abs(netProfit).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Fleet Status */}
+        <Card className="bg-white border-0 shadow-md">
+          <div className="p-6 border-b border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900">Fleet Status</h3>
+            <p className="text-sm text-gray-600">Current vehicle availability</p>
+          </div>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {vehicles?.slice(0, 4).map((vehicle, index) => (
+                <div key={vehicle.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                    <div>
+                      <p className="font-medium text-gray-900">{vehicle.licensePlate}</p>
+                      <p className="text-sm text-gray-600">{vehicle.model}</p>
+                    </div>
+                  </div>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    Available
+                  </Badge>
+                </div>
+              )) || (
+                <div className="text-center py-8">
+                  <Truck className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-gray-500">No vehicles registered</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Quick Actions */}
+      <Card className="bg-white border-0 shadow-md">
+        <div className="p-6 border-b border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
+          <p className="text-sm text-gray-600">Manage your fleet and operations</p>
+        </div>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Button className="h-20 flex flex-col items-center justify-center bg-blue-600 hover:bg-blue-700">
+              <Users className="w-6 h-6 mb-2" />
+              <span>Manage Users</span>
+            </Button>
+            <Button className="h-20 flex flex-col items-center justify-center bg-green-600 hover:bg-green-700">
+              <Truck className="w-6 h-6 mb-2" />
+              <span>Fleet Management</span>
+            </Button>
+            <Button className="h-20 flex flex-col items-center justify-center bg-orange-600 hover:bg-orange-700">
+              <DollarSign className="w-6 h-6 mb-2" />
+              <span>Salary Management</span>
+            </Button>
+            <Button className="h-20 flex flex-col items-center justify-center bg-purple-600 hover:bg-purple-700">
+              <TrendingUp className="w-6 h-6 mb-2" />
+              <span>Financial Reports</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
