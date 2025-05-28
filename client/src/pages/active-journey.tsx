@@ -200,47 +200,7 @@ export default function ActiveJourney() {
             </CardContent>
           </Card>
 
-          {/* Real-time Tracking */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <Navigation className="text-blue-600 mr-2" size={20} />
-                Real-time Tracking
-              </h3>
-              
-              {/* Mock GPS Display */}
-              <div className="bg-gray-100 rounded-lg p-6 mb-4">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-blue-600 flex items-center justify-center">
-                      <Gauge className="mr-2" size={24} />
-                      {mockSpeed}
-                    </div>
-                    <p className="text-sm text-gray-500">km/h</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold profit-green flex items-center justify-center">
-                      <Route className="mr-2" size={24} />
-                      {mockDistance}
-                    </div>
-                    <p className="text-sm text-gray-500">km covered</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Mock Location */}
-              <div className="bg-blue-50 rounded-lg p-4">
-                <div className="flex items-center">
-                  <MapPin className="text-blue-600 mr-3" size={20} />
-                  <div>
-                    <p className="font-medium">Current Location</p>
-                    <p className="text-sm text-gray-600">17.3850° N, 78.4867° E</p>
-                    <p className="text-xs text-gray-500">Near Secunderabad Junction</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+
 
           {/* Journey Expenses */}
           <Card>
@@ -668,23 +628,7 @@ export default function ActiveJourney() {
             </CardContent>
           </Card>
 
-          {/* Emergency Contacts */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Emergency</h3>
-              
-              <div className="space-y-3">
-                <Button className="w-full bg-red-600 hover:bg-red-700" disabled>
-                  <AlertTriangle className="w-4 h-4 mr-2" />
-                  Report Issue
-                </Button>
-                <div className="text-center text-sm text-gray-500">
-                  <p>Support: +91 9876543210</p>
-                  <p>Admin: +91 9876543211</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+
         </div>
       </div>
 
