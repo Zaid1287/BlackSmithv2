@@ -6,13 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Truck, Route, UserCheck, TrafficCone, Search, X } from "lucide-react";
+import { Truck, Route, UserCheck, TrafficCone, Search, X, Plus } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
+import AddExpenseModal from "@/components/add-expense-modal";
 
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedJourney, setSelectedJourney] = useState<any>(null);
+  const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
 
   const { data: dashboardStats } = useQuery({
     queryKey: ["/api/dashboard/stats"],
@@ -504,7 +506,17 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <h4 className="font-semibold mb-3">Expense Breakdown</h4>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold">Expense Breakdown</h4>
+                  <Button 
+                    size="sm" 
+                    onClick={() => setShowAddExpenseModal(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Expense
+                  </Button>
+                </div>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {selectedJourneyExpenses.length === 0 ? (
                     <p className="text-gray-500 text-sm">No expenses recorded</p>
@@ -537,6 +549,15 @@ export default function AdminDashboard() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Add Expense Modal */}
+      {selectedJourney && (
+        <AddExpenseModal
+          open={showAddExpenseModal}
+          onOpenChange={setShowAddExpenseModal}
+          journeyId={selectedJourney.id}
+        />
+      )}
     </div>
   );
 }
