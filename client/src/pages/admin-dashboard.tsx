@@ -594,8 +594,8 @@ export default function AdminDashboard() {
                       <div className="flex items-center gap-2">
                         <p className="font-medium text-lg">
                           ₹{selectedJourneyExpenses
-                            .filter(exp => exp.category === 'toll')
-                            .reduce((sum, exp) => sum + parseFloat(exp.amount), 0)
+                            .filter((exp: any) => exp.category === 'toll')
+                            .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0)
                             .toLocaleString()}
                         </p>
                         <Button
@@ -641,7 +641,7 @@ export default function AdminDashboard() {
                         ₹{parseFloat(selectedJourney.balance || 0).toLocaleString()}
                       </p>
                       <div className="mt-2 text-sm text-gray-600">
-                        <p><strong>Working Balance:</strong> ₹{selectedJourney.pouch || 0} (pouch) + ₹{selectedJourneyExpenses.filter(exp => exp.category === 'top_up').reduce((sum, exp) => sum + parseFloat(exp.amount), 0)} (top-ups) - ₹{selectedJourney.totalExpenses || 0} (expenses)</p>
+                        <p><strong>Working Balance:</strong> ₹{selectedJourney.pouch || 0} (pouch) + ₹{selectedJourneyExpenses.filter((exp: any) => exp.category === 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0)} (top-ups) - ₹{selectedJourney.totalExpenses || 0} (expenses)</p>
                         {selectedJourney.status === 'completed' && (
                           <p><strong>Final Adjustments:</strong> ₹{selectedJourney.security || 0} (security) (added because journey is completed)</p>
                         )}
