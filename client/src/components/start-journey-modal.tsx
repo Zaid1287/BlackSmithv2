@@ -89,6 +89,7 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
           destination: data.destination,
           pouch: data.pouch,
           security: data.security || "0",
+          photos: photos,
         }),
       });
       

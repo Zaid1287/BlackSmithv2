@@ -37,6 +37,7 @@ export const journeys = pgTable("journeys", {
   distanceCovered: decimal("distance_covered", { precision: 15, scale: 2 }).default("0"),
   totalExpenses: decimal("total_expenses", { precision: 15, scale: 2 }).default("0"),
   balance: decimal("balance", { precision: 15, scale: 2 }).default("0"),
+  photos: jsonb("photos"), // Array of base64 photo strings
 });
 
 export const expenses = pgTable("expenses", {

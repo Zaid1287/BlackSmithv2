@@ -219,9 +219,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/journeys", authenticateToken, async (req: any, res) => {
     try {
+      const { photos, ...journeyFields } = req.body;
       const journeyData = insertJourneySchema.parse({
-        ...req.body,
+        ...journeyFields,
         driverId: req.user.id,
+        photos: photos || null,
       });
       const journey = await storage.createJourney(journeyData);
       res.json(journey);

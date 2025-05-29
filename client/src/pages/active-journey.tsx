@@ -231,6 +231,27 @@ export default function ActiveJourney() {
             </CardContent>
           </Card>
 
+          {/* Journey Photos - Admin Only */}
+          {user?.role === 'admin' && userActiveJourney?.photos && Array.isArray(userActiveJourney.photos) && userActiveJourney.photos.length > 0 && (
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Journey Photos</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {userActiveJourney.photos.map((photo: string, index: number) => (
+                    <div key={index} className="relative aspect-square overflow-hidden rounded-lg border border-gray-200">
+                      <img 
+                        src={photo} 
+                        alt={`Journey photo ${index + 1}`}
+                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
+                        onClick={() => window.open(photo, '_blank')}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Journey Controls */}
           <Card>
             <CardContent className="p-6">
