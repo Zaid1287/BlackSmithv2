@@ -144,7 +144,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bs-gradient-orange text-white hover-lift scale-in mobile-card">
+        <Card className={`${parseFloat(financialStats?.netProfit || 0) >= 0 ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' : 'bg-gradient-to-r from-red-500 to-red-600'} text-white hover-lift scale-in mobile-card`}>
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
