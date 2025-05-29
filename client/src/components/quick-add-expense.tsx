@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, X } from "lucide-react";
 
@@ -30,7 +31,7 @@ const regularExpenseTypes = [
 
 export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseProps) {
   const [amounts, setAmounts] = useState<{[key: string]: string}>({});
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -115,97 +116,89 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
     }
   };
 
-  if (!isExpanded) {
-    return (
+  return (
+    <>
       <Button
-        onClick={() => setIsExpanded(true)}
+        onClick={() => setShowModal(true)}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white"
         size="lg"
       >
         <Plus className="w-5 h-5 mr-2" />
-        Add Quick Expense
+        Add Expense
       </Button>
-    );
-  }
 
-  return (
-    <div className="space-y-6 p-4 border rounded-lg bg-white">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Add Expenses</h3>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setIsExpanded(false);
-            if (onClose) onClose();
-          }}
-        >
-          <X className="w-4 h-4" />
-        </Button>
-      </div>
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">Add Expenses</DialogTitle>
+          </DialogHeader>
 
-      {/* HYD Inward Income Section - Special Green Container */}
-      <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <h4 className="text-green-700 font-semibold text-lg">HYD Inward</h4>
-            <h5 className="text-green-700 font-medium">Income</h5>
-            <p className="text-green-600 text-sm">(This is an income item)</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
-              <Input
-                type="text"
-                placeholder="Amount"
-                value={amounts['hyd_inward'] || ''}
-                onChange={(e) => handleAmountChange('hyd_inward', e.target.value)}
-                className="pl-8 w-40 bg-white border-green-300 focus:border-green-500"
-              />
-            </div>
-            <Button
-              onClick={() => handleAddExpense('hyd_inward')}
-              disabled={addExpenseMutation.isPending}
-              className="bg-green-600 hover:bg-green-700 text-white px-6"
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              Add
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Regular Expenses Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        {regularExpenseTypes.map((expenseType) => (
-          <div key={expenseType.value} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h4 className="font-medium text-gray-900 mb-3">{expenseType.label}</h4>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
-                  <Input
-                    type="text"
-                    placeholder="Amount"
-                    value={amounts[expenseType.value] || ''}
-                    onChange={(e) => handleAmountChange(expenseType.value, e.target.value)}
-                    className="pl-8 bg-white"
-                  />
+          <div className="space-y-6 p-4">
+            {/* HYD Inward Income Section - Special Green Container */}
+            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h4 className="text-green-700 font-semibold text-lg">HYD Inward</h4>
+                  <h5 className="text-green-700 font-medium">Income</h5>
+                  <p className="text-green-600 text-sm">(This is an income item)</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                    <Input
+                      type="text"
+                      placeholder="Amount"
+                      value={amounts['hyd_inward'] || ''}
+                      onChange={(e) => handleAmountChange('hyd_inward', e.target.value)}
+                      className="pl-8 w-40 bg-white border-green-300 focus:border-green-500"
+                    />
+                  </div>
+                  <Button
+                    onClick={() => handleAddExpense('hyd_inward')}
+                    disabled={addExpenseMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add
+                  </Button>
                 </div>
               </div>
-              <Button
-                onClick={() => handleAddExpense(expenseType.value)}
-                disabled={addExpenseMutation.isPending}
-                variant="outline"
-                className="ml-3 px-4"
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                Add
-              </Button>
+            </div>
+
+            {/* Regular Expenses Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              {regularExpenseTypes.map((expenseType) => (
+                <div key={expenseType.value} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 mb-3">{expenseType.label}</h4>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                        <Input
+                          type="text"
+                          placeholder="Amount"
+                          value={amounts[expenseType.value] || ''}
+                          onChange={(e) => handleAmountChange(expenseType.value, e.target.value)}
+                          className="pl-8 bg-white"
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => handleAddExpense(expenseType.value)}
+                      disabled={addExpenseMutation.isPending}
+                      variant="outline"
+                      className="ml-3 px-4"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-    </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
