@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Truck, Route, UserCheck, TrafficCone, Search } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Truck, Route, UserCheck, TrafficCone, Search, X } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
 
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedJourney, setSelectedJourney] = useState<any>(null);
 
   const { data: dashboardStats } = useQuery({
     queryKey: ["/api/dashboard/stats"],
@@ -58,6 +60,19 @@ export default function AdminDashboard() {
       if (!response.ok) throw new Error("Failed to fetch vehicles");
       return response.json();
     },
+  });
+
+  const { data: selectedJourneyExpenses = [] } = useQuery({
+    queryKey: ["/api/journeys", selectedJourney?.id, "expenses"],
+    queryFn: async () => {
+      const response = await fetch(`/api/journeys/${selectedJourney?.id}/expenses`, {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch expenses");
+      return response.json();
+    },
+    enabled: !!selectedJourney?.id,
   });
 
   return (
@@ -398,6 +413,130 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </Card>
+
+      {/* Journey Details Modal */}
+      <Dialog open={!!selectedJourney} onOpenChange={() => setSelectedJourney(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Journey Details - {selectedJourney?.destination}</span>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedJourney(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedJourney && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Journey Information */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Journey Information</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">License Plate:</span>
+                    <span className="font-medium">{selectedJourney.licensePlate}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Destination:</span>
+                    <span className="font-medium">{selectedJourney.destination}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Status:</span>
+                    <span className={`px-2 py-1 rounded-full text-xs capitalize ${
+                      selectedJourney.status === 'active' ? 'bg-blue-100 text-blue-700' :
+                      selectedJourney.status === 'completed' ? 'bg-green-100 text-green-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {selectedJourney.status}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Pouch Amount:</span>
+                    <span className="font-medium">₹{parseFloat(selectedJourney.pouchAmount || 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Security Deposit:</span>
+                    <span className="font-medium">₹{parseFloat(selectedJourney.securityDeposit || 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Distance:</span>
+                    <span className="font-medium">{selectedJourney.distance || 0} km</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Speed:</span>
+                    <span className="font-medium">{selectedJourney.speed || 0} km/h</span>
+                  </div>
+                  {selectedJourney.photos && selectedJourney.photos.length > 0 && (
+                    <div>
+                      <span className="text-gray-600">Photos:</span>
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        {selectedJourney.photos.map((photo: string, index: number) => (
+                          <img
+                            key={index}
+                            src={photo}
+                            alt={`Journey photo ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg border"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Financial Information */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Financial Information</h3>
+                <div className="space-y-3 mb-6">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Current Balance:</span>
+                    <span className={`font-medium ${
+                      parseFloat(selectedJourney.balance || 0) >= 0 ? 'profit-green' : 'loss-red'
+                    }`}>
+                      ₹{parseFloat(selectedJourney.balance || 0).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Expenses:</span>
+                    <span className="font-medium text-red-600">
+                      ₹{parseFloat(selectedJourney.totalExpenses || 0).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                <h4 className="font-semibold mb-3">Expense Breakdown</h4>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {selectedJourneyExpenses.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No expenses recorded</p>
+                  ) : (
+                    selectedJourneyExpenses.map((expense: any) => (
+                      <div key={expense.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <div>
+                          <span className={`text-sm font-medium ${
+                            expense.type === 'hyd_inward' ? 'profit-green' :
+                            expense.type === 'top_up' ? 'profit-green' :
+                            'text-gray-900'
+                          }`}>
+                            {expense.type.replace('_', ' ').toUpperCase()}
+                          </span>
+                          {expense.description && (
+                            <p className="text-xs text-gray-500">{expense.description}</p>
+                          )}
+                        </div>
+                        <span className={`font-medium ${
+                          expense.type === 'hyd_inward' || expense.type === 'top_up' ? 'profit-green' : 'text-red-600'
+                        }`}>
+                          {expense.type === 'hyd_inward' || expense.type === 'top_up' ? '+' : '-'}₹{parseFloat(expense.amount).toLocaleString()}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
