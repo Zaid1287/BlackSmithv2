@@ -268,7 +268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/expenses", authenticateToken, async (req, res) => {
+  app.post("/api/expenses", authenticateToken, async (req: any, res) => {
     try {
       const expenseData = insertExpenseSchema.parse(req.body);
       const expense = await storage.createExpense(expenseData);
@@ -277,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid expense data", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to create expense" });
+      res.status(500).json({ message: "Failed to create expense", error: error.message });
     }
   });
 

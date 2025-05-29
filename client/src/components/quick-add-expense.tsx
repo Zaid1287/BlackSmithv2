@@ -42,15 +42,6 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
 
   const addExpenseMutation = useMutation({
     mutationFn: async (data: { type: string; amount: number }) => {
-      const requestBody = {
-        journeyId: journeyId,
-        category: data.type,
-        amount: data.amount.toString(),
-        description: `${regularExpenseTypes.find(t => t.value === data.type)?.label || data.type} expense`,
-      };
-      
-      console.log("Sending expense request:", requestBody);
-      
       const response = await fetch(`/api/expenses`, {
         method: "POST",
         headers: {
@@ -58,13 +49,16 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
           ...getAuthHeaders(),
         },
         credentials: "include",
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          journeyId: journeyId,
+          category: data.type,
+          amount: data.amount.toString(),
+          description: `${regularExpenseTypes.find(t => t.value === data.type)?.label || data.type} expense`,
+        }),
       });
       
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error("Expense creation failed:", response.status, errorData);
-        throw new Error(`Failed to add expense: ${response.status} ${errorData}`);
+        throw new Error("Failed to add expense");
       }
       
       return response.json();
