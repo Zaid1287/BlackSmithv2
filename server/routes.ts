@@ -323,6 +323,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reset financial data endpoint (admin only)
+  app.post("/api/reset-financial-data", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      await storage.resetAllFinancialData();
+      res.json({ message: "Financial data reset successfully" });
+    } catch (error) {
+      console.error("Reset financial data error:", error);
+      res.status(500).json({ message: "Failed to reset financial data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

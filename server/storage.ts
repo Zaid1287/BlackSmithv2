@@ -38,6 +38,9 @@ export interface IStorage {
   // Dashboard stats
   getDashboardStats(): Promise<any>;
   getFinancialStats(): Promise<any>;
+  
+  // Reset methods
+  resetAllFinancialData(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -314,6 +317,16 @@ export class DatabaseStorage implements IStorage {
         remaining: 0,
       },
     };
+  }
+
+  async resetAllFinancialData(): Promise<void> {
+    // Delete all financial data in the correct order (respecting foreign key constraints)
+    await db.delete(expenses);
+    await db.delete(journeys);
+    await db.delete(salaryPayments);
+    
+    // Reset vehicle statuses to available
+    await db.update(vehicles).set({ status: 'available' });
   }
 }
 

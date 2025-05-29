@@ -1,14 +1,22 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, DollarSign, Download, RotateCcw, BarChart3, PieChart, TrendingDown } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { TrendingUp, DollarSign, Download, RotateCcw, BarChart3, PieChart, TrendingDown, Shield } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function FinancialManagement() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [confirmationText, setConfirmationText] = useState("");
   
   const { data: financialStats, isLoading } = useQuery({
     queryKey: ["/api/dashboard/financial"],
@@ -33,6 +41,41 @@ export default function FinancialManagement() {
       return response.json();
     },
   });
+
+  const resetFinancialDataMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/reset-financial-data");
+    },
+    onSuccess: () => {
+      toast({
+        title: "Financial Data Reset",
+        description: "All financial data has been successfully reset.",
+      });
+      setShowResetDialog(false);
+      setConfirmationText("");
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Reset Failed",
+        description: error.message || "Failed to reset financial data",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleResetConfirm = () => {
+    if (confirmationText === "RESET FINANCIAL DATA") {
+      resetFinancialDataMutation.mutate();
+    } else {
+      toast({
+        title: "Verification Failed",
+        description: "Please type exactly: RESET FINANCIAL DATA",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -76,12 +119,76 @@ export default function FinancialManagement() {
             <Download className="w-4 h-4 mr-2" />
             Export to Excel
           </Button>
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowResetDialog(true)}
+            className="text-red-600 border-red-600 hover:bg-red-50"
+          >
             <RotateCcw className="w-4 h-4 mr-2" />
             Reset Financial Data
           </Button>
         </div>
       </div>
+
+      {/* Reset Confirmation Dialog */}
+      <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-red-600">
+              <Shield className="w-5 h-5" />
+              <span>Reset Financial Data</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-800 font-medium mb-2">⚠️ WARNING: This action cannot be undone!</p>
+              <p className="text-sm text-red-700">
+                This will permanently delete all financial data including:
+              </p>
+              <ul className="text-sm text-red-700 mt-2 list-disc list-inside">
+                <li>All journey records</li>
+                <li>All expense data</li>
+                <li>All salary payments</li>
+                <li>All revenue calculations</li>
+              </ul>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-900">
+                Type "RESET FINANCIAL DATA" to confirm:
+              </label>
+              <Input
+                type="text"
+                value={confirmationText}
+                onChange={(e) => setConfirmationText(e.target.value)}
+                placeholder="RESET FINANCIAL DATA"
+                className="font-mono"
+              />
+            </div>
+            
+            <div className="flex space-x-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowResetDialog(false);
+                  setConfirmationText("");
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleResetConfirm}
+                disabled={confirmationText !== "RESET FINANCIAL DATA" || resetFinancialDataMutation.isPending}
+                className="flex-1 bg-red-600 hover:bg-red-700"
+              >
+                {resetFinancialDataMutation.isPending ? "Resetting..." : "Reset Data"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Financial Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
