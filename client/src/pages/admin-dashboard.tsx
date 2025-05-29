@@ -26,6 +26,8 @@ export default function AdminDashboard() {
       if (!response.ok) throw new Error("Failed to fetch dashboard stats");
       return response.json();
     },
+    refetchInterval: 10000, // Refresh every 10 seconds
+    staleTime: 5000, // Consider data stale after 5 seconds
   });
 
   const { data: financialStats } = useQuery({
@@ -38,6 +40,8 @@ export default function AdminDashboard() {
       if (!response.ok) throw new Error("Failed to fetch financial stats");
       return response.json();
     },
+    refetchInterval: 15000, // Refresh every 15 seconds
+    staleTime: 10000, // Consider data stale after 10 seconds
   });
 
   const { data: journeys = [] } = useQuery({
@@ -50,6 +54,9 @@ export default function AdminDashboard() {
       if (!response.ok) throw new Error("Failed to fetch journeys");
       return response.json();
     },
+    refetchInterval: 5000, // Refresh every 5 seconds for faster journey updates
+    staleTime: 2000, // Consider data stale after 2 seconds
+    refetchOnWindowFocus: true, // Refetch when user focuses the window
   });
 
   const { data: vehicles = [] } = useQuery({
@@ -62,6 +69,7 @@ export default function AdminDashboard() {
       if (!response.ok) throw new Error("Failed to fetch vehicles");
       return response.json();
     },
+    staleTime: 30000, // Vehicles don't change often, cache for 30 seconds
   });
 
   const { data: selectedJourneyExpenses = [] } = useQuery({
@@ -75,6 +83,8 @@ export default function AdminDashboard() {
       return response.json();
     },
     enabled: !!selectedJourney?.id,
+    refetchInterval: 3000, // Refresh expenses every 3 seconds when modal is open
+    staleTime: 1000, // Consider expenses stale after 1 second
   });
 
   return (
