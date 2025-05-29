@@ -12,9 +12,15 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  const { getAuthHeaders } = await import("./auth");
+  const headers = {
+    ...(data ? { "Content-Type": "application/json" } : {}),
+    ...getAuthHeaders(),
+  };
+
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
