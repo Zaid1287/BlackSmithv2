@@ -132,6 +132,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
             <span className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${category.isRevenue ? 'text-green-500' : 'text-gray-400'}`}>₹</span>
             <Input
               type="number"
+              inputMode="numeric"
               placeholder="Amount"
               value={amounts[category.value] || ""}
               onChange={(e) => handleAmountChange(category.value, e.target.value)}
@@ -162,6 +163,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
             <span className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${category.isRevenue ? 'text-green-500' : 'text-gray-400'}`}>₹</span>
             <Input
               type="number"
+              inputMode="numeric"
               placeholder="Amount"
               value={amounts[category.value] || ""}
               onChange={(e) => handleAmountChange(category.value, e.target.value)}

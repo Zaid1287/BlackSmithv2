@@ -175,6 +175,7 @@ export default function AddExpenseModal({ open, onOpenChange, journeyId }: AddEx
                       <Input 
                         {...field} 
                         type="number" 
+                        inputMode="numeric"
                         placeholder="0" 
                         className="pl-8"
                       />

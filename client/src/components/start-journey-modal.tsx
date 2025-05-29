@@ -235,6 +235,7 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
                       <Input 
                         {...field} 
                         type="number" 
+                        inputMode="numeric"
                         placeholder="0" 
                         className="pl-8"
                       />
@@ -257,6 +258,7 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
                       <Input 
                         {...field} 
                         type="number" 
+                        inputMode="numeric"
                         placeholder="0" 
                         className="pl-8"
                       />
