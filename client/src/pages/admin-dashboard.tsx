@@ -160,8 +160,8 @@ export default function AdminDashboard() {
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xs md:text-sm font-medium opacity-90">Revenue</h3>
-                <p className="text-lg md:text-2xl font-bold">₹{parseFloat(financialStats?.revenue || 0).toLocaleString()}</p>
+                <h3 className="text-xs md:text-sm font-medium opacity-90">Net Profit</h3>
+                <p className="text-lg md:text-2xl font-bold">₹{parseFloat(financialStats?.netProfit || 0).toLocaleString()}</p>
               </div>
               <TrafficCone className="opacity-80" size={24} />
             </div>
