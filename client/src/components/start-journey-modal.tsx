@@ -34,9 +34,20 @@ import { useToast } from "@/hooks/use-toast";
 const journeySchema = z.object({
   vehicleId: z.string().min(1, "Please select a vehicle"),
   licensePlate: z.string().min(1, "License plate is required"),
-  destination: z.string().min(1, "Destination is required"),
-  pouch: z.string().min(1, "Pouch amount is required"),
-  security: z.string().default("0"),
+  destination: z.string()
+    .min(3, "Destination must be at least 3 characters")
+    .max(100, "Destination cannot exceed 100 characters")
+    .regex(/^[a-zA-Z0-9\s,.-]+$/, "Destination contains invalid characters"),
+  pouch: z.string()
+    .min(1, "Pouch amount is required")
+    .regex(/^\d+(\.\d{1,2})?$/, "Please enter a valid pouch amount")
+    .refine((val) => parseFloat(val) > 0, "Pouch amount must be greater than 0")
+    .refine((val) => parseFloat(val) <= 500000, "Pouch amount cannot exceed ₹5,00,000"),
+  security: z.string()
+    .default("0")
+    .refine((val) => /^\d+(\.\d{1,2})?$/.test(val), "Please enter a valid security amount")
+    .refine((val) => parseFloat(val) >= 0, "Security amount cannot be negative")
+    .refine((val) => parseFloat(val) <= 100000, "Security amount cannot exceed ₹1,00,000"),
 });
 
 type JourneyFormData = z.infer<typeof journeySchema>;

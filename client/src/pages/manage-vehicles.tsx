@@ -114,7 +114,8 @@ export default function ManageVehicles() {
   });
 
   const handleDeleteVehicle = (vehicleId: number, licensePlate: string) => {
-    if (confirm(`Are you sure you want to delete vehicle "${licensePlate}"?`)) {
+    const confirmMessage = `Are you sure you want to delete vehicle "${licensePlate}"?\n\nThis action cannot be undone and will remove all associated data.`;
+    if (window.confirm(confirmMessage)) {
       deleteVehicleMutation.mutate(vehicleId);
     }
   };

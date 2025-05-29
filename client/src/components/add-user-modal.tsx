@@ -29,11 +29,24 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 const userSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  name: z.string().min(1, "Name is required"),
+  username: z.string()
+    .min(3, "Username must be at least 3 characters")
+    .max(20, "Username cannot exceed 20 characters")
+    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .max(50, "Password cannot exceed 50 characters")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number"),
+  name: z.string()
+    .min(2, "Name must be at least 2 characters")
+    .max(50, "Name cannot exceed 50 characters")
+    .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
   role: z.string().min(1, "Please select a role"),
-  salary: z.string().optional(),
+  salary: z.string()
+    .optional()
+    .refine((val) => !val || /^\d+(\.\d{1,2})?$/.test(val), "Please enter a valid salary amount")
+    .refine((val) => !val || parseFloat(val) >= 0, "Salary cannot be negative")
+    .refine((val) => !val || parseFloat(val) <= 1000000, "Salary cannot exceed ₹10,00,000"),
 });
 
 type UserFormData = z.infer<typeof userSchema>;

@@ -81,20 +81,31 @@ export default function FinancialManagement() {
 
   const handleExportToExcel = async () => {
     try {
+      toast({
+        title: "Exporting Data",
+        description: "Preparing Excel file with all financial data...",
+      });
+
       // Fetch all necessary data for export
       const [journeysData, allExpenses] = await Promise.all([
         fetch("/api/journeys", {
           headers: getAuthHeaders(),
           credentials: "include",
-        }).then(res => res.json()),
+        }).then(res => {
+          if (!res.ok) throw new Error("Failed to fetch journeys");
+          return res.json();
+        }),
         
         fetch("/api/expenses/all", {
           headers: getAuthHeaders(),
           credentials: "include",
-        }).then(res => res.json()).catch(() => [])
+        }).then(res => {
+          if (!res.ok) throw new Error("Failed to fetch expenses");
+          return res.json();
+        }).catch(() => [])
       ]);
 
-      // Create workbook
+      // Create workbook with enhanced formatting
       const workbook = XLSX.utils.book_new();
 
       // Summary Sheet

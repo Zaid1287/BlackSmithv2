@@ -33,8 +33,14 @@ import { useAuth } from "@/hooks/use-auth";
 const expenseSchema = z.object({
   journeyId: z.number(),
   category: z.string().min(1, "Please select a category"),
-  amount: z.string().min(1, "Amount is required"),
-  description: z.string().optional(),
+  amount: z.string()
+    .min(1, "Amount is required")
+    .regex(/^\d+(\.\d{1,2})?$/, "Please enter a valid amount (e.g., 100 or 100.50)")
+    .refine((val) => parseFloat(val) > 0, "Amount must be greater than 0")
+    .refine((val) => parseFloat(val) <= 100000, "Amount cannot exceed ₹1,00,000"),
+  description: z.string()
+    .min(3, "Description must be at least 3 characters")
+    .max(200, "Description cannot exceed 200 characters"),
 });
 
 type ExpenseFormData = z.infer<typeof expenseSchema>;

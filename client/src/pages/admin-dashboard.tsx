@@ -202,12 +202,23 @@ export default function AdminDashboard() {
             {/* Journey Tiles */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mobile-grid">
               {journeys.length === 0 ? (
-                <div className="col-span-full text-center py-8 text-gray-500 fade-in">
-                  <div className="loading-shimmer h-4 w-32 mx-auto mb-2 rounded"></div>
-                  <p className="mobile-text">No journeys found</p>
+                <div className="col-span-full text-center py-12 text-gray-500 fade-in">
+                  <Route className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                  <h3 className="text-lg font-medium mb-2">No Journeys Available</h3>
+                  <p className="mobile-text">Start by creating a new journey from the manage vehicles section</p>
                 </div>
               ) : (
-                journeys.slice(0, 9).map((journey: any, index: number) => (
+                journeys
+                  .filter(journey => 
+                    statusFilter === 'all' || journey.status === statusFilter
+                  )
+                  .filter(journey =>
+                    searchTerm === '' || 
+                    journey.destination?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    journey.licensePlate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    journey.driverName?.toLowerCase().includes(searchTerm.toLowerCase())
+                  )
+                  .slice(0, 12).map((journey: any, index: number) => (
                   <Card 
                     key={journey.id} 
                     className={`cursor-pointer hover-lift border-l-4 slide-up mobile-card ${
