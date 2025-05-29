@@ -525,20 +525,20 @@ export default function AdminDashboard() {
                       <div key={expense.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                         <div>
                           <span className={`text-sm font-medium ${
-                            expense.type === 'hyd_inward' ? 'profit-green' :
-                            expense.type === 'top_up' ? 'profit-green' :
+                            expense.category === 'hyd_inward' ? 'profit-green' :
+                            expense.category === 'top_up' ? 'profit-green' :
                             'text-gray-900'
                           }`}>
-                            {expense.type.replace('_', ' ').toUpperCase()}
+                            {(expense.category || expense.type || 'Unknown').replace('_', ' ').toUpperCase()}
                           </span>
                           {expense.description && (
                             <p className="text-xs text-gray-500">{expense.description}</p>
                           )}
                         </div>
                         <span className={`font-medium ${
-                          expense.type === 'hyd_inward' || expense.type === 'top_up' ? 'profit-green' : 'text-red-600'
+                          expense.category === 'hyd_inward' || expense.category === 'top_up' ? 'profit-green' : 'text-red-600'
                         }`}>
-                          {expense.type === 'hyd_inward' || expense.type === 'top_up' ? '+' : '-'}₹{parseFloat(expense.amount).toLocaleString()}
+                          {expense.category === 'hyd_inward' || expense.category === 'top_up' ? '+' : '-'}₹{parseFloat(expense.amount || 0).toLocaleString()}
                         </span>
                       </div>
                     ))
