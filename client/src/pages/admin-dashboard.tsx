@@ -88,60 +88,60 @@ export default function AdminDashboard() {
   });
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-3 md:p-6 mobile-optimized">
+      <div className="flex items-center justify-between mb-4 md:mb-8 fade-in">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">BlackSmith Logistics Dashboard</h1>
-          <p className="text-gray-500">Complete overview of your logistics operations</p>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">BlackSmith Logistics</h1>
+          <p className="text-sm md:text-base text-gray-500 hidden md:block">Complete overview of your logistics operations</p>
         </div>
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="bs-gradient-blue text-white">
-          <CardContent className="p-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8 mobile-grid">
+        <Card className="bs-gradient-blue text-white hover-lift scale-in mobile-card">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium opacity-90">Total Vehicles</h3>
-                <p className="text-3xl font-bold">{dashboardStats?.vehicles?.total || 0}</p>
+                <h3 className="text-xs md:text-sm font-medium opacity-90">Total Vehicles</h3>
+                <p className="text-xl md:text-3xl font-bold">{dashboardStats?.vehicles?.total || 0}</p>
               </div>
-              <Truck className="text-2xl opacity-80" size={32} />
+              <Truck className="opacity-80" size={24} />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bs-gradient-indigo text-white">
-          <CardContent className="p-6">
+        <Card className="bs-gradient-indigo text-white hover-lift scale-in mobile-card">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium opacity-90">Active Journeys</h3>
-                <p className="text-3xl font-bold">{dashboardStats?.journeys?.active || 0}</p>
+                <h3 className="text-xs md:text-sm font-medium opacity-90">Active Journeys</h3>
+                <p className="text-xl md:text-3xl font-bold">{dashboardStats?.journeys?.active || 0}</p>
               </div>
-              <Route className="text-2xl opacity-80" size={32} />
+              <Route className="opacity-80" size={24} />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bs-gradient-green text-white">
-          <CardContent className="p-6">
+        <Card className="bs-gradient-green text-white hover-lift scale-in mobile-card">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium opacity-90">Available Drivers</h3>
-                <p className="text-3xl font-bold">{dashboardStats?.drivers?.available || 0}</p>
+                <h3 className="text-xs md:text-sm font-medium opacity-90">Available Drivers</h3>
+                <p className="text-xl md:text-3xl font-bold">{dashboardStats?.drivers?.available || 0}</p>
               </div>
-              <UserCheck className="text-2xl opacity-80" size={32} />
+              <UserCheck className="opacity-80" size={24} />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bs-gradient-orange text-white">
-          <CardContent className="p-6">
+        <Card className="bs-gradient-orange text-white hover-lift scale-in mobile-card">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium opacity-90">Avg Trip Distance</h3>
-                <p className="text-3xl font-bold">{dashboardStats?.journeys?.avgDistance || 0} km</p>
+                <h3 className="text-xs md:text-sm font-medium opacity-90">Revenue</h3>
+                <p className="text-lg md:text-2xl font-bold">₹{parseFloat(financialStats?.revenue || 0).toLocaleString()}</p>
               </div>
-              <TrafficCone className="text-2xl opacity-80" size={32} />
+              <TrafficCone className="opacity-80" size={24} />
             </div>
           </CardContent>
         </Card>
@@ -200,26 +200,28 @@ export default function AdminDashboard() {
             </div>
 
             {/* Journey Tiles */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mobile-grid">
               {journeys.length === 0 ? (
-                <div className="col-span-full text-center py-8 text-gray-500">
-                  No journeys found
+                <div className="col-span-full text-center py-8 text-gray-500 fade-in">
+                  <div className="loading-shimmer h-4 w-32 mx-auto mb-2 rounded"></div>
+                  <p className="mobile-text">No journeys found</p>
                 </div>
               ) : (
-                journeys.slice(0, 9).map((journey: any) => (
+                journeys.slice(0, 9).map((journey: any, index: number) => (
                   <Card 
                     key={journey.id} 
-                    className={`cursor-pointer hover:shadow-lg transition-shadow border-l-4 ${
+                    className={`cursor-pointer hover-lift border-l-4 slide-up mobile-card ${
                       journey.status === 'active' ? 'border-l-blue-500' : 
                       journey.status === 'completed' ? 'border-l-green-500' : 'border-l-gray-500'
                     }`}
+                    style={{ animationDelay: `${index * 0.1}s` }}
                     onClick={() => setSelectedJourney(journey)}
                   >
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
+                    <CardContent className="p-3 md:p-4">
+                      <div className="space-y-2 md:space-y-3">
                         <div className="flex items-center justify-between">
-                          <h4 className="font-semibold text-lg truncate">{journey.destination}</h4>
-                          <span className={`px-2 py-1 rounded-full text-xs capitalize ${
+                          <h4 className="font-semibold text-base md:text-lg truncate mobile-text">{journey.destination}</h4>
+                          <span className={`px-2 py-1 rounded-full text-xs capitalize scale-in ${
                             journey.status === 'active' ? 'bg-blue-100 text-blue-700' :
                             journey.status === 'completed' ? 'bg-green-100 text-green-700' :
                             'bg-gray-100 text-gray-700'
@@ -228,14 +230,14 @@ export default function AdminDashboard() {
                           </span>
                         </div>
                         
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
+                        <div className="space-y-1 md:space-y-2">
+                          <div className="flex items-center justify-between text-xs md:text-sm">
                             <span className="text-gray-500">License Plate:</span>
                             <span className="font-medium">{journey.licensePlate}</span>
                           </div>
                           
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-500">Current Balance:</span>
+                          <div className="flex items-center justify-between text-xs md:text-sm">
+                            <span className="text-gray-500">Balance:</span>
                             <span className={`font-medium ${
                               parseFloat(journey.balance) >= 0 ? 'profit-green' : 'loss-red'
                             }`}>
@@ -243,17 +245,10 @@ export default function AdminDashboard() {
                             </span>
                           </div>
                           
-                          <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center justify-between text-xs md:text-sm">
                             <span className="text-gray-500">Speed:</span>
                             <span className="font-medium">{journey.speed || 0} km/h</span>
                           </div>
-                          
-                          {journey.distance && (
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-500">Distance:</span>
-                              <span className="font-medium">{journey.distance} km</span>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -428,27 +423,27 @@ export default function AdminDashboard() {
 
       {/* Journey Details Modal */}
       <Dialog open={!!selectedJourney} onOpenChange={() => setSelectedJourney(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mobile-modal scale-in">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-lg md:text-xl mobile-text">
               Journey Details - {selectedJourney?.destination}
             </DialogTitle>
           </DialogHeader>
 
           {selectedJourney && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 mobile-grid">
               {/* Journey Information */}
-              <div>
-                <h3 className="text-xl font-semibold mb-6">Journey Information</h3>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
+              <div className="fade-in">
+                <h3 className="text-lg md:text-xl font-semibold mb-4 md:mb-6">Journey Information</h3>
+                <div className="space-y-4 md:space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                     <div>
-                      <p className="text-gray-500 text-sm">Driver</p>
-                      <p className="font-medium text-lg">Driver Name</p>
+                      <p className="text-gray-500 text-xs md:text-sm">Driver</p>
+                      <p className="font-medium text-sm md:text-lg">Driver Name</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 text-sm">License Plate</p>
-                      <p className="font-medium text-lg">{selectedJourney.licensePlate}</p>
+                      <p className="text-gray-500 text-xs md:text-sm">License Plate</p>
+                      <p className="font-medium text-sm md:text-lg">{selectedJourney.licensePlate}</p>
                     </div>
                   </div>
 
