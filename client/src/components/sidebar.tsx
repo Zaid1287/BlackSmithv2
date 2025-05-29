@@ -19,8 +19,8 @@ import { useAuth } from "@/hooks/use-auth";
 
 const navigation = [
   { name: "Dashboard", href: "/active-journeys", icon: LayoutDashboard, roles: ["driver"] },
-  { name: "Dashboard", href: "/financial-management", icon: LayoutDashboard, roles: ["admin"] },
-  { name: "Journey History", href: "/journey-history", icon: History, roles: ["driver"] },
+  { name: "Dashboard", href: "/admin-dashboard", icon: LayoutDashboard, roles: ["admin"] },
+  { name: "Journey History", href: "/journey-history", icon: History, roles: ["driver", "admin"] },
   { name: "Mobile Driver App", href: "/mobile-driver", icon: Globe, roles: ["driver"] },
   { name: "Manage Users", href: "/manage-users", icon: Users, roles: ["admin"] },
   { name: "Manage Vehicles", href: "/manage-vehicles", icon: Truck, roles: ["admin"] },
