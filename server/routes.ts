@@ -281,6 +281,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/expenses/all", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const expenses = await storage.getAllExpenses();
+      res.json(expenses);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch all expenses" });
+    }
+  });
+
   // Salary management routes
   app.get("/api/salaries", authenticateToken, requireAdmin, async (req, res) => {
     try {

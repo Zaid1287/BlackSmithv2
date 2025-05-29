@@ -10,6 +10,8 @@ import { getAuthHeaders } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 export default function FinancialManagement() {
   const { user } = useAuth();
@@ -77,6 +79,119 @@ export default function FinancialManagement() {
     }
   };
 
+  const handleExportToExcel = async () => {
+    try {
+      // Fetch all necessary data for export
+      const [journeysData, allExpenses] = await Promise.all([
+        fetch("/api/journeys", {
+          headers: getAuthHeaders(),
+          credentials: "include",
+        }).then(res => res.json()),
+        
+        fetch("/api/expenses/all", {
+          headers: getAuthHeaders(),
+          credentials: "include",
+        }).then(res => res.json()).catch(() => [])
+      ]);
+
+      // Create workbook
+      const workbook = XLSX.utils.book_new();
+
+      // Summary Sheet
+      const summaryData = [
+        ["BlackSmith Traders - Financial Report"],
+        ["Generated on:", new Date().toLocaleDateString()],
+        [""],
+        ["Financial Summary"],
+        ["Total Revenue", `₹${totalRevenue.toLocaleString()}`],
+        ["Total Expenses", `₹${totalExpenses.toLocaleString()}`],
+        ["Net Profit", `₹${netProfit.toLocaleString()}`],
+        ["Security Deposits", `₹${securityDeposits.toLocaleString()}`],
+        ["Salary Expenses", `₹${salaryExpenses.toLocaleString()}`],
+        ["HYD Inward", `₹${hydInwardAmount.toLocaleString()}`],
+      ];
+      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
+
+      // Journeys Sheet
+      const journeyHeaders = [
+        "Journey ID", "License Plate", "Destination", "Driver", "Status", 
+        "Start Date", "End Date", "Pouch Amount", "Security Deposit", 
+        "Total Expenses", "Current Balance"
+      ];
+      
+      const journeyData = journeysData.map((journey: any) => [
+        journey.id,
+        journey.licensePlate,
+        journey.destination,
+        journey.driverName || "N/A",
+        journey.status,
+        journey.startTime ? new Date(journey.startTime).toLocaleDateString() : "",
+        journey.endTime ? new Date(journey.endTime).toLocaleDateString() : "",
+        parseFloat(journey.pouch || 0),
+        parseFloat(journey.security || 0),
+        parseFloat(journey.totalExpenses || 0),
+        parseFloat(journey.balance || 0)
+      ]);
+
+      const journeySheet = XLSX.utils.aoa_to_sheet([journeyHeaders, ...journeyData]);
+      XLSX.utils.book_append_sheet(workbook, journeySheet, "Journeys");
+
+      // Expenses Sheet (if data available)
+      if (allExpenses.length > 0) {
+        const expenseHeaders = [
+          "Expense ID", "Journey ID", "Category", "Amount", "Description", "Date", "Driver"
+        ];
+        
+        const expenseData = allExpenses.map((expense: any) => [
+          expense.id,
+          expense.journeyId,
+          expense.category.replace('_', ' ').toUpperCase(),
+          parseFloat(expense.amount),
+          expense.description || "",
+          new Date(expense.timestamp).toLocaleDateString(),
+          expense.driverName || "N/A"
+        ]);
+
+        const expenseSheet = XLSX.utils.aoa_to_sheet([expenseHeaders, ...expenseData]);
+        XLSX.utils.book_append_sheet(workbook, expenseSheet, "Expenses");
+      }
+
+      // Category-wise expense summary
+      const categoryTotals: { [key: string]: number } = {};
+      allExpenses.forEach((expense: any) => {
+        const category = expense.category.replace('_', ' ').toUpperCase();
+        categoryTotals[category] = (categoryTotals[category] || 0) + parseFloat(expense.amount);
+      });
+
+      const categoryData = [
+        ["Category", "Total Amount"],
+        ...Object.entries(categoryTotals).map(([category, amount]) => [category, amount])
+      ];
+      
+      const categorySheet = XLSX.utils.aoa_to_sheet(categoryData);
+      XLSX.utils.book_append_sheet(workbook, categorySheet, "Category Summary");
+
+      // Generate and download file
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+      const fileName = `BlackSmith_Traders_Financial_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+      saveAs(data, fileName);
+
+      toast({
+        title: "Export Successful",
+        description: "Financial report has been downloaded successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to generate Excel report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="p-6">
@@ -115,7 +230,7 @@ export default function FinancialManagement() {
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Financial Management</h1>
         <div className="flex items-center space-x-3">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportToExcel}>
             <Download className="w-4 h-4 mr-2" />
             Export to Excel
           </Button>

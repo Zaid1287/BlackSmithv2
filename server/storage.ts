@@ -30,6 +30,7 @@ export interface IStorage {
   createExpense(expense: InsertExpense): Promise<Expense>;
   getExpensesByJourney(journeyId: number): Promise<Expense[]>;
   getExpensesByJourneyForUser(journeyId: number, userRole: string): Promise<Expense[]>;
+  getAllExpenses(): Promise<Expense[]>;
   
   // Salary methods
   createSalaryPayment(payment: InsertSalaryPayment): Promise<SalaryPayment>;
