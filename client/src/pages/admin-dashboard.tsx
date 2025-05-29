@@ -172,46 +172,61 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Journey Cards */}
-            <div className="space-y-4">
+            {/* Journey Tiles */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {journeys.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="col-span-full text-center py-8 text-gray-500">
                   No journeys found
                 </div>
               ) : (
-                journeys.slice(0, 5).map((journey: any) => (
-                  <Card key={journey.id} className={`border-l-4 ${
-                    journey.status === 'active' ? 'border-l-blue-500' : 
-                    journey.status === 'completed' ? 'border-l-green-500' : 'border-l-gray-500'
-                  }`}>
+                journeys.slice(0, 9).map((journey: any) => (
+                  <Card 
+                    key={journey.id} 
+                    className={`cursor-pointer hover:shadow-lg transition-shadow border-l-4 ${
+                      journey.status === 'active' ? 'border-l-blue-500' : 
+                      journey.status === 'completed' ? 'border-l-green-500' : 'border-l-gray-500'
+                    }`}
+                    onClick={() => setSelectedJourney(journey)}
+                  >
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div>
-                            <h4 className="font-semibold">{journey.destination}</h4>
-                            <p className="text-sm text-gray-500">License Plate: {journey.licensePlate}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-6">
-                          <div className="text-right">
-                            <p className="text-sm text-gray-500">Current Balance:</p>
-                            <p className={`font-semibold ${
-                              parseFloat(journey.balance) >= 0 ? 'profit-green' : 'loss-red'
-                            }`}>
-                              ₹{parseFloat(journey.balance).toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-gray-500">Speed:</p>
-                            <p className="font-semibold">{journey.speed || 0} km/h</p>
-                          </div>
-                          <span className={`px-3 py-1 rounded-full text-sm capitalize ${
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold text-lg truncate">{journey.destination}</h4>
+                          <span className={`px-2 py-1 rounded-full text-xs capitalize ${
                             journey.status === 'active' ? 'bg-blue-100 text-blue-700' :
                             journey.status === 'completed' ? 'bg-green-100 text-green-700' :
                             'bg-gray-100 text-gray-700'
                           }`}>
                             {journey.status}
                           </span>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500">License Plate:</span>
+                            <span className="font-medium">{journey.licensePlate}</span>
+                          </div>
+                          
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500">Current Balance:</span>
+                            <span className={`font-medium ${
+                              parseFloat(journey.balance) >= 0 ? 'profit-green' : 'loss-red'
+                            }`}>
+                              ₹{parseFloat(journey.balance).toLocaleString()}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500">Speed:</span>
+                            <span className="font-medium">{journey.speed || 0} km/h</span>
+                          </div>
+                          
+                          {journey.distance && (
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-500">Distance:</span>
+                              <span className="font-medium">{journey.distance} km</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </CardContent>
