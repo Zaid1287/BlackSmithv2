@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TrendingUp, DollarSign, Download, RotateCcw, BarChart3, PieChart, TrendingDown, Shield } from "lucide-react";
-import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { getAuthHeaders } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -491,91 +491,51 @@ export default function FinancialManagement() {
               </CardContent>
             </Card>
 
-            {/* Expense Analysis */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-2">Expense Analysis</h3>
-                <p className="text-sm text-gray-500 mb-6">Visual breakdown of expenses by type (including salary payments)</p>
-                
-                <div className="space-y-4">
-                  <div className="flex space-x-4 border-b pb-3">
-                    <Button variant="outline" size="sm" className="bg-gray-100">
-                      By Category
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      Timeline
-                    </Button>
-                  </div>
-                  
-                  {/* Mock Chart Area */}
-                  <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500">Chart visualization would appear here</p>
-                      <p className="text-xs text-gray-400">Showing expense breakdown by category</p>
-                    </div>
-                  </div>
-                  
-                  {/* Legend */}
-                  <div className="flex flex-wrap gap-3 text-xs">
-                    <div className="flex items-center space-x-1">
-                      <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                      <span>salary_refund (7%)</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-3 h-3 bg-green-500 rounded"></div>
-                      <span>fuel (21%)</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                      <span>maintenance (9%)</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-3 h-3 bg-red-500 rounded"></div>
-                      <span>misc (3%)</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
         </TabsContent>
 
         <TabsContent value="visualization" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Revenue Breakdown Chart */}
+            {/* Expense Bar Chart */}
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-2">Revenue Breakdown</h3>
-                <p className="text-sm text-gray-500 mb-6">Visual breakdown of all revenue sources</p>
+                <h3 className="text-lg font-semibold mb-2">Expense Analysis</h3>
+                <p className="text-sm text-gray-500 mb-6">Bar chart showing expenses by category</p>
                 
-                {revenueChartData.length > 0 ? (
+                {expenseBreakdownData.length > 0 ? (
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsPieChart>
-                        <Pie
-                          data={revenueChartData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={120}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          {revenueChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
+                      <BarChart data={expenseBreakdownData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="name" 
+                          angle={-45}
+                          textAnchor="end"
+                          height={100}
+                          fontSize={12}
+                        />
+                        <YAxis 
+                          tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
+                          fontSize={12}
+                        />
+                        <Tooltip 
+                          formatter={(value) => [`₹${Number(value).toLocaleString()}`, 'Amount']}
+                          labelStyle={{ color: '#374151' }}
+                        />
+                        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                          {expenseBreakdownData.map((entry, index) => (
+                            <Cell key={`bar-${index}`} fill={entry.color} />
                           ))}
-                        </Pie>
-                        <Tooltip formatter={(value) => [`₹${Number(value).toLocaleString()}`, '']} />
-                        <Legend />
-                      </RechartsPieChart>
+                        </Bar>
+                      </BarChart>
                     </ResponsiveContainer>
                   </div>
                 ) : (
                   <div className="h-80 bg-gray-50 rounded-lg flex items-center justify-center">
                     <div className="text-center">
-                      <PieChart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">No revenue data available</p>
+                      <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500">No expense data available</p>
                     </div>
                   </div>
                 )}
