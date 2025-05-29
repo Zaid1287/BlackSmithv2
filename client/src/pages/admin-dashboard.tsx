@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedJourney, setSelectedJourney] = useState<any>(null);
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: dashboardStats } = useQuery({
     queryKey: ["/api/dashboard/stats"],
@@ -470,7 +471,7 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                     <div>
                       <p className="text-gray-500 text-xs md:text-sm">Driver</p>
-                      <p className="font-medium text-sm md:text-lg">Driver Name</p>
+                      <p className="font-medium text-sm md:text-lg">{selectedJourney.driverName || 'Driver Name'}</p>
                     </div>
                     <div>
                       <p className="text-gray-500 text-xs md:text-sm">License Plate</p>
@@ -517,12 +518,12 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-gray-500 text-sm">Pouch Amount</p>
-                      <p className="font-medium text-lg">₹{parseFloat(selectedJourney.pouchAmount || 0).toLocaleString()}</p>
+                      <p className="font-medium text-lg">₹{parseFloat(selectedJourney.pouch || 0).toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-gray-500 text-sm">Security Deposit</p>
                       <div>
-                        <p className="font-medium text-lg">₹{parseFloat(selectedJourney.securityDeposit || 0).toLocaleString()}</p>
+                        <p className="font-medium text-lg">₹{parseFloat(selectedJourney.security || 0).toLocaleString()}</p>
                         {selectedJourney.status === 'completed' && (
                           <p className="text-green-600 text-xs">Added back to balance (journey completed)</p>
                         )}
@@ -533,7 +534,44 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-gray-500 text-sm">HYD Inward</p>
-                      <p className="font-medium text-lg">N/A</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-lg text-green-600">
+                          ₹{selectedJourneyExpenses
+                            .filter((exp: any) => exp.category === 'hyd_inward')
+                            .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0)
+                            .toLocaleString()}
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const amount = prompt('Enter HYD Inward amount:');
+                            if (amount && !isNaN(parseFloat(amount))) {
+                              // Add HYD Inward expense
+                              fetch(`/api/journeys/${selectedJourney.id}/expenses`, {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  ...getAuthHeaders(),
+                                },
+                                credentials: 'include',
+                                body: JSON.stringify({
+                                  journeyId: selectedJourney.id,
+                                  category: 'hyd_inward',
+                                  amount: amount,
+                                  description: 'HYD Inward Revenue'
+                                })
+                              }).then(() => {
+                                queryClient.invalidateQueries({ queryKey: ["/api/journeys", selectedJourney.id, "expenses"] });
+                                queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
+                              });
+                            }
+                          }}
+                          className="text-xs"
+                        >
+                          Add
+                        </Button>
+                      </div>
                     </div>
                     <div>
                       <p className="text-gray-500 text-sm">Current Expenses</p>
@@ -544,11 +582,53 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-gray-500 text-sm">Total Top-ups</p>
-                      <p className="font-medium text-lg text-green-600">+₹0</p>
+                      <p className="font-medium text-lg text-green-600">
+                        +₹{selectedJourneyExpenses
+                          .filter((exp: any) => exp.category === 'top_up')
+                          .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0)
+                          .toLocaleString()}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-gray-500 text-sm">Estimated Fuel Cost</p>
-                      <p className="font-medium text-lg">Unknown</p>
+                      <p className="text-gray-500 text-sm">Toll Expenses</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-lg">
+                          ₹{selectedJourneyExpenses
+                            .filter(exp => exp.category === 'toll')
+                            .reduce((sum, exp) => sum + parseFloat(exp.amount), 0)
+                            .toLocaleString()}
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const amount = prompt('Enter Toll amount:');
+                            if (amount && !isNaN(parseFloat(amount))) {
+                              // Add Toll expense
+                              fetch(`/api/journeys/${selectedJourney.id}/expenses`, {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  ...getAuthHeaders(),
+                                },
+                                credentials: 'include',
+                                body: JSON.stringify({
+                                  journeyId: selectedJourney.id,
+                                  category: 'toll',
+                                  amount: amount,
+                                  description: 'Toll Expense'
+                                })
+                              }).then(() => {
+                                queryClient.invalidateQueries({ queryKey: ["/api/journeys", selectedJourney.id, "expenses"] });
+                                queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
+                              });
+                            }
+                          }}
+                          className="text-xs"
+                        >
+                          Add
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
@@ -561,9 +641,38 @@ export default function AdminDashboard() {
                         ₹{parseFloat(selectedJourney.balance || 0).toLocaleString()}
                       </p>
                       <div className="mt-2 text-sm text-gray-600">
-                        <p><strong>Working Balance:</strong> ₹{selectedJourney.pouchAmount || 0} (pouch) + ₹0 (top-ups) - ₹{selectedJourney.totalExpenses || 0} (expenses)</p>
+                        <p><strong>Working Balance:</strong> ₹{selectedJourney.pouch || 0} (pouch) + ₹{selectedJourneyExpenses.filter(exp => exp.category === 'top_up').reduce((sum, exp) => sum + parseFloat(exp.amount), 0)} (top-ups) - ₹{selectedJourney.totalExpenses || 0} (expenses)</p>
                         {selectedJourney.status === 'completed' && (
-                          <p><strong>Final Adjustments:</strong> ₹{selectedJourney.securityDeposit || 0} (security) (added because journey is completed)</p>
+                          <p><strong>Final Adjustments:</strong> ₹{selectedJourney.security || 0} (security) (added because journey is completed)</p>
+                        )}
+                      </div>
+                      <div className="mt-4 flex gap-2">
+                        <Button
+                          onClick={() => setShowAddExpenseModal(true)}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Expense
+                        </Button>
+                        {selectedJourney.status === 'active' && (
+                          <Button
+                            onClick={() => {
+                              if (confirm(`Complete journey to ${selectedJourney.destination}?`)) {
+                                fetch(`/api/journeys/${selectedJourney.id}/complete`, {
+                                  method: 'POST',
+                                  headers: getAuthHeaders(),
+                                  credentials: 'include'
+                                }).then(() => {
+                                  queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
+                                  queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
+                                  setSelectedJourney(null);
+                                });
+                              }
+                            }}
+                            className="flex-1 bg-green-600 hover:bg-green-700"
+                          >
+                            Complete Journey
+                          </Button>
                         )}
                       </div>
                     </div>
