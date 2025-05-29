@@ -60,7 +60,7 @@ export default function Salaries() {
       if (!response.ok) throw new Error("Failed to fetch salary payments");
       return response.json();
     },
-    staleTime: 30000, // Cache for 30 seconds to reduce API calls
+    staleTime: 15000, // Cache for 15 seconds to reduce API calls
   });
 
   // Mutation for processing multiple advances at once
