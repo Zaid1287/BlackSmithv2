@@ -87,12 +87,32 @@ export default function AdminDashboard() {
     staleTime: 1000, // Consider expenses stale after 1 second
   });
 
+  if (!dashboardStats || !financialStats) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-24 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+          <div className="h-96 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-3 md:p-6 mobile-optimized">
       <div className="flex items-center justify-between mb-4 md:mb-8 fade-in">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-gray-900">BlackSmith Logistics</h1>
           <p className="text-sm md:text-base text-gray-500 hidden md:block">Complete overview of your logistics operations</p>
+          <div className="flex items-center mt-2 text-xs text-gray-400">
+            <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+            Live data - Updates every 5 seconds
+          </div>
         </div>
       </div>
 
@@ -209,10 +229,10 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 journeys
-                  .filter(journey => 
+                  .filter((journey: any) => 
                     statusFilter === 'all' || journey.status === statusFilter
                   )
-                  .filter(journey =>
+                  .filter((journey: any) =>
                     searchTerm === '' || 
                     journey.destination?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     journey.licensePlate?.toLowerCase().includes(searchTerm.toLowerCase()) ||

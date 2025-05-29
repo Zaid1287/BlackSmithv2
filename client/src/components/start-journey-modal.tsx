@@ -45,9 +45,9 @@ const journeySchema = z.object({
     .refine((val) => parseFloat(val) <= 500000, "Pouch amount cannot exceed ₹5,00,000"),
   security: z.string()
     .default("0")
-    .refine((val) => /^\d+(\.\d{1,2})?$/.test(val), "Please enter a valid security amount")
-    .refine((val) => parseFloat(val) >= 0, "Security amount cannot be negative")
-    .refine((val) => parseFloat(val) <= 100000, "Security amount cannot exceed ₹1,00,000"),
+    .refine((val: string) => /^\d+(\.\d{1,2})?$/.test(val), "Please enter a valid security amount")
+    .refine((val: string) => parseFloat(val) >= 0, "Security amount cannot be negative")
+    .refine((val: string) => parseFloat(val) <= 100000, "Security amount cannot exceed ₹1,00,000"),
 });
 
 type JourneyFormData = z.infer<typeof journeySchema>;
