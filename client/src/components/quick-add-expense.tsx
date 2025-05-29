@@ -177,6 +177,30 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
                   />
                 </div>
               </div>
+
+              {/* Submit Income Button */}
+              <div className="border-t border-green-200 pt-4 flex gap-3">
+                {amounts['hyd_inward'] && (
+                  <Button
+                    onClick={() => handleAddExpense('hyd_inward')}
+                    disabled={addExpenseMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add HYD Inward
+                  </Button>
+                )}
+                {amounts['top_up'] && (
+                  <Button
+                    onClick={() => handleAddExpense('top_up')}
+                    disabled={addExpenseMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Top Up
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Regular Expenses Grid */}
