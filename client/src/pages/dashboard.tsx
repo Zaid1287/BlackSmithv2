@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Truck, MapPin, Receipt, Flag } from "lucide-react";
+import { Plus, Truck, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { getAuthHeaders } from "@/lib/auth";
 import StartJourneyModal from "@/components/start-journey-modal";
@@ -34,6 +34,19 @@ export default function Dashboard() {
       return response.json();
     },
     enabled: user?.role === "driver",
+  });
+
+  // Fetch financial stats for all users
+  const { data: financialStats } = useQuery({
+    queryKey: ["/api/dashboard/financial"],
+    queryFn: async () => {
+      const response = await fetch("/api/dashboard/financial", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch financial stats");
+      return response.json();
+    },
   });
 
   const hasActiveJourney = user?.role === "driver" && activeJourneys.some((j: any) => j.driverId === user.id);
@@ -95,45 +108,54 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Feature Cards */}
+          {/* Financial Overview Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
+            <Card className="bg-green-500 text-white">
               <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <MapPin className="text-blue-600" size={20} />
-                  </div>
+                <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Journey Tracking</h3>
-                    <p className="text-gray-600 text-sm">Track your location and speed in real-time during your journey.</p>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <DollarSign className="w-5 h-5" />
+                      <span className="text-lg font-medium">Total Revenue</span>
+                    </div>
+                    <div className="text-3xl font-bold">₹{(financialStats?.revenue || 0).toLocaleString()}</div>
+                    <div className="text-sm opacity-90 mt-2">
+                      <div>Journey Revenue + Security</div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-red-500 text-white">
               <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Receipt className="text-green-600" size={20} />
-                  </div>
+                <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Expense Management</h3>
-                    <p className="text-gray-600 text-sm">Easily log and track all your journey-related expenses.</p>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <TrendingDown className="w-5 h-5" />
+                      <span className="text-lg font-medium">Total Expenses</span>
+                    </div>
+                    <div className="text-3xl font-bold">₹{(financialStats?.expenses || 0).toLocaleString()}</div>
+                    <div className="text-sm opacity-90 mt-2">
+                      <div>Journey + Salary Expenses</div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white">
               <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <Flag className="text-orange-600" size={20} />
-                  </div>
+                <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Journey Milestones</h3>
-                    <p className="text-gray-600 text-sm">Track important events and get notifications during your journey.</p>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <TrendingUp className="w-5 h-5" />
+                      <span className="text-lg font-medium">Net Profit</span>
+                    </div>
+                    <div className="text-3xl font-bold">₹{(financialStats?.netProfit || 0).toLocaleString()}</div>
+                    <div className="text-sm opacity-90 mt-2">
+                      <div>Current Financial Status</div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
