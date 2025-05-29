@@ -392,31 +392,31 @@ export default function Salaries() {
               </div>
             </div>
 
-            {/* Payment Entries */}
+            {/* Advance Entries */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h4 className="font-medium">Payment Entries</h4>
-                <Button onClick={addPaymentEntry} size="sm" variant="outline">
+                <h4 className="font-medium">Advance Entries</h4>
+                <Button onClick={addAdvanceEntry} size="sm" variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Entry
                 </Button>
               </div>
 
               <div className="space-y-3">
-                {paymentEntries.map((entry) => (
+                {advanceEntries.map((entry) => (
                   <div key={entry.id} className="border rounded-lg p-4 bg-gray-50">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                       <div>
                         <label className="text-xs text-gray-500 mb-1 block">Type</label>
                         <Select
                           value={entry.transactionType}
-                          onValueChange={(value) => updatePaymentEntry(entry.id, 'transactionType', value)}
+                          onValueChange={(value) => updateAdvanceEntry(entry.id, 'transactionType', value)}
                         >
                           <SelectTrigger className="h-8">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="payment">Payment</SelectItem>
+                            <SelectItem value="advance">Salary Advance</SelectItem>
                             <SelectItem value="debt">Debt</SelectItem>
                           </SelectContent>
                         </Select>
@@ -427,7 +427,7 @@ export default function Salaries() {
                           type="number"
                           placeholder="Amount"
                           value={entry.amount}
-                          onChange={(e) => updatePaymentEntry(entry.id, 'amount', e.target.value)}
+                          onChange={(e) => updateAdvanceEntry(entry.id, 'amount', e.target.value)}
                           className="h-8"
                         />
                       </div>
@@ -436,13 +436,13 @@ export default function Salaries() {
                         <Input
                           placeholder="Description"
                           value={entry.description}
-                          onChange={(e) => updatePaymentEntry(entry.id, 'description', e.target.value)}
+                          onChange={(e) => updateAdvanceEntry(entry.id, 'description', e.target.value)}
                           className="h-8"
                         />
                       </div>
                       <div className="flex items-end">
                         <Button
-                          onClick={() => removePaymentEntry(entry.id)}
+                          onClick={() => removeAdvanceEntry(entry.id)}
                           variant="outline"
                           size="sm"
                           className="h-8 w-8 p-0"
@@ -454,25 +454,25 @@ export default function Salaries() {
                   </div>
                 ))}
 
-                {paymentEntries.length === 0 && (
+                {advanceEntries.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
-                    <p>No payment entries added yet.</p>
+                    <p>No advance entries added yet.</p>
                     <p className="text-sm">Click "Add Entry" to start.</p>
                   </div>
                 )}
               </div>
 
               {/* Total Calculation */}
-              {paymentEntries.length > 0 && (
+              {advanceEntries.length > 0 && (
                 <div className="mt-4 p-4 bg-blue-50 rounded-lg">
                   <div className="flex justify-between items-center">
                     <span className="font-medium">Total Impact:</span>
-                    <span className={`font-bold text-lg ${calculateTotalPayments() >= 0 ? 'text-red-600' : 'text-green-600'}`}>
-                      {calculateTotalPayments() >= 0 ? '-' : '+'}₹{Math.abs(calculateTotalPayments()).toLocaleString()}
+                    <span className={`font-bold text-lg ${calculateTotalAdvances() >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {calculateTotalAdvances() >= 0 ? '-' : '+'}₹{Math.abs(calculateTotalAdvances()).toLocaleString()}
                     </span>
                   </div>
                   <p className="text-xs text-gray-600 mt-1">
-                    {calculateTotalPayments() >= 0 
+                    {calculateTotalAdvances() >= 0 
                       ? 'This amount will be deducted from net profit' 
                       : 'This amount will be added to net profit'}
                   </p>
@@ -483,43 +483,43 @@ export default function Salaries() {
             {/* Action Buttons */}
             <div className="flex gap-3 pt-4 border-t">
               <Button
-                onClick={() => setShowPaymentDialog(false)}
+                onClick={() => setShowAdvanceDialog(false)}
                 variant="outline"
                 className="flex-1"
               >
                 Cancel
               </Button>
               <Button
-                onClick={() => processPaymentsMutation.mutate(paymentEntries)}
-                disabled={paymentEntries.length === 0 || processPaymentsMutation.isPending}
+                onClick={() => processAdvancesMutation.mutate(advanceEntries)}
+                disabled={advanceEntries.length === 0 || processAdvancesMutation.isPending}
                 className="flex-1 bg-gray-900 hover:bg-gray-800"
               >
-                {processPaymentsMutation.isPending ? "Processing..." : `Process ${paymentEntries.length} Entries`}
+                {processAdvancesMutation.isPending ? "Processing..." : `Process ${advanceEntries.length} Entries`}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Payment History Dialog */}
+      {/* Advance History Dialog */}
       <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Payment History</DialogTitle>
+            <DialogTitle>Advance History</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             {salaryPayments.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <History className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p>No payment history found.</p>
+                <p>No advance history found.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {salaryPayments.map((payment: any) => {
                   const employee = users.find((u: any) => u.id === payment.userId);
                   const amount = parseFloat(payment.amount);
-                  const isPayment = amount > 0;
+                  const isAdvance = amount > 0;
                   
                   return (
                     <div key={payment.id} className="border rounded-lg p-4 bg-gray-50">
@@ -532,11 +532,11 @@ export default function Salaries() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <Badge variant={isPayment ? "destructive" : "default"}>
-                            {isPayment ? 'Payment' : 'Debt'}
+                          <Badge variant={isAdvance ? "destructive" : "default"}>
+                            {isAdvance ? 'Salary Advance' : 'Debt'}
                           </Badge>
-                          <p className={`font-bold text-lg mt-1 ${isPayment ? 'text-red-600' : 'text-green-600'}`}>
-                            {isPayment ? '-' : '+'}₹{Math.abs(amount).toLocaleString()}
+                          <p className={`font-bold text-lg mt-1 ${isAdvance ? 'text-red-600' : 'text-green-600'}`}>
+                            {isAdvance ? '-' : '+'}₹{Math.abs(amount).toLocaleString()}
                           </p>
                         </div>
                       </div>
