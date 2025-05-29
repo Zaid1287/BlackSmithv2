@@ -291,16 +291,17 @@ export class DatabaseStorage implements IStorage {
       })
       .from(journeys);
 
-    // Calculate salary payments and refunds
+    // Calculate salary payments (positive) and debts received (negative) separately
     const [salaryStats] = await db
       .select({
-        paidAmount: sql<number>`COALESCE(SUM(${salaryPayments.amount}), 0)`,
+        totalPayments: sql<number>`COALESCE(SUM(${salaryPayments.amount}) FILTER (WHERE ${salaryPayments.amount} > 0), 0)`,
+        totalDebts: sql<number>`COALESCE(SUM(ABS(${salaryPayments.amount})) FILTER (WHERE ${salaryPayments.amount} < 0), 0)`,
       })
       .from(salaryPayments);
 
-    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Salary Refunds + HYD Inward + Top-ups
+    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups
     const baseProfit = (journeyStats.totalRevenue || 0) + (journeyStats.completedSecurity || 0) - (journeyStats.totalExpenses || 0);
-    const salaryAdjustment = -(salaryStats.paidAmount || 0); // Subtract salary payments (refunds would be added)
+    const salaryAdjustment = -(salaryStats.totalPayments || 0) + (salaryStats.totalDebts || 0); // Subtract payments, add debts
     const additionalRevenue = (revenueStats.hydInwardRevenue || 0) + (revenueStats.topUpRevenue || 0);
     
     const netProfit = baseProfit + salaryAdjustment + additionalRevenue;

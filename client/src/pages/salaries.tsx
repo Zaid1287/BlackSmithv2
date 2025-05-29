@@ -112,10 +112,15 @@ export default function Salaries() {
   // Filter only drivers
   const drivers = users.filter((user: any) => user.role === 'driver');
   
-  // Calculate totals
+  // Calculate totals with proper handling of positive and negative amounts
   const totalSalaryAmount = drivers.reduce((sum: number, user: any) => sum + parseFloat(user.salary || 0), 0);
-  const totalPaidAmount = salaryPayments.reduce((sum: number, payment: any) => sum + parseFloat(payment.amount || 0), 0);
-  const totalRemainingBalance = totalSalaryAmount - totalPaidAmount;
+  const totalPaymentsToDrivers = salaryPayments
+    .filter((payment: any) => parseFloat(payment.amount) > 0)
+    .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
+  const totalDebtsFromDrivers = salaryPayments
+    .filter((payment: any) => parseFloat(payment.amount) < 0)
+    .reduce((sum: number, payment: any) => sum + Math.abs(parseFloat(payment.amount)), 0);
+  const netSalaryImpact = totalPaymentsToDrivers - totalDebtsFromDrivers; // Net impact on profit
 
   if (isLoading) {
     return (
@@ -187,9 +192,9 @@ export default function Salaries() {
               <div>
                 <div className="flex items-center mb-2">
                   <CheckCircle className="mr-2" size={20} />
-                  <h3 className="text-sm font-medium opacity-90">Total Paid Amount</h3>
+                  <h3 className="text-sm font-medium opacity-90">Payments Made</h3>
                 </div>
-                <p className="text-3xl font-bold">₹{totalPaidAmount.toLocaleString()}</p>
+                <p className="text-3xl font-bold">₹{totalPaymentsToDrivers.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
@@ -201,9 +206,9 @@ export default function Salaries() {
               <div>
                 <div className="flex items-center mb-2">
                   <Clock className="mr-2" size={20} />
-                  <h3 className="text-sm font-medium opacity-90">Total Remaining Balance</h3>
+                  <h3 className="text-sm font-medium opacity-90">Debts Received</h3>
                 </div>
-                <p className="text-3xl font-bold">₹{totalRemainingBalance.toLocaleString()}</p>
+                <p className="text-3xl font-bold">₹{totalDebtsFromDrivers.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
@@ -261,12 +266,12 @@ export default function Salaries() {
                       </div>
                       
                       <Button 
-                        onClick={() => handlePaySalary(driver.id, driver.name, driver.salary)}
+                        onClick={() => handleCustomPayment(driver.id, driver.name)}
                         className="w-full bg-gray-900 hover:bg-gray-800"
-                        disabled={isPaid || payMutation.isPending}
+                        disabled={payMutation.isPending}
                       >
                         <CreditCard className="w-4 h-4 mr-2" />
-                        {isPaid ? "Already Paid" : payMutation.isPending ? "Processing..." : "Pay Salary"}
+                        {payMutation.isPending ? "Processing..." : "Payment / Debt"}
                       </Button>
                     </CardContent>
                   </Card>
