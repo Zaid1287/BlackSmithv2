@@ -48,11 +48,7 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode;
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">BlackSmith Traders</h1>
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <span className="text-gray-400 text-xl cursor-pointer hover:text-gray-600">🔔</span>
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-              </div>
-              <div className="text-sm text-gray-500">Welcome back, {user.name}!</div>
+              <div className="text-sm text-blue-600 font-medium">Welcome back, {user.name}!</div>
             </div>
           </div>
         </header>
