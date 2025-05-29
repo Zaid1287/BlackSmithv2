@@ -45,15 +45,17 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
 
   const addExpenseMutation = useMutation({
     mutationFn: async (data: { type: string; amount: number }) => {
-      const response = await fetch(`/api/journeys/${journeyId}/expenses`, {
+      const response = await fetch(`/api/expenses`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`,
         },
         credentials: "include",
         body: JSON.stringify({
+          journeyId: journeyId,
           category: data.type,
-          amount: data.amount,
+          amount: data.amount.toString(),
           description: `${expenseTypes.find(t => t.value === data.type)?.label} expense`,
         }),
       });
@@ -69,9 +71,13 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
         title: "Success",
         description: "Expense added successfully",
       });
+      // Force refresh all related data
       queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
       queryClient.invalidateQueries({ queryKey: ["/api/expenses"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      queryClient.refetchQueries({ queryKey: ["/api/journeys"] });
+      queryClient.refetchQueries({ queryKey: ["/api/dashboard/financial"] });
       
       // Reset form
       setSelectedType("");
@@ -215,7 +221,7 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-2 max-h-64 overflow-y-auto">
           {expenseTypes.map((type) => {
             const IconComponent = type.icon;
             return (
@@ -223,7 +229,7 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
                 key={type.value}
                 onClick={() => handleExpenseTypeClick(type.value)}
                 variant="outline"
-                className="h-12 text-xs flex flex-col items-center space-y-1 hover:bg-gray-50"
+                className="w-full h-10 text-sm flex items-center justify-start space-x-3 hover:bg-gray-50"
               >
                 <div className={`w-6 h-6 rounded ${type.color} flex items-center justify-center`}>
                   <IconComponent className="w-3 h-3 text-white" />
