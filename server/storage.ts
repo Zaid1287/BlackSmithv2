@@ -184,14 +184,26 @@ export class DatabaseStorage implements IStorage {
       .from(expenses)
       .where(and(
         eq(expenses.journeyId, journeyId), 
-        not(eq(expenses.category, 'hyd_inward'))
+        not(eq(expenses.category, 'hyd_inward')),
+        not(eq(expenses.category, 'top_up'))
+      ));
+
+    // Calculate top-up separately to add to balance
+    const [topUpResult] = await db
+      .select({
+        totalTopUp: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
+      })
+      .from(expenses)
+      .where(and(
+        eq(expenses.journeyId, journeyId), 
+        eq(expenses.category, 'top_up')
       ));
 
     const [journey] = await db.select().from(journeys).where(eq(journeys.id, journeyId));
     
     if (journey) {
-      // Balance = pouch - actual expenses (excluding HYD Inward which goes directly to profit)
-      const balance = parseFloat(journey.pouch) - parseFloat(expenseResult.totalExpenses.toString());
+      // Balance = pouch + top_up - actual expenses (excluding HYD Inward and Top Up)
+      const balance = parseFloat(journey.pouch) + parseFloat(topUpResult.totalTopUp.toString()) - parseFloat(expenseResult.totalExpenses.toString());
       
       await db.update(journeys).set({
         totalExpenses: expenseResult.totalExpenses.toString(),
