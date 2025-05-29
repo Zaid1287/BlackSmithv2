@@ -179,6 +179,10 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getAllExpenses(): Promise<Expense[]> {
+    return await db.select().from(expenses).orderBy(desc(expenses.timestamp));
+  }
+
   private async updateJourneyTotals(journeyId: number): Promise<void> {
     // Calculate actual expenses (excluding HYD Inward which goes directly to profit)
     const [expenseResult] = await db
