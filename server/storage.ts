@@ -313,15 +313,35 @@ export class DatabaseStorage implements IStorage {
       })
       .from(journeys);
 
+    // Ensure all values are properly converted to numbers
+    const totalRevenue = parseFloat(journeyStats.totalRevenue?.toString() || '0');
+    const totalSecurity = parseFloat(allSecurityStats.totalSecurity?.toString() || '0');
+    const totalExpenses = parseFloat(journeyStats.totalExpenses?.toString() || '0');
+    const totalPayments = parseFloat(salaryStats.totalPayments?.toString() || '0');
+    const totalDebts = parseFloat(salaryStats.totalDebts?.toString() || '0');
+    const hydInward = parseFloat(revenueStats.hydInwardRevenue?.toString() || '0');
+    const topUp = parseFloat(revenueStats.topUpRevenue?.toString() || '0');
+    
+    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp);
+
     return {
-      revenue: (journeyStats.totalRevenue || 0) + (allSecurityStats.totalSecurity || 0),
-      expenses: journeyStats.totalExpenses || 0,
-      netProfit: netProfit,
+      revenue: totalRevenue + totalSecurity,
+      expenses: totalExpenses,
+      netProfit: isNaN(calculatedNetProfit) ? 0 : calculatedNetProfit,
       salaryStats: {
-        total: 0, // We'll calculate this from users table if needed
-        paid: salaryStats.paidAmount || 0,
-        remaining: 0,
+        totalPayments: totalPayments,
+        totalDebts: totalDebts,
+        netSalaryImpact: totalPayments - totalDebts,
       },
+      breakdown: {
+        journeyRevenue: totalRevenue,
+        securityDeposits: totalSecurity,
+        hydInwardRevenue: hydInward,
+        topUpRevenue: topUp,
+        journeyExpenses: totalExpenses,
+        salaryPayments: totalPayments,
+        salaryDebts: totalDebts,
+      }
     };
   }
 

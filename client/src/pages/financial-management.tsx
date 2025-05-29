@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TrendingUp, DollarSign, Download, RotateCcw, BarChart3, PieChart, TrendingDown, Shield } from "lucide-react";
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { getAuthHeaders } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -118,8 +119,8 @@ export default function FinancialManagement() {
         ["Total Expenses", `₹${totalExpenses.toLocaleString()}`],
         ["Net Profit", `₹${netProfit.toLocaleString()}`],
         ["Security Deposits", `₹${securityDeposits.toLocaleString()}`],
-        ["Salary Expenses", `₹${salaryExpenses.toLocaleString()}`],
-        ["HYD Inward", `₹${hydInwardAmount.toLocaleString()}`],
+        ["Salary Payments", `₹${salaryPayments.toLocaleString()}`],
+        ["HYD Inward", `₹${hydInwardRevenue.toLocaleString()}`],
       ];
       const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
       XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
@@ -218,16 +219,32 @@ export default function FinancialManagement() {
     );
   }
 
-  const totalRevenue = parseFloat(financialStats?.revenue || "0");
-  const totalExpenses = parseFloat(financialStats?.expenses || "0");
-  const netProfit = parseFloat(financialStats?.netProfit || "0");
+  const totalRevenue = parseFloat(financialStats?.revenue?.toString() || "0") || 0;
+  const totalExpenses = parseFloat(financialStats?.expenses?.toString() || "0") || 0;
+  const netProfit = parseFloat(financialStats?.netProfit?.toString() || "0") || 0;
   
-  // Calculate breakdown from actual data
-  const hydInwardAmount = parseFloat(financialStats?.hydInward || "0");
-  const pouchAmount = totalRevenue - hydInwardAmount;
-  const securityDeposits = parseFloat(financialStats?.securityDeposits || "0");
-  const salaryExpenses = parseFloat(financialStats?.salaryExpenses || "0");
-  const salaryRefunds = parseFloat(financialStats?.salaryRefunds || "0");
+  // Calculate breakdown from actual data with proper fallbacks
+  const breakdown = financialStats?.breakdown || {};
+  const journeyRevenue = parseFloat(breakdown.journeyRevenue?.toString() || "0") || 0;
+  const securityDeposits = parseFloat(breakdown.securityDeposits?.toString() || "0") || 0;
+  const hydInwardRevenue = parseFloat(breakdown.hydInwardRevenue?.toString() || "0") || 0;
+  const topUpRevenue = parseFloat(breakdown.topUpRevenue?.toString() || "0") || 0;
+  const journeyExpenses = parseFloat(breakdown.journeyExpenses?.toString() || "0") || 0;
+  const salaryPayments = parseFloat(breakdown.salaryPayments?.toString() || "0") || 0;
+  const salaryDebts = parseFloat(breakdown.salaryDebts?.toString() || "0") || 0;
+
+  // Prepare chart data
+  const revenueChartData = [
+    { name: 'Journey Revenue', value: journeyRevenue, color: '#10b981' },
+    { name: 'Security Deposits', value: securityDeposits, color: '#3b82f6' },
+    { name: 'HYD Inward', value: hydInwardRevenue, color: '#8b5cf6' },
+    { name: 'Top-ups', value: topUpRevenue, color: '#f59e0b' },
+  ].filter(item => item.value > 0);
+
+  const expenseChartData = [
+    { name: 'Journey Expenses', value: journeyExpenses, color: '#ef4444' },
+    { name: 'Salary Payments', value: salaryPayments, color: '#f97316' },
+  ].filter(item => item.value > 0);
 
   const recentExpenses = [
     { type: "Salary_refund", amount: 2940, notes: "Salary deduction for Aleem - Adding back to profit (+2940)", time: "10 days ago" },
@@ -329,8 +346,8 @@ export default function FinancialManagement() {
                 </div>
                 <div className="text-3xl font-bold">₹{totalRevenue.toLocaleString()}</div>
                 <div className="text-sm opacity-90 mt-2">
-                  <div>Pouch: ₹{pouchAmount.toLocaleString()}</div>
-                  <div>HYD Inward: ₹{hydInwardAmount.toLocaleString()}</div>
+                  <div>Journey: ₹{journeyRevenue.toLocaleString()}</div>
+                  <div>HYD Inward: ₹{hydInwardRevenue.toLocaleString()}</div>
                 </div>
               </div>
             </div>
@@ -465,21 +482,85 @@ export default function FinancialManagement() {
         </TabsContent>
 
         <TabsContent value="visualization" className="space-y-6">
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-2">Expense Visualization</h3>
-              <p className="text-sm text-gray-500 mb-6">Visual breakdown of expenses by type (including salary payments)</p>
-              
-              {/* Mock Visualization Area */}
-              <div className="h-96 bg-gray-50 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <PieChart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 text-lg">Interactive Charts</p>
-                  <p className="text-xs text-gray-400">Pie charts and trend analysis would appear here</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Revenue Breakdown Chart */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-2">Revenue Breakdown</h3>
+                <p className="text-sm text-gray-500 mb-6">Visual breakdown of all revenue sources</p>
+                
+                {revenueChartData.length > 0 ? (
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RechartsPieChart>
+                        <Pie
+                          data={revenueChartData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={120}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {revenueChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => [`₹${Number(value).toLocaleString()}`, '']} />
+                        <Legend />
+                      </RechartsPieChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-80 bg-gray-50 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <PieChart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500">No revenue data available</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Expense Breakdown Chart */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-2">Expense Breakdown</h3>
+                <p className="text-sm text-gray-500 mb-6">Visual breakdown of all expense categories</p>
+                
+                {expenseChartData.length > 0 ? (
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RechartsPieChart>
+                        <Pie
+                          data={expenseChartData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={120}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {expenseChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => [`₹${Number(value).toLocaleString()}`, '']} />
+                        <Legend />
+                      </RechartsPieChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-80 bg-gray-50 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <PieChart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500">No expense data available</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
