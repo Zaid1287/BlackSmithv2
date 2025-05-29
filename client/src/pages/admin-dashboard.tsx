@@ -119,19 +119,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8 mobile-grid">
-        <Card className="bs-gradient-blue text-white hover-lift scale-in mobile-card">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xs md:text-sm font-medium opacity-90">Total Vehicles</h3>
-                <p className="text-xl md:text-3xl font-bold">{dashboardStats?.vehicles?.total || 0}</p>
-              </div>
-              <Truck className="opacity-80" size={24} />
-            </div>
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8 mobile-grid">
         <Card className="bs-gradient-indigo text-white hover-lift scale-in mobile-card">
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
@@ -144,14 +132,14 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bs-gradient-green text-white hover-lift scale-in mobile-card">
+        <Card className="bs-gradient-blue text-white hover-lift scale-in mobile-card">
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xs md:text-sm font-medium opacity-90">Available Drivers</h3>
-                <p className="text-xl md:text-3xl font-bold">{dashboardStats?.drivers?.available || 0}</p>
+                <h3 className="text-xs md:text-sm font-medium opacity-90">Revenue</h3>
+                <p className="text-lg md:text-2xl font-bold">₹{parseFloat(financialStats?.revenue || 0).toLocaleString()}</p>
               </div>
-              <UserCheck className="opacity-80" size={24} />
+              <Truck className="opacity-80" size={24} />
             </div>
           </CardContent>
         </Card>
