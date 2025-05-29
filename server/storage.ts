@@ -278,8 +278,8 @@ export class DatabaseStorage implements IStorage {
     const [journeyStats] = await db
       .select({
         totalRevenue: sql<number>`COALESCE(SUM(${journeys.pouch}), 0)`,
-        totalSecurity: sql<number>`COALESCE(SUM(${journeys.security}), 0)`,
         totalExpenses: sql<number>`COALESCE(SUM(${journeys.totalExpenses}), 0)`,
+        completedSecurity: sql<number>`COALESCE(SUM(${journeys.security}) FILTER (WHERE ${journeys.status} = 'completed'), 0)`,
       })
       .from(journeys);
 
@@ -290,15 +290,22 @@ export class DatabaseStorage implements IStorage {
       })
       .from(salaryPayments);
 
-    // Net Profit = (Revenue + Security Deposits - Expenses) - Salary Payments + Salary Refunds + HYD Inward + Top-ups
-    const baseProfit = (journeyStats.totalRevenue || 0) + (journeyStats.totalSecurity || 0) - (journeyStats.totalExpenses || 0);
+    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Salary Refunds + HYD Inward + Top-ups
+    const baseProfit = (journeyStats.totalRevenue || 0) + (journeyStats.completedSecurity || 0) - (journeyStats.totalExpenses || 0);
     const salaryAdjustment = -(salaryStats.paidAmount || 0); // Subtract salary payments (refunds would be added)
     const additionalRevenue = (revenueStats.hydInwardRevenue || 0) + (revenueStats.topUpRevenue || 0);
     
     const netProfit = baseProfit + salaryAdjustment + additionalRevenue;
 
+    // Get total security deposits for revenue display
+    const [allSecurityStats] = await db
+      .select({
+        totalSecurity: sql<number>`COALESCE(SUM(${journeys.security}), 0)`,
+      })
+      .from(journeys);
+
     return {
-      revenue: (journeyStats.totalRevenue || 0) + (journeyStats.totalSecurity || 0),
+      revenue: (journeyStats.totalRevenue || 0) + (allSecurityStats.totalSecurity || 0),
       expenses: journeyStats.totalExpenses || 0,
       netProfit: netProfit,
       salaryStats: {
