@@ -13,20 +13,24 @@ interface QuickAddExpenseProps {
 
 const regularExpenseTypes = [
   { value: "loading", label: "Loading" },
-  { value: "rope", label: "Rope" },
   { value: "fuel", label: "Fuel" },
-  { value: "food", label: "Food" },
-  { value: "maintenance", label: "Maintenance" },
+  { value: "toll", label: "Toll" },
   { value: "rto", label: "RTO" },
-  { value: "unloading", label: "Unloading" },
-  { value: "miscellaneous", label: "Miscellaneous" },
+  { value: "hyd_unloading", label: "HYD Unloading" },
   { value: "mechanical", label: "Mechanical" },
   { value: "body_works", label: "Body Works" },
-  { value: "tires_air", label: "Tires Air" },
+  { value: "tire_change", label: "Tire Change" },
   { value: "weighment", label: "Weighment" },
+  { value: "rope", label: "Rope" },
+  { value: "food", label: "Food" },
+  { value: "maintenance", label: "Maintenance" },
+  { value: "nzb_unloading", label: "NZB Unloading" },
+  { value: "miscellaneous", label: "Miscellaneous" },
+  { value: "electrical", label: "Electrical" },
+  { value: "tires_air", label: "Tires Air" },
+  { value: "tire_greasing", label: "Tire Greasing" },
   { value: "adblue", label: "AdBlue" },
-  { value: "other", label: "Other" },
-  { value: "toll", label: "Toll" },
+  { value: "top_up", label: "Top Up" },
 ];
 
 export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseProps) {
