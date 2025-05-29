@@ -290,6 +290,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/debug/expenses/:journeyId", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const journeyId = parseInt(req.params.journeyId);
+      const allExpenses = await storage.getExpensesByJourney(journeyId);
+      const userFilteredExpenses = await storage.getExpensesByJourneyForUser(journeyId, req.user.role);
+      res.json({
+        journeyId,
+        userRole: req.user.role,
+        allExpenses,
+        userFilteredExpenses,
+        count: {
+          all: allExpenses.length,
+          filtered: userFilteredExpenses.length
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to debug expenses" });
+    }
+  });
+
   // Salary management routes
   app.get("/api/salaries", authenticateToken, requireAdmin, async (req, res) => {
     try {
