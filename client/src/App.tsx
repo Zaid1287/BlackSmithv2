@@ -92,11 +92,15 @@ function Router() {
     <Switch>
       <Route path="/login">
         {user ? (
-          user.role === "admin" ? <Redirect to="/financial-management" /> : <Redirect to="/active-journeys" />
+          user.role === "admin" ? <Redirect to="/admin-dashboard" /> : <Redirect to="/active-journeys" />
         ) : <Login />}
       </Route>
       
-
+      <Route path="/admin-dashboard">
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <AdminDashboard />
+        </ProtectedRoute>
+      </Route>
 
       <Route path="/active-journeys">
         <ProtectedRoute allowedRoles={["driver"]}>
@@ -105,7 +109,7 @@ function Router() {
       </Route>
 
       <Route path="/journey-history">
-        <ProtectedRoute allowedRoles={["driver"]}>
+        <ProtectedRoute allowedRoles={["driver", "admin"]}>
           <JourneyHistory />
         </ProtectedRoute>
       </Route>
@@ -142,7 +146,7 @@ function Router() {
 
       <Route path="/">
         {user ? (
-          user.role === "admin" ? <Redirect to="/financial-management" /> : <Redirect to="/active-journeys" />
+          user.role === "admin" ? <Redirect to="/admin-dashboard" /> : <Redirect to="/active-journeys" />
         ) : <Redirect to="/login" />}
       </Route>
 
