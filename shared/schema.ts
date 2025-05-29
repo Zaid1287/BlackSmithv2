@@ -53,7 +53,9 @@ export const expenses = pgTable("expenses", {
 export const salaryPayments = pgTable("salary_payments", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
-  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(), // Can be positive (payment) or negative (debt)
+  description: text("description"), // Optional description for the payment/debt
+  transactionType: text("transaction_type").notNull().default("payment"), // "payment", "debt", "adjustment"
   paidAt: timestamp("paid_at").defaultNow(),
   month: text("month").notNull(),
   year: integer("year").notNull(),
@@ -122,6 +124,8 @@ export const insertExpenseSchema = createInsertSchema(expenses).omit({
 export const insertSalaryPaymentSchema = createInsertSchema(salaryPayments).omit({
   id: true,
   paidAt: true,
+}).extend({
+  amount: z.string().regex(/^-?\d+(\.\d{1,2})?$/, "Please enter a valid amount"),
 });
 
 // Types

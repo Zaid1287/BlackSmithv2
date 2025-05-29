@@ -39,35 +39,73 @@ export default function Salaries() {
   });
 
   const payMutation = useMutation({
-    mutationFn: async ({ userId, amount }: { userId: number; amount: string }) => {
+    mutationFn: async ({ userId, amount, description, transactionType }: { 
+      userId: number; 
+      amount: string; 
+      description?: string;
+      transactionType: string;
+    }) => {
       const currentDate = new Date();
       const response = await apiRequest("POST", "/api/salaries/pay", {
         userId,
         amount,
+        description,
+        transactionType,
         month: currentDate.toLocaleString('default', { month: 'long' }),
         year: currentDate.getFullYear(),
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      const amount = parseFloat(variables.amount);
+      const isPayment = amount > 0;
       toast({
-        title: "Payment Successful",
-        description: "Salary payment has been processed successfully!",
+        title: isPayment ? "Payment Successful" : "Debt Recorded",
+        description: isPayment 
+          ? `Payment of ₹${Math.abs(amount)} has been processed and deducted from net profit.`
+          : `Debt of ₹${Math.abs(amount)} has been recorded and added to net profit.`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/salaries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
     },
     onError: (error: any) => {
       toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process salary payment",
+        title: "Transaction Failed",
+        description: error.message || "Failed to process transaction",
         variant: "destructive",
       });
     },
   });
 
-  const handlePaySalary = (userId: number, userName: string, salary: string) => {
-    if (confirm(`Pay salary of ₹${salary} to ${userName}?`)) {
-      payMutation.mutate({ userId, amount: salary });
+  const handleCustomPayment = (userId: number, userName: string) => {
+    const amount = prompt(`Enter amount for ${userName}:\n\nPositive amount = Payment (deducted from profit)\nNegative amount = Debt (added to profit)\n\nExample: 5000 or -2000`);
+    if (amount === null) return;
+    
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount)) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid number",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const description = prompt("Enter description (optional):") || "";
+    const isPayment = numAmount > 0;
+    const transactionType = isPayment ? "payment" : "debt";
+    
+    const confirmMessage = isPayment 
+      ? `Pay ₹${Math.abs(numAmount)} to ${userName}?\n\nThis will be deducted from net profit.`
+      : `Record debt of ₹${Math.abs(numAmount)} from ${userName}?\n\nThis will be added to net profit.`;
+    
+    if (confirm(confirmMessage)) {
+      payMutation.mutate({ 
+        userId, 
+        amount: amount,
+        description,
+        transactionType
+      });
     }
   };
 
