@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { getAuthHeaders } from "@/lib/auth";
 import { Plus, X } from "lucide-react";
 
 interface QuickAddExpenseProps {
@@ -45,7 +46,7 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+          ...getAuthHeaders(),
         },
         credentials: "include",
         body: JSON.stringify({
@@ -146,25 +147,15 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
                   <h5 className="text-green-700 font-medium">Income</h5>
                   <p className="text-green-600 text-sm">(This is an income item)</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
-                    <Input
-                      type="text"
-                      placeholder="Amount"
-                      value={amounts['hyd_inward'] || ''}
-                      onChange={(e) => handleAmountChange('hyd_inward', e.target.value)}
-                      className="pl-8 w-40 bg-white border-green-300 focus:border-green-500"
-                    />
-                  </div>
-                  <Button
-                    onClick={() => handleAddExpense('hyd_inward')}
-                    disabled={addExpenseMutation.isPending}
-                    className="bg-green-600 hover:bg-green-700 text-white px-6"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add
-                  </Button>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                  <Input
+                    type="text"
+                    placeholder="Amount"
+                    value={amounts['hyd_inward'] || ''}
+                    onChange={(e) => handleAmountChange('hyd_inward', e.target.value)}
+                    className="pl-8 w-40 bg-white border-green-300 focus:border-green-500"
+                  />
                 </div>
               </div>
 
@@ -175,25 +166,15 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
                   <h5 className="text-green-700 font-medium">Income</h5>
                   <p className="text-green-600 text-sm">(This is an income item)</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
-                    <Input
-                      type="text"
-                      placeholder="Amount"
-                      value={amounts['top_up'] || ''}
-                      onChange={(e) => handleAmountChange('top_up', e.target.value)}
-                      className="pl-8 w-40 bg-white border-green-300 focus:border-green-500"
-                    />
-                  </div>
-                  <Button
-                    onClick={() => handleAddExpense('top_up')}
-                    disabled={addExpenseMutation.isPending}
-                    className="bg-green-600 hover:bg-green-700 text-white px-6"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add
-                  </Button>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                  <Input
+                    type="text"
+                    placeholder="Amount"
+                    value={amounts['top_up'] || ''}
+                    onChange={(e) => handleAmountChange('top_up', e.target.value)}
+                    className="pl-8 w-40 bg-white border-green-300 focus:border-green-500"
+                  />
                 </div>
               </div>
             </div>
