@@ -16,12 +16,12 @@ import { useAuth } from "@/hooks/use-auth";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
-interface PaymentEntry {
+interface AdvanceEntry {
   id: string;
   userId: number;
   amount: string;
   description: string;
-  transactionType: 'payment' | 'debt';
+  transactionType: 'advance' | 'debt';
 }
 
 export default function Salaries() {
@@ -29,9 +29,9 @@ export default function Salaries() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // State for multiple payment entries
-  const [paymentEntries, setPaymentEntries] = useState<PaymentEntry[]>([]);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  // State for multiple advance entries
+  const [advanceEntries, setAdvanceEntries] = useState<AdvanceEntry[]>([]);
+  const [showAdvanceDialog, setShowAdvanceDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [showHistoryDialog, setShowHistoryDialog] = useState(false);
 
@@ -62,9 +62,9 @@ export default function Salaries() {
     },
   });
 
-  // Mutation for processing multiple payments at once
-  const processPaymentsMutation = useMutation({
-    mutationFn: async (entries: PaymentEntry[]) => {
+  // Mutation for processing multiple advances at once
+  const processAdvancesMutation = useMutation({
+    mutationFn: async (entries: AdvanceEntry[]) => {
       const responses = await Promise.all(
         entries.map(async (entry) => {
           const currentDate = new Date();
@@ -83,56 +83,56 @@ export default function Salaries() {
     },
     onSuccess: () => {
       toast({
-        title: "Payments Processed",
-        description: `Successfully processed ${paymentEntries.length} transactions`,
+        title: "Salary Advances Processed",
+        description: `Successfully processed ${advanceEntries.length} transactions`,
       });
-      setPaymentEntries([]);
-      setShowPaymentDialog(false);
+      setAdvanceEntries([]);
+      setShowAdvanceDialog(false);
       queryClient.invalidateQueries({ queryKey: ["/api/salaries"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
     },
     onError: (error: any) => {
       toast({
         title: "Processing Failed",
-        description: error.message || "Failed to process payments",
+        description: error.message || "Failed to process salary advances",
         variant: "destructive",
       });
     },
   });
 
-  // Helper functions for payment management
-  const addPaymentEntry = () => {
-    const newEntry: PaymentEntry = {
+  // Helper functions for advance management
+  const addAdvanceEntry = () => {
+    const newEntry: AdvanceEntry = {
       id: Date.now().toString(),
       userId: selectedEmployee?.id || 0,
       amount: '',
       description: '',
-      transactionType: 'payment'
+      transactionType: 'advance'
     };
-    setPaymentEntries([...paymentEntries, newEntry]);
+    setAdvanceEntries([...advanceEntries, newEntry]);
   };
 
-  const removePaymentEntry = (id: string) => {
-    setPaymentEntries(paymentEntries.filter(entry => entry.id !== id));
+  const removeAdvanceEntry = (id: string) => {
+    setAdvanceEntries(advanceEntries.filter(entry => entry.id !== id));
   };
 
-  const updatePaymentEntry = (id: string, field: keyof PaymentEntry, value: string) => {
-    setPaymentEntries(paymentEntries.map(entry => 
+  const updateAdvanceEntry = (id: string, field: keyof AdvanceEntry, value: string) => {
+    setAdvanceEntries(advanceEntries.map(entry => 
       entry.id === id ? { ...entry, [field]: value } : entry
     ));
   };
 
-  const calculateTotalPayments = () => {
-    return paymentEntries.reduce((sum, entry) => {
+  const calculateTotalAdvances = () => {
+    return advanceEntries.reduce((sum, entry) => {
       const amount = parseFloat(entry.amount) || 0;
-      return entry.transactionType === 'payment' ? sum + amount : sum - amount;
+      return entry.transactionType === 'advance' ? sum + amount : sum - amount;
     }, 0);
   };
 
-  const openPaymentDialog = (employee: any) => {
+  const openAdvanceDialog = (employee: any) => {
     setSelectedEmployee(employee);
-    setPaymentEntries([]);
-    setShowPaymentDialog(true);
+    setAdvanceEntries([]);
+    setShowAdvanceDialog(true);
   };
 
   const exportEmployeeReport = (employee: any) => {
@@ -145,7 +145,7 @@ export default function Salaries() {
       ['Username', employee.username],
       ['Base Salary', `₹${parseFloat(employee.salary || 0).toLocaleString()}`],
       [''],
-      ['Payment History'],
+      ['Advance History'],
       ['Date', 'Amount', 'Type', 'Description', 'Month', 'Year']
     ];
 
@@ -153,7 +153,7 @@ export default function Salaries() {
       worksheetData.push([
         new Date(payment.createdAt).toLocaleDateString(),
         `₹${parseFloat(payment.amount).toLocaleString()}`,
-        parseFloat(payment.amount) > 0 ? 'Payment' : 'Debt',
+        parseFloat(payment.amount) > 0 ? 'Salary Advance' : 'Debt',
         payment.description || '',
         payment.month,
         payment.year
@@ -219,7 +219,7 @@ export default function Salaries() {
           className="flex items-center gap-2"
         >
           <History className="w-4 h-4" />
-          Payment History
+          Advance History
         </Button>
       </div>
 
@@ -245,7 +245,7 @@ export default function Salaries() {
               <div>
                 <div className="flex items-center mb-2">
                   <CheckCircle className="mr-2" size={20} />
-                  <h3 className="text-sm font-medium opacity-90">Total Paid Amount</h3>
+                  <h3 className="text-sm font-medium opacity-90">Total Advance Amount</h3>
                 </div>
                 <p className="text-3xl font-bold">₹{totalPaymentsToDrivers.toLocaleString()}</p>
               </div>
@@ -322,7 +322,7 @@ export default function Salaries() {
                           <span className="text-sm font-medium">₹{parseFloat(driver.salary || 0).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm text-gray-500">Total Paid:</span>
+                          <span className="text-sm text-gray-500">Total Advance:</span>
                           <span className="text-sm font-medium text-green-600">₹{totalPaid.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
@@ -335,7 +335,7 @@ export default function Salaries() {
                       
                       <div className="flex gap-2">
                         <Button 
-                          onClick={() => openPaymentDialog(driver)}
+                          onClick={() => openAdvanceDialog(driver)}
                           className="flex-1 bg-gray-900 hover:bg-gray-800"
                           size="sm"
                         >
@@ -359,11 +359,11 @@ export default function Salaries() {
         </CardContent>
       </Card>
 
-      {/* Payment Dialog */}
-      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+      {/* Salary Advance Dialog */}
+      <Dialog open={showAdvanceDialog} onOpenChange={setShowAdvanceDialog}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Manage Payments - {selectedEmployee?.name}</DialogTitle>
+            <DialogTitle>Manage Salary Advances - {selectedEmployee?.name}</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6">
