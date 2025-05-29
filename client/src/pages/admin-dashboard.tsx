@@ -523,44 +523,12 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-gray-500 text-sm">HYD Inward</p>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-lg text-green-600">
-                          ₹{selectedJourneyExpenses
-                            .filter((exp: any) => exp.category === 'hyd_inward')
-                            .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0)
-                            .toLocaleString()}
-                        </p>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            const amount = prompt('Enter HYD Inward amount:');
-                            if (amount && !isNaN(parseFloat(amount))) {
-                              // Add HYD Inward expense
-                              fetch(`/api/journeys/${selectedJourney.id}/expenses`, {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                  ...getAuthHeaders(),
-                                },
-                                credentials: 'include',
-                                body: JSON.stringify({
-                                  journeyId: selectedJourney.id,
-                                  category: 'hyd_inward',
-                                  amount: amount,
-                                  description: 'HYD Inward Revenue'
-                                })
-                              }).then(() => {
-                                queryClient.invalidateQueries({ queryKey: ["/api/journeys", selectedJourney.id, "expenses"] });
-                                queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
-                              });
-                            }
-                          }}
-                          className="text-xs"
-                        >
-                          Add
-                        </Button>
-                      </div>
+                      <p className="font-medium text-lg text-green-600">
+                        ₹{selectedJourneyExpenses
+                          .filter((exp: any) => exp.category === 'hyd_inward')
+                          .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0)
+                          .toLocaleString()}
+                      </p>
                     </div>
                     <div>
                       <p className="text-gray-500 text-sm">Current Expenses</p>
@@ -580,44 +548,12 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <p className="text-gray-500 text-sm">Toll Expenses</p>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-lg">
-                          ₹{selectedJourneyExpenses
-                            .filter((exp: any) => exp.category === 'toll')
-                            .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0)
-                            .toLocaleString()}
-                        </p>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            const amount = prompt('Enter Toll amount:');
-                            if (amount && !isNaN(parseFloat(amount))) {
-                              // Add Toll expense
-                              fetch(`/api/journeys/${selectedJourney.id}/expenses`, {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                  ...getAuthHeaders(),
-                                },
-                                credentials: 'include',
-                                body: JSON.stringify({
-                                  journeyId: selectedJourney.id,
-                                  category: 'toll',
-                                  amount: amount,
-                                  description: 'Toll Expense'
-                                })
-                              }).then(() => {
-                                queryClient.invalidateQueries({ queryKey: ["/api/journeys", selectedJourney.id, "expenses"] });
-                                queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
-                              });
-                            }
-                          }}
-                          className="text-xs"
-                        >
-                          Add
-                        </Button>
-                      </div>
+                      <p className="font-medium text-lg">
+                        ₹{selectedJourneyExpenses
+                          .filter((exp: any) => exp.category === 'toll')
+                          .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0)
+                          .toLocaleString()}
+                      </p>
                     </div>
                   </div>
 
