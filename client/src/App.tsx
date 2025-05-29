@@ -48,7 +48,7 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode;
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">BlackSmith Traders</h1>
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-blue-600 font-medium">Welcome back, {user.name}!</div>
+              <div className="text-sm font-medium" style={{ color: 'hsl(220 39% 11%)' }}>Welcome back, {user.name}!</div>
             </div>
           </div>
         </header>
