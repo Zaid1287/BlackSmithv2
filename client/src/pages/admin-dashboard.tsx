@@ -426,144 +426,110 @@ export default function AdminDashboard() {
           </DialogHeader>
 
           {selectedJourney && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Journey Information */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Journey Information</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">License Plate:</span>
-                    <span className="font-medium">{selectedJourney.licensePlate}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Destination:</span>
-                    <span className="font-medium">{selectedJourney.destination}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Status:</span>
-                    <span className={`px-2 py-1 rounded-full text-xs capitalize ${
-                      selectedJourney.status === 'active' ? 'bg-blue-100 text-blue-700' :
-                      selectedJourney.status === 'completed' ? 'bg-green-100 text-green-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {selectedJourney.status}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Pouch Amount:</span>
-                    <span className="font-medium">₹{parseFloat(selectedJourney.pouchAmount || 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Security Deposit:</span>
-                    <span className="font-medium">₹{parseFloat(selectedJourney.securityDeposit || 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Distance:</span>
-                    <span className="font-medium">{selectedJourney.distance || 0} km</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Speed:</span>
-                    <span className="font-medium">{selectedJourney.speed || 0} km/h</span>
-                  </div>
-                  {selectedJourney.photos && selectedJourney.photos.length > 0 && (
+                <h3 className="text-xl font-semibold mb-6">Journey Information</h3>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <span className="text-gray-600">Photos:</span>
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        {selectedJourney.photos.map((photo: string, index: number) => (
-                          <img
-                            key={index}
-                            src={photo}
-                            alt={`Journey photo ${index + 1}`}
-                            className="w-full h-32 object-cover rounded-lg border"
-                          />
-                        ))}
-                      </div>
+                      <p className="text-gray-500 text-sm">Driver</p>
+                      <p className="font-medium text-lg">Driver Name</p>
                     </div>
-                  )}
+                    <div>
+                      <p className="text-gray-500 text-sm">License Plate</p>
+                      <p className="font-medium text-lg">{selectedJourney.licensePlate}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-gray-500 text-sm">Started At</p>
+                      <p className="font-medium text-lg">
+                        {selectedJourney.startTime ? new Date(selectedJourney.startTime).toLocaleString() : 'Unknown'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-sm">ETA</p>
+                      <p className="font-medium text-lg">Unknown</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-gray-500 text-sm">Distance</p>
+                      <p className="font-medium text-lg">{selectedJourney.distance || 'Unknown'}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-sm">Status</p>
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                        selectedJourney.status === 'completed' 
+                          ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                          : 'bg-gray-100 text-gray-700 border border-gray-200'
+                      }`}>
+                        {selectedJourney.status === 'completed' ? '✓ Completed' : selectedJourney.status}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Expense Categories */}
+              {/* Financial Information */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Expense Categories</h3>
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Current Balance:</span>
-                    <span className={`font-medium ${
-                      parseFloat(selectedJourney.balance || 0) >= 0 ? 'profit-green' : 'loss-red'
-                    }`}>
-                      ₹{parseFloat(selectedJourney.balance || 0).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total Expenses:</span>
-                    <span className="font-medium text-red-600">
-                      ₹{parseFloat(selectedJourney.totalExpenses || 0).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-
-                {/* HYD Inward - Admin only, green background */}
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                  <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold mb-6">Financial Information</h3>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <h4 className="font-medium text-green-800">HYD Inward</h4>
-                      <p className="text-sm text-green-600">Income (This is an income item)</p>
+                      <p className="text-gray-500 text-sm">Pouch Amount</p>
+                      <p className="font-medium text-lg">₹{parseFloat(selectedJourney.pouchAmount || 0).toLocaleString()}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        placeholder="₹ Amount"
-                        className="w-32 px-3 py-2 border border-green-300 rounded-md text-sm"
-                      />
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Regular expense categories grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    'Loading', 'Rope', 'Fuel', 'Food', 'Maintenance', 'RTO', 
-                    'Unloading', 'Miscellaneous', 'Mechanical', 'Body Works', 
-                    'Tires Air', 'Weighment', 'AdBlue', 'Other'
-                  ].map((category) => (
-                    <div key={category} className="border border-gray-200 rounded-lg p-3">
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-900">{category}</h4>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            placeholder="₹ Amount"
-                            className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
-                          />
-                          <Button size="sm" variant="outline">
-                            <Plus className="h-4 w-4 mr-1" />
-                            Add
-                          </Button>
-                        </div>
+                    <div>
+                      <p className="text-gray-500 text-sm">Security Deposit</p>
+                      <div>
+                        <p className="font-medium text-lg">₹{parseFloat(selectedJourney.securityDeposit || 0).toLocaleString()}</p>
+                        {selectedJourney.status === 'completed' && (
+                          <p className="text-green-600 text-xs">Added back to balance (journey completed)</p>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
 
-                {/* Toll - Admin only */}
-                <div className="border border-gray-200 rounded-lg p-3 mt-3">
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-gray-900">Toll</h4>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        placeholder="₹ Amount"
-                        className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
-                      />
-                      <Button size="sm" variant="outline">
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add
-                      </Button>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-gray-500 text-sm">HYD Inward</p>
+                      <p className="font-medium text-lg">N/A</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-sm">Current Expenses</p>
+                      <p className="font-medium text-lg">₹{parseFloat(selectedJourney.totalExpenses || 0).toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-gray-500 text-sm">Total Top-ups</p>
+                      <p className="font-medium text-lg text-green-600">+₹0</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-sm">Estimated Fuel Cost</p>
+                      <p className="font-medium text-lg">Unknown</p>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <div>
+                      <p className="text-gray-500 text-sm">Current Balance</p>
+                      <p className={`font-bold text-2xl ${
+                        parseFloat(selectedJourney.balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        ₹{parseFloat(selectedJourney.balance || 0).toLocaleString()}
+                      </p>
+                      <div className="mt-2 text-sm text-gray-600">
+                        <p><strong>Working Balance:</strong> ₹{selectedJourney.pouchAmount || 0} (pouch) + ₹0 (top-ups) - ₹{selectedJourney.totalExpenses || 0} (expenses)</p>
+                        {selectedJourney.status === 'completed' && (
+                          <p><strong>Final Adjustments:</strong> ₹{selectedJourney.securityDeposit || 0} (security) (added because journey is completed)</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
