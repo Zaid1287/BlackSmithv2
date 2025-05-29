@@ -6,6 +6,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
+import PWAInstallPrompt from "@/components/pwa-install-prompt";
+import OfflineIndicator from "@/components/offline-indicator";
+import { pwaManager } from "@/lib/pwa";
 
 // Page components
 import Login from "@/pages/login";
@@ -148,11 +151,18 @@ function Router() {
 }
 
 function App() {
+  useEffect(() => {
+    // Initialize PWA features
+    pwaManager.init();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Router />
+        <PWAInstallPrompt />
+        <OfflineIndicator />
       </TooltipProvider>
     </QueryClientProvider>
   );
