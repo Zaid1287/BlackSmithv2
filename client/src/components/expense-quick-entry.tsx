@@ -120,8 +120,39 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
   const regularCategories = expenseCategories.filter(cat => cat.value !== 'hyd_inward' && cat.value !== 'top_up');
 
   const renderCategoryCard = (category: any, isFullWidth = false) => (
-    <Card key={category.value} className={`p-4 border ${category.isRevenue ? 'border-green-300 bg-green-50' : 'border-gray-200'} ${isFullWidth ? 'col-span-full' : ''}`}>
-      <div className="flex items-center justify-between">
+    <Card key={category.value} className={`p-3 border ${category.isRevenue ? 'border-green-300 bg-green-50' : 'border-gray-200'} ${isFullWidth ? 'col-span-full' : ''}`}>
+      {/* Mobile Layout: Stack vertically */}
+      <div className="flex flex-col space-y-3 sm:hidden">
+        <div className={`font-medium ${category.isRevenue ? 'text-green-700' : 'text-gray-700'}`}>
+          {category.label}
+          {category.isRevenue && <span className="text-xs text-green-600 block">+Revenue</span>}
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="relative flex-1">
+            <span className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${category.isRevenue ? 'text-green-500' : 'text-gray-400'}`}>₹</span>
+            <Input
+              type="number"
+              placeholder="Amount"
+              value={amounts[category.value] || ""}
+              onChange={(e) => handleAmountChange(category.value, e.target.value)}
+              className={`pl-8 h-10 text-center ${category.isRevenue ? 'border-green-300 focus:border-green-500' : ''}`}
+              min="0"
+              step="0.01"
+            />
+          </div>
+          <Button
+            onClick={() => handleAddExpense(category.value)}
+            disabled={!amounts[category.value] || parseFloat(amounts[category.value] || "0") <= 0 || addExpenseMutation.isPending}
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 h-10 px-3"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Desktop Layout: Side by side */}
+      <div className="hidden sm:flex items-center justify-between">
         <div className={`font-medium min-w-0 flex-1 ${category.isRevenue ? 'text-green-700' : 'text-gray-700'}`}>
           {category.label}
           {category.isRevenue && <span className="text-xs text-green-600 block">+Revenue</span>}
