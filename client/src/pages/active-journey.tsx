@@ -130,8 +130,17 @@ export default function ActiveJourney() {
     );
   }
 
-  const totalExpenses = expenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
-  const currentBalance = parseFloat(userActiveJourney.pouch) - totalExpenses;
+  // Calculate actual expenses (excluding HYD Inward and Top Up)
+  const actualExpenses = expenses.filter((expense: any) => 
+    expense.category !== 'hyd_inward' && expense.category !== 'top_up'
+  );
+  const totalExpenses = actualExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
+  
+  // Calculate top-up amounts to add to balance
+  const topUpExpenses = expenses.filter((expense: any) => expense.category === 'top_up');
+  const totalTopUp = topUpExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
+  
+  const currentBalance = parseFloat(userActiveJourney.pouch) + totalTopUp - totalExpenses;
 
   return (
     <div className="p-6">
@@ -195,10 +204,23 @@ export default function ActiveJourney() {
               {expenses.length > 0 ? (
                 <div className="space-y-3">
                   {expenses.map((expense: any) => (
-                    <div key={expense.id} className="border border-gray-200 rounded-lg p-4">
+                    <div key={expense.id} className={`border rounded-lg p-4 ${
+                      expense.category === 'hyd_inward' || expense.category === 'top_up' 
+                        ? 'border-green-300 bg-green-50' 
+                        : 'border-gray-200'
+                    }`}>
                       <div className="flex items-center justify-between">
                         <div>
-                          <h4 className="font-medium capitalize">{expense.category.replace('_', ' ')}</h4>
+                          <h4 className={`font-medium capitalize ${
+                            expense.category === 'hyd_inward' || expense.category === 'top_up' 
+                              ? 'text-green-700' 
+                              : 'text-gray-900'
+                          }`}>
+                            {expense.category.replace('_', ' ')}
+                            {(expense.category === 'hyd_inward' || expense.category === 'top_up') && (
+                              <span className="text-xs text-green-600 ml-2">+Income</span>
+                            )}
+                          </h4>
                           {expense.description && (
                             <p className="text-sm text-gray-500">{expense.description}</p>
                           )}
@@ -207,18 +229,30 @@ export default function ActiveJourney() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <span className="font-semibold text-lg">₹{parseFloat(expense.amount).toLocaleString()}</span>
+                          <span className={`font-semibold text-lg ${
+                            expense.category === 'hyd_inward' || expense.category === 'top_up' 
+                              ? 'text-green-600' 
+                              : 'text-gray-900'
+                          }`}>
+                            {(expense.category === 'hyd_inward' || expense.category === 'top_up') ? '+' : ''}₹{parseFloat(expense.amount).toLocaleString()}
+                          </span>
                         </div>
                       </div>
                     </div>
                   ))}
                   
-                  {/* Total */}
-                  <div className="border-t border-gray-200 pt-3">
+                  {/* Totals */}
+                  <div className="border-t border-gray-200 pt-3 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold">Total Expenses</span>
                       <span className="font-bold text-xl">₹{totalExpenses.toLocaleString()}</span>
                     </div>
+                    {totalTopUp > 0 && (
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-green-700">Total Top Up</span>
+                        <span className="font-bold text-xl text-green-600">+₹{totalTopUp.toLocaleString()}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
