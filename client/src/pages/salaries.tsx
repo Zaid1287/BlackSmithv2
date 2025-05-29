@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -60,6 +60,7 @@ export default function Salaries() {
       if (!response.ok) throw new Error("Failed to fetch salary payments");
       return response.json();
     },
+    staleTime: 30000, // Cache for 30 seconds to reduce API calls
   });
 
   // Mutation for processing multiple advances at once
@@ -168,18 +169,27 @@ export default function Salaries() {
     saveAs(data, `${employee.name}_salary_report.xlsx`);
   };
 
-  // Filter only drivers
-  const drivers = users.filter((user: any) => user.role === 'driver');
-  
-  // Calculate totals with proper handling of positive and negative amounts
-  const totalSalaryAmount = drivers.reduce((sum: number, user: any) => sum + parseFloat(user.salary || 0), 0);
-  const totalPaymentsToDrivers = salaryPayments
-    .filter((payment: any) => parseFloat(payment.amount) > 0)
-    .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
-  const totalDebtsFromDrivers = salaryPayments
-    .filter((payment: any) => parseFloat(payment.amount) < 0)
-    .reduce((sum: number, payment: any) => sum + Math.abs(parseFloat(payment.amount)), 0);
-  const remainingBalance = totalSalaryAmount - totalPaymentsToDrivers + totalDebtsFromDrivers;
+  // Memoized calculations to prevent unnecessary re-renders
+  const { drivers, totalSalaryAmount, totalPaymentsToDrivers, totalDebtsFromDrivers, remainingBalance } = useMemo(() => {
+    const filteredDrivers = users.filter((user: any) => user.role === 'driver');
+    
+    const salaryTotal = filteredDrivers.reduce((sum: number, user: any) => sum + parseFloat(user.salary || 0), 0);
+    const paymentsTotal = salaryPayments
+      .filter((payment: any) => parseFloat(payment.amount) > 0)
+      .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
+    const debtsTotal = salaryPayments
+      .filter((payment: any) => parseFloat(payment.amount) < 0)
+      .reduce((sum: number, payment: any) => sum + Math.abs(parseFloat(payment.amount)), 0);
+    const balance = salaryTotal - paymentsTotal + debtsTotal;
+    
+    return {
+      drivers: filteredDrivers,
+      totalSalaryAmount: salaryTotal,
+      totalPaymentsToDrivers: paymentsTotal,
+      totalDebtsFromDrivers: debtsTotal,
+      remainingBalance: balance
+    };
+  }, [users, salaryPayments]);
 
   // Admin access control
   if (!isAdmin) {
@@ -288,20 +298,24 @@ export default function Salaries() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {drivers.map((driver: any) => {
-                // Calculate total payments and debts for this driver
-                const driverPayments = salaryPayments.filter((payment: any) => payment.userId === driver.id);
-                const totalPaid = driverPayments
-                  .filter((payment: any) => parseFloat(payment.amount) > 0)
-                  .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
-                const totalDebts = driverPayments
-                  .filter((payment: any) => parseFloat(payment.amount) < 0)
-                  .reduce((sum: number, payment: any) => sum + Math.abs(parseFloat(payment.amount)), 0);
-                const balance = parseFloat(driver.salary || 0) - totalPaid + totalDebts;
-                
-                // Status based on balance
-                const status = balance <= 0 ? 'paid' : balance < parseFloat(driver.salary || 0) / 2 ? 'partial' : 'pending';
-                const statusColor = status === 'paid' ? 'text-green-600' : status === 'partial' ? 'text-yellow-600' : 'text-red-600';
-                const statusText = status === 'paid' ? 'Fully Paid' : status === 'partial' ? 'Partially Paid' : 'Pending';
+                // Memoized calculations per driver to reduce computation
+                const driverData = useMemo(() => {
+                  const driverPayments = salaryPayments.filter((payment: any) => payment.userId === driver.id);
+                  const totalPaid = driverPayments
+                    .filter((payment: any) => parseFloat(payment.amount) > 0)
+                    .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
+                  const totalDebts = driverPayments
+                    .filter((payment: any) => parseFloat(payment.amount) < 0)
+                    .reduce((sum: number, payment: any) => sum + Math.abs(parseFloat(payment.amount)), 0);
+                  const balance = parseFloat(driver.salary || 0) - totalPaid + totalDebts;
+                  
+                  // Status based on balance
+                  const status = balance <= 0 ? 'paid' : balance < parseFloat(driver.salary || 0) / 2 ? 'partial' : 'pending';
+                  const statusColor = status === 'paid' ? 'text-green-600' : status === 'partial' ? 'text-yellow-600' : 'text-red-600';
+                  const statusText = status === 'paid' ? 'Fully Paid' : status === 'partial' ? 'Partially Paid' : 'Pending';
+                  
+                  return { totalPaid, balance, status, statusColor, statusText };
+                }, [driver.id, driver.salary, salaryPayments]);
 
                 return (
                   <Card key={driver.id} className="border border-gray-200 hover:shadow-md transition-shadow">
@@ -311,8 +325,8 @@ export default function Salaries() {
                           <h3 className="font-semibold text-gray-900">{driver.name}</h3>
                           <p className="text-sm text-gray-500">{driver.username}</p>
                         </div>
-                        <Badge variant={status === 'paid' ? "default" : status === 'partial' ? "secondary" : "destructive"}>
-                          {statusText}
+                        <Badge variant={driverData.status === 'paid' ? "default" : driverData.status === 'partial' ? "secondary" : "destructive"}>
+                          {driverData.statusText}
                         </Badge>
                       </div>
                       
@@ -323,12 +337,12 @@ export default function Salaries() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-gray-500">Total Advance:</span>
-                          <span className="text-sm font-medium text-green-600">₹{totalPaid.toLocaleString()}</span>
+                          <span className="text-sm font-medium text-green-600">₹{driverData.totalPaid.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-gray-500">Balance:</span>
-                          <span className={`text-sm font-medium ${statusColor}`}>
-                            ₹{balance.toLocaleString()}
+                          <span className={`text-sm font-medium ${driverData.statusColor}`}>
+                            ₹{driverData.balance.toLocaleString()}
                           </span>
                         </div>
                       </div>
