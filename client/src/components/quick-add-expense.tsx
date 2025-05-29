@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, X, Fuel, Car, Coffee, ParkingCircle, Wrench, Package, PackageOpen, DollarSign, Banknote, MoreHorizontal } from "lucide-react";
+import { Plus, X, Fuel, Car, Coffee, ParkingCircle, Wrench, Package, PackageOpen, DollarSign, Banknote, MoreHorizontal, FileText, Cog, Zap, Circle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface QuickAddExpenseProps {
@@ -12,16 +12,26 @@ interface QuickAddExpenseProps {
 }
 
 const expenseTypes = [
+  { value: "loading", label: "Loading", icon: Package, color: "bg-indigo-500" },
   { value: "fuel", label: "Fuel", icon: Fuel, color: "bg-orange-500" },
   { value: "toll", label: "Toll", icon: Car, color: "bg-blue-500" },
+  { value: "rto", label: "RTO", icon: FileText, color: "bg-purple-600" },
+  { value: "hyd_unloading", label: "HYD Unloading", icon: PackageOpen, color: "bg-emerald-500" },
+  { value: "mechanical", label: "Mechanical", icon: Cog, color: "bg-red-600" },
+  { value: "body_works", label: "Body Works", icon: Wrench, color: "bg-gray-600" },
+  { value: "tire_change", label: "Tire Change", icon: Circle, color: "bg-slate-600" },
+  { value: "weighment", label: "Weighment", icon: MoreHorizontal, color: "bg-amber-600" },
+  { value: "rope", label: "Rope", icon: MoreHorizontal, color: "bg-brown-500" },
   { value: "food", label: "Food", icon: Coffee, color: "bg-green-500" },
-  { value: "parking", label: "Parking", icon: ParkingCircle, color: "bg-purple-500" },
   { value: "maintenance", label: "Maintenance", icon: Wrench, color: "bg-red-500" },
-  { value: "loading", label: "Loading", icon: Package, color: "bg-indigo-500" },
-  { value: "unloading", label: "Unloading", icon: PackageOpen, color: "bg-teal-500" },
+  { value: "nzb_unloading", label: "NZB Unloading", icon: PackageOpen, color: "bg-teal-600" },
+  { value: "miscellaneous", label: "Miscellaneous", icon: MoreHorizontal, color: "bg-gray-500" },
+  { value: "electrical", label: "Electrical", icon: Zap, color: "bg-yellow-600" },
+  { value: "tires_air", label: "Tires Air", icon: Circle, color: "bg-cyan-500" },
+  { value: "tire_greasing", label: "Tire Greasing", icon: Circle, color: "bg-violet-500" },
+  { value: "adblue", label: "AdBlue", icon: MoreHorizontal, color: "bg-blue-700" },
   { value: "hyd_inward", label: "HYD Inward", icon: DollarSign, color: "bg-emerald-600" },
   { value: "top_up", label: "Top-up", icon: Banknote, color: "bg-yellow-500" },
-  { value: "other", label: "Other", icon: MoreHorizontal, color: "bg-gray-500" },
 ];
 
 export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseProps) {
