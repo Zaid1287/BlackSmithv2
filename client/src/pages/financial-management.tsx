@@ -105,24 +105,71 @@ export default function FinancialManagement() {
         }).catch(() => [])
       ]);
 
+      // Calculate financial metrics
+      const totalRevenue = journeysData.reduce((sum: number, journey: any) => 
+        sum + parseFloat(journey.pouch || 0), 0);
+      const totalExpenses = allExpenses.reduce((sum: number, expense: any) => 
+        sum + parseFloat(expense.amount || 0), 0);
+      const securityDeposits = journeysData.reduce((sum: number, journey: any) => 
+        sum + parseFloat(journey.security || 0), 0);
+      const netProfit = totalRevenue - totalExpenses;
+
       // Create workbook with enhanced formatting
       const workbook = XLSX.utils.book_new();
 
-      // Summary Sheet
+      // Company Header Sheet
+      const currentDate = new Date();
+      const reportPeriod = `${currentDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}`;
+      
       const summaryData = [
-        ["BlackSmith Traders - Financial Report"],
-        ["Generated on:", new Date().toLocaleDateString()],
+        ["BLACKSMITH TRADERS PRIVATE LIMITED"],
+        ["LOGISTICS & TRANSPORTATION SERVICES"],
         [""],
-        ["Financial Summary"],
-        ["Total Revenue", `₹${totalRevenue.toLocaleString()}`],
-        ["Total Expenses", `₹${totalExpenses.toLocaleString()}`],
-        ["Net Profit", `₹${netProfit.toLocaleString()}`],
-        ["Security Deposits", `₹${securityDeposits.toLocaleString()}`],
-        ["Salary Expenses", `₹${salaryExpenses.toLocaleString()}`],
-        ["HYD Inward", `₹${hydInwardAmount.toLocaleString()}`],
+        ["FINANCIAL STATEMENT & PROFIT LOSS REPORT"],
+        [`Period: ${reportPeriod}`],
+        [`Generated on: ${currentDate.toLocaleDateString('en-IN')} at ${currentDate.toLocaleTimeString('en-IN')}`],
+        [""],
+        ["FINANCIAL SUMMARY"],
+        ["Particulars", "Amount (₹)", "Percentage (%)"],
+        ["Total Revenue (Pouch Amount)", totalRevenue.toFixed(2), "100.00"],
+        ["Total Operating Expenses", totalExpenses.toFixed(2), ((totalExpenses/totalRevenue)*100).toFixed(2)],
+        ["Security Deposits Collected", securityDeposits.toFixed(2), ((securityDeposits/totalRevenue)*100).toFixed(2)],
+        ["Net Profit/Loss", netProfit.toFixed(2), ((netProfit/totalRevenue)*100).toFixed(2)],
+        [""],
+        ["EXPENSE BREAKDOWN BY CATEGORY"],
+        ["Category", "Amount (₹)", "% of Total Expenses"],
       ];
+
+      // Calculate category-wise expenses
+      const categoryTotals: { [key: string]: number } = {};
+      allExpenses.forEach((expense: any) => {
+        const category = expense.category.replace(/_/g, ' ').toUpperCase();
+        categoryTotals[category] = (categoryTotals[category] || 0) + parseFloat(expense.amount || 0);
+      });
+
+      // Add category breakdown to summary
+      Object.entries(categoryTotals).forEach(([category, amount]) => {
+        const percentage = totalExpenses > 0 ? ((amount / totalExpenses) * 100).toFixed(2) : "0.00";
+        summaryData.push([category, amount.toFixed(2), percentage]);
+      });
+
+      summaryData.push(["", "", ""]);
+      summaryData.push(["OPERATIONAL METRICS"]);
+      summaryData.push(["Total Journeys", journeysData.length.toString(), ""]);
+      summaryData.push(["Active Journeys", journeysData.filter((j: any) => j.status === 'active').length.toString(), ""]);
+      summaryData.push(["Completed Journeys", journeysData.filter((j: any) => j.status === 'completed').length.toString(), ""]);
+      summaryData.push(["Average Revenue per Journey", (totalRevenue / Math.max(journeysData.length, 1)).toFixed(2), ""]);
+
       const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-      XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
+      
+      // Set column widths
+      summarySheet['!cols'] = [
+        { wch: 35 }, // Column A
+        { wch: 15 }, // Column B  
+        { wch: 15 }  // Column C
+      ];
+
+      XLSX.utils.book_append_sheet(workbook, summarySheet, "Executive Summary");
 
       // Journeys Sheet
       const journeyHeaders = [
