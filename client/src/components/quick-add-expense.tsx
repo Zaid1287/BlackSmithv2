@@ -3,10 +3,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Fuel, Car, Coffee, ParkingCircle, Wrench, Package, PackageOpen, DollarSign, Banknote, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 
 interface QuickAddExpenseProps {
   journeyId: number;
@@ -14,29 +12,29 @@ interface QuickAddExpenseProps {
 }
 
 const expenseTypes = [
-  { value: "fuel", label: "Fuel" },
-  { value: "toll", label: "Toll" },
-  { value: "food", label: "Food" },
-  { value: "parking", label: "Parking" },
-  { value: "maintenance", label: "Maintenance" },
-  { value: "loading", label: "Loading" },
-  { value: "unloading", label: "Unloading" },
-  { value: "hyd_inward", label: "HYD Inward" },
-  { value: "top_up", label: "Top-up" },
-  { value: "other", label: "Other" },
+  { value: "fuel", label: "Fuel", icon: Fuel, color: "bg-orange-500" },
+  { value: "toll", label: "Toll", icon: Car, color: "bg-blue-500" },
+  { value: "food", label: "Food", icon: Coffee, color: "bg-green-500" },
+  { value: "parking", label: "Parking", icon: ParkingCircle, color: "bg-purple-500" },
+  { value: "maintenance", label: "Maintenance", icon: Wrench, color: "bg-red-500" },
+  { value: "loading", label: "Loading", icon: Package, color: "bg-indigo-500" },
+  { value: "unloading", label: "Unloading", icon: PackageOpen, color: "bg-teal-500" },
+  { value: "hyd_inward", label: "HYD Inward", icon: DollarSign, color: "bg-emerald-600" },
+  { value: "top_up", label: "Top-up", icon: Banknote, color: "bg-yellow-500" },
+  { value: "other", label: "Other", icon: MoreHorizontal, color: "bg-gray-500" },
 ];
 
 export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseProps) {
   const [selectedType, setSelectedType] = useState("");
   const [amount, setAmount] = useState("");
-  const [description, setDescription] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showAmountInput, setShowAmountInput] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const addExpenseMutation = useMutation({
-    mutationFn: async (data: { type: string; amount: number; description: string }) => {
+    mutationFn: async (data: { type: string; amount: number }) => {
       const response = await fetch(`/api/journeys/${journeyId}/expenses`, {
         method: "POST",
         headers: {
@@ -46,7 +44,7 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
         body: JSON.stringify({
           category: data.type,
           amount: data.amount,
-          description: data.description,
+          description: `${expenseTypes.find(t => t.value === data.type)?.label} expense`,
         }),
       });
       
@@ -68,7 +66,7 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
       // Reset form
       setSelectedType("");
       setAmount("");
-      setDescription("");
+      setShowAmountInput(false);
       setIsExpanded(false);
       
       if (onClose) onClose();
@@ -82,13 +80,18 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
     },
   });
 
+  const handleExpenseTypeClick = (type: string) => {
+    setSelectedType(type);
+    setShowAmountInput(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!selectedType || !amount) {
       toast({
         title: "Error",
-        description: "Please select expense type and enter amount",
+        description: "Please enter amount",
         variant: "destructive",
       });
       return;
@@ -97,7 +100,6 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
     addExpenseMutation.mutate({
       type: selectedType,
       amount: parseFloat(amount),
-      description: description || `${expenseTypes.find(t => t.value === selectedType)?.label} expense`,
     });
   };
 
@@ -115,17 +117,86 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
     );
   }
 
+  if (showAmountInput) {
+    const selectedExpenseType = expenseTypes.find(t => t.value === selectedType);
+    const IconComponent = selectedExpenseType?.icon || MoreHorizontal;
+    
+    return (
+      <Card className="border-2 border-blue-200">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <div className={`w-6 h-6 rounded ${selectedExpenseType?.color} flex items-center justify-center`}>
+                <IconComponent className="w-3 h-3 text-white" />
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900">{selectedExpenseType?.label}</h3>
+            </div>
+            <Button
+              onClick={() => {
+                setShowAmountInput(false);
+                setSelectedType("");
+                setAmount("");
+              }}
+              size="sm"
+              variant="ghost"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
+              <Input
+                type="number"
+                placeholder="Enter amount"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="h-10 text-sm"
+                step="0.01"
+                min="0"
+                autoFocus
+              />
+            </div>
+
+            <div className="flex space-x-2">
+              <Button
+                type="submit"
+                size="sm"
+                className="flex-1 h-8 text-xs"
+                disabled={addExpenseMutation.isPending || !amount}
+              >
+                {addExpenseMutation.isPending ? "Adding..." : "Add Expense"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setShowAmountInput(false);
+                  setSelectedType("");
+                  setAmount("");
+                }}
+                className="h-8 text-xs"
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="border-2 border-blue-200">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900">Add Expense</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Select Expense Type</h3>
           <Button
             onClick={() => {
               setIsExpanded(false);
               setSelectedType("");
               setAmount("");
-              setDescription("");
             }}
             size="sm"
             variant="ghost"
@@ -134,70 +205,24 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {expenseTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Input
-                type="number"
-                placeholder="Amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="h-8 text-xs"
-                step="0.01"
-                min="0"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Input
-              placeholder="Description (optional)"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="h-8 text-xs"
-            />
-          </div>
-
-          <div className="flex space-x-2">
-            <Button
-              type="submit"
-              size="sm"
-              className="flex-1 h-8 text-xs"
-              disabled={addExpenseMutation.isPending}
-            >
-              {addExpenseMutation.isPending ? "Adding..." : "Add Expense"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setIsExpanded(false);
-                setSelectedType("");
-                setAmount("");
-                setDescription("");
-              }}
-              className="h-8 text-xs"
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
+        <div className="grid grid-cols-2 gap-2">
+          {expenseTypes.map((type) => {
+            const IconComponent = type.icon;
+            return (
+              <Button
+                key={type.value}
+                onClick={() => handleExpenseTypeClick(type.value)}
+                variant="outline"
+                className="h-12 text-xs flex flex-col items-center space-y-1 hover:bg-gray-50"
+              >
+                <div className={`w-6 h-6 rounded ${type.color} flex items-center justify-center`}>
+                  <IconComponent className="w-3 h-3 text-white" />
+                </div>
+                <span>{type.label}</span>
+              </Button>
+            );
+          })}
+        </div>
       </CardContent>
     </Card>
   );
