@@ -420,11 +420,8 @@ export default function AdminDashboard() {
       <Dialog open={!!selectedJourney} onOpenChange={() => setSelectedJourney(null)}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>Journey Details - {selectedJourney?.destination}</span>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedJourney(null)}>
-                <X className="h-4 w-4" />
-              </Button>
+            <DialogTitle>
+              Journey Details - {selectedJourney?.destination}
             </DialogTitle>
           </DialogHeader>
 
@@ -486,9 +483,9 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Financial Information */}
+              {/* Expense Categories */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Financial Information</h3>
+                <h3 className="text-lg font-semibold mb-4">Expense Categories</h3>
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Current Balance:</span>
@@ -506,43 +503,69 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold">Expense Breakdown</h4>
-                  <Button 
-                    size="sm" 
-                    onClick={() => setShowAddExpenseModal(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Expense
-                  </Button>
+                {/* HYD Inward - Admin only, green background */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-green-800">HYD Inward</h4>
+                      <p className="text-sm text-green-600">Income (This is an income item)</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        placeholder="₹ Amount"
+                        className="w-32 px-3 py-2 border border-green-300 rounded-md text-sm"
+                      />
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {selectedJourneyExpenses.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No expenses recorded</p>
-                  ) : (
-                    selectedJourneyExpenses.map((expense: any) => (
-                      <div key={expense.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                        <div>
-                          <span className={`text-sm font-medium ${
-                            expense.category === 'hyd_inward' ? 'profit-green' :
-                            expense.category === 'top_up' ? 'profit-green' :
-                            'text-gray-900'
-                          }`}>
-                            {(expense.category || expense.type || 'Unknown').replace('_', ' ').toUpperCase()}
-                          </span>
-                          {expense.description && (
-                            <p className="text-xs text-gray-500">{expense.description}</p>
-                          )}
+
+                {/* Regular expense categories grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    'Loading', 'Rope', 'Fuel', 'Food', 'Maintenance', 'RTO', 
+                    'Unloading', 'Miscellaneous', 'Mechanical', 'Body Works', 
+                    'Tires Air', 'Weighment', 'AdBlue', 'Other'
+                  ].map((category) => (
+                    <div key={category} className="border border-gray-200 rounded-lg p-3">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-900">{category}</h4>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            placeholder="₹ Amount"
+                            className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                          />
+                          <Button size="sm" variant="outline">
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add
+                          </Button>
                         </div>
-                        <span className={`font-medium ${
-                          expense.category === 'hyd_inward' || expense.category === 'top_up' ? 'profit-green' : 'text-red-600'
-                        }`}>
-                          {expense.category === 'hyd_inward' || expense.category === 'top_up' ? '+' : '-'}₹{parseFloat(expense.amount || 0).toLocaleString()}
-                        </span>
                       </div>
-                    ))
-                  )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Toll - Admin only */}
+                <div className="border border-gray-200 rounded-lg p-3 mt-3">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-gray-900">Toll</h4>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        placeholder="₹ Amount"
+                        className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                      <Button size="sm" variant="outline">
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
