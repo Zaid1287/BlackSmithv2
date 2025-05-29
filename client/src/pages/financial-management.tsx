@@ -45,6 +45,18 @@ export default function FinancialManagement() {
     },
   });
 
+  const { data: allExpenses } = useQuery({
+    queryKey: ["/api/expenses/all"],
+    queryFn: async () => {
+      const response = await fetch("/api/expenses/all", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch all expenses");
+      return response.json();
+    },
+  });
+
   const resetFinancialDataMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("POST", "/api/reset-financial-data");
@@ -241,10 +253,58 @@ export default function FinancialManagement() {
     { name: 'Top-ups', value: topUpRevenue, color: '#f59e0b' },
   ].filter(item => item.value > 0);
 
+  // Calculate individual expense type totals from all expenses
+  const expenseTypeBreakdown = allExpenses?.reduce((acc: any, expense: any) => {
+    const category = expense.category;
+    const amount = parseFloat(expense.amount || 0);
+    
+    // Skip income items (they're not expenses)
+    if (category === 'hyd_inward' || category === 'top_up') {
+      return acc;
+    }
+    
+    if (!acc[category]) {
+      acc[category] = 0;
+    }
+    acc[category] += amount;
+    return acc;
+  }, {}) || {};
+
+  // Define colors for different expense types
+  const expenseColors = {
+    fuel: '#ef4444',
+    toll: '#dc2626', 
+    loading: '#f97316',
+    unloading: '#ea580c',
+    food: '#d97706',
+    maintenance: '#ca8a04',
+    mechanical: '#eab308',
+    rto: '#84cc16',
+    rope: '#65a30d',
+    weighment: '#16a34a',
+    body_works: '#059669',
+    tires_air: '#0891b2',
+    adblue: '#0284c7',
+    electrical: '#2563eb',
+    tire_change: '#4f46e5',
+    tire_greasing: '#7c3aed',
+    nzb_unloading: '#9333ea',
+    miscellaneous: '#c2410c',
+    other: '#991b1b'
+  };
+
+  // Convert to chart data format
+  const expenseBreakdownData = Object.entries(expenseTypeBreakdown).map(([category, amount]: [string, any]) => ({
+    name: category.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+    value: amount,
+    color: expenseColors[category as keyof typeof expenseColors] || '#6b7280'
+  })).filter(item => item.value > 0);
+
+  // Add salary payments as a separate category
   const expenseChartData = [
-    { name: 'Journey Expenses', value: journeyExpenses, color: '#ef4444' },
-    { name: 'Salary Payments', value: salaryPayments, color: '#f97316' },
-  ].filter(item => item.value > 0);
+    ...expenseBreakdownData,
+    ...(salaryPayments > 0 ? [{ name: 'Salary Payments', value: salaryPayments, color: '#374151' }] : [])
+  ];
 
   const recentExpenses = [
     { type: "Salary_refund", amount: 2940, notes: "Salary deduction for Aleem - Adding back to profit (+2940)", time: "10 days ago" },
