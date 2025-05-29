@@ -110,7 +110,7 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
         className="text-xs"
       >
         <Plus className="w-3 h-3 mr-1" />
-        Quick Add Expense
+        Add Expense
       </Button>
     );
   }
@@ -119,7 +119,7 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
     <Card className="border-2 border-blue-200">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900">Quick Add Expense</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Add Expense</h3>
           <Button
             onClick={() => {
               setIsExpanded(false);
