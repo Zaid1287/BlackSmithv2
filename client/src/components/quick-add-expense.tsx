@@ -30,7 +30,6 @@ const regularExpenseTypes = [
   { value: "tires_air", label: "Tires Air" },
   { value: "tire_greasing", label: "Tire Greasing" },
   { value: "adblue", label: "AdBlue" },
-  { value: "top_up", label: "Top Up" },
 ];
 
 export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseProps) {
@@ -138,8 +137,9 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
           </DialogHeader>
 
           <div className="space-y-6 p-4">
-            {/* HYD Inward Income Section - Special Green Container */}
-            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+            {/* Income Section - Special Green Container */}
+            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 space-y-4">
+              {/* HYD Inward */}
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <h4 className="text-green-700 font-semibold text-lg">HYD Inward</h4>
@@ -159,6 +159,35 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
                   </div>
                   <Button
                     onClick={() => handleAddExpense('hyd_inward')}
+                    disabled={addExpenseMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add
+                  </Button>
+                </div>
+              </div>
+
+              {/* Top Up */}
+              <div className="flex items-center justify-between border-t border-green-200 pt-4">
+                <div className="flex-1">
+                  <h4 className="text-green-700 font-semibold text-lg">Top Up</h4>
+                  <h5 className="text-green-700 font-medium">Income</h5>
+                  <p className="text-green-600 text-sm">(This is an income item)</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                    <Input
+                      type="text"
+                      placeholder="Amount"
+                      value={amounts['top_up'] || ''}
+                      onChange={(e) => handleAmountChange('top_up', e.target.value)}
+                      className="pl-8 w-40 bg-white border-green-300 focus:border-green-500"
+                    />
+                  </div>
+                  <Button
+                    onClick={() => handleAddExpense('top_up')}
                     disabled={addExpenseMutation.isPending}
                     className="bg-green-600 hover:bg-green-700 text-white px-6"
                   >
