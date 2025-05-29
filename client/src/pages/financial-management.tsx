@@ -385,8 +385,8 @@ export default function FinancialManagement() {
                 <div className="text-3xl font-bold">₹{netProfit.toLocaleString()}</div>
                 <div className="text-sm opacity-90 mt-2">
                   <div>Security Deposits: ₹{securityDeposits.toLocaleString()}</div>
-                  <div>Salary Expenses: ₹{salaryExpenses.toLocaleString()}</div>
-                  <div>Salary Refunds: +₹{salaryRefunds.toLocaleString()}</div>
+                  <div>Salary Payments: ₹{salaryPayments.toLocaleString()}</div>
+                  <div>Salary Debts: +₹{salaryDebts.toLocaleString()}</div>
                 </div>
               </div>
             </div>
