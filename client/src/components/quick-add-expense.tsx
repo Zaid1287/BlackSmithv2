@@ -1,44 +1,36 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, X, Fuel, Car, Coffee, ParkingCircle, Wrench, Package, PackageOpen, DollarSign, Banknote, MoreHorizontal, FileText, Cog, Zap, Circle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Plus, X } from "lucide-react";
 
 interface QuickAddExpenseProps {
   journeyId: number;
   onClose?: () => void;
 }
 
-const expenseTypes = [
-  { value: "loading", label: "Loading", icon: Package, color: "bg-indigo-500" },
-  { value: "fuel", label: "Fuel", icon: Fuel, color: "bg-orange-500" },
-  { value: "toll", label: "Toll", icon: Car, color: "bg-blue-500" },
-  { value: "rto", label: "RTO", icon: FileText, color: "bg-purple-600" },
-  { value: "hyd_unloading", label: "HYD Unloading", icon: PackageOpen, color: "bg-emerald-500" },
-  { value: "mechanical", label: "Mechanical", icon: Cog, color: "bg-red-600" },
-  { value: "body_works", label: "Body Works", icon: Wrench, color: "bg-gray-600" },
-  { value: "tire_change", label: "Tire Change", icon: Circle, color: "bg-slate-600" },
-  { value: "weighment", label: "Weighment", icon: MoreHorizontal, color: "bg-amber-600" },
-  { value: "rope", label: "Rope", icon: MoreHorizontal, color: "bg-brown-500" },
-  { value: "food", label: "Food", icon: Coffee, color: "bg-green-500" },
-  { value: "maintenance", label: "Maintenance", icon: Wrench, color: "bg-red-500" },
-  { value: "nzb_unloading", label: "NZB Unloading", icon: PackageOpen, color: "bg-teal-600" },
-  { value: "miscellaneous", label: "Miscellaneous", icon: MoreHorizontal, color: "bg-gray-500" },
-  { value: "electrical", label: "Electrical", icon: Zap, color: "bg-yellow-600" },
-  { value: "tires_air", label: "Tires Air", icon: Circle, color: "bg-cyan-500" },
-  { value: "tire_greasing", label: "Tire Greasing", icon: Circle, color: "bg-violet-500" },
-  { value: "adblue", label: "AdBlue", icon: MoreHorizontal, color: "bg-blue-700" },
-  { value: "hyd_inward", label: "HYD Inward", icon: DollarSign, color: "bg-emerald-600" },
-  { value: "top_up", label: "Top-up", icon: Banknote, color: "bg-yellow-500" },
+const regularExpenseTypes = [
+  { value: "loading", label: "Loading" },
+  { value: "rope", label: "Rope" },
+  { value: "fuel", label: "Fuel" },
+  { value: "food", label: "Food" },
+  { value: "maintenance", label: "Maintenance" },
+  { value: "rto", label: "RTO" },
+  { value: "unloading", label: "Unloading" },
+  { value: "miscellaneous", label: "Miscellaneous" },
+  { value: "mechanical", label: "Mechanical" },
+  { value: "body_works", label: "Body Works" },
+  { value: "tires_air", label: "Tires Air" },
+  { value: "weighment", label: "Weighment" },
+  { value: "adblue", label: "AdBlue" },
+  { value: "other", label: "Other" },
+  { value: "toll", label: "Toll" },
 ];
 
 export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseProps) {
-  const [selectedType, setSelectedType] = useState("");
-  const [amount, setAmount] = useState("");
+  const [amounts, setAmounts] = useState<{[key: string]: string}>({});
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showAmountInput, setShowAmountInput] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -56,7 +48,7 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
           journeyId: journeyId,
           category: data.type,
           amount: data.amount.toString(),
-          description: `${expenseTypes.find(t => t.value === data.type)?.label} expense`,
+          description: `${regularExpenseTypes.find(t => t.value === data.type)?.label || data.type} expense`,
         }),
       });
       
@@ -66,26 +58,26 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
       
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      const expenseLabel = variables.type === 'hyd_inward' ? 'HYD Inward Income' : 
+                          regularExpenseTypes.find(t => t.value === variables.type)?.label || variables.type;
+      
       toast({
         title: "Success",
-        description: "Expense added successfully",
+        description: `${expenseLabel} added: ₹${variables.amount.toLocaleString()}`,
       });
+      
       // Force refresh all related data
       queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
       queryClient.invalidateQueries({ queryKey: ["/api/expenses"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
-      queryClient.refetchQueries({ queryKey: ["/api/journeys"] });
-      queryClient.refetchQueries({ queryKey: ["/api/dashboard/financial"] });
       
-      // Reset form
-      setSelectedType("");
-      setAmount("");
-      setShowAmountInput(false);
-      setIsExpanded(false);
-      
-      if (onClose) onClose();
+      // Clear the amount for this specific expense type
+      setAmounts(prev => ({
+        ...prev,
+        [variables.type]: ""
+      }));
     },
     onError: (error: any) => {
       toast({
@@ -96,150 +88,124 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
     },
   });
 
-  const handleExpenseTypeClick = (type: string) => {
-    setSelectedType(type);
-    setShowAmountInput(true);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedType || !amount) {
+  const handleAddExpense = (type: string) => {
+    const amount = amounts[type];
+    if (!amount || parseFloat(amount) <= 0) {
       toast({
         title: "Error",
-        description: "Please enter amount",
+        description: "Please enter a valid amount",
         variant: "destructive",
       });
       return;
     }
 
     addExpenseMutation.mutate({
-      type: selectedType,
+      type: type,
       amount: parseFloat(amount),
     });
+  };
+
+  const handleAmountChange = (type: string, value: string) => {
+    // Only allow numbers and decimal point
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setAmounts(prev => ({
+        ...prev,
+        [type]: value
+      }));
+    }
   };
 
   if (!isExpanded) {
     return (
       <Button
         onClick={() => setIsExpanded(true)}
-        size="sm"
-        variant="outline"
-        className="text-xs"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+        size="lg"
       >
-        <Plus className="w-3 h-3 mr-1" />
-        Add Expense
+        <Plus className="w-5 h-5 mr-2" />
+        Add Quick Expense
       </Button>
     );
   }
 
-  if (showAmountInput) {
-    const selectedExpenseType = expenseTypes.find(t => t.value === selectedType);
-    const IconComponent = selectedExpenseType?.icon || MoreHorizontal;
-    
-    return (
-      <Card className="border-2 border-blue-200">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <div className={`w-6 h-6 rounded ${selectedExpenseType?.color} flex items-center justify-center`}>
-                <IconComponent className="w-3 h-3 text-white" />
-              </div>
-              <h3 className="text-sm font-semibold text-gray-900">{selectedExpenseType?.label}</h3>
-            </div>
-            <Button
-              onClick={() => {
-                setShowAmountInput(false);
-                setSelectedType("");
-                setAmount("");
-              }}
-              size="sm"
-              variant="ghost"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
+  return (
+    <div className="space-y-6 p-4 border rounded-lg bg-white">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Add Expenses</h3>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setIsExpanded(false);
+            if (onClose) onClose();
+          }}
+        >
+          <X className="w-4 h-4" />
+        </Button>
+      </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div>
+      {/* HYD Inward Income Section - Special Green Container */}
+      <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <h4 className="text-green-700 font-semibold text-lg">HYD Inward</h4>
+            <h5 className="text-green-700 font-medium">Income</h5>
+            <p className="text-green-600 text-sm">(This is an income item)</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
               <Input
-                type="number"
-                placeholder="Enter amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="h-10 text-sm"
-                step="0.01"
-                min="0"
-                autoFocus
+                type="text"
+                placeholder="Amount"
+                value={amounts['hyd_inward'] || ''}
+                onChange={(e) => handleAmountChange('hyd_inward', e.target.value)}
+                className="pl-8 w-40 bg-white border-green-300 focus:border-green-500"
               />
             </div>
+            <Button
+              onClick={() => handleAddExpense('hyd_inward')}
+              disabled={addExpenseMutation.isPending}
+              className="bg-green-600 hover:bg-green-700 text-white px-6"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Add
+            </Button>
+          </div>
+        </div>
+      </div>
 
-            <div className="flex space-x-2">
+      {/* Regular Expenses Grid */}
+      <div className="grid grid-cols-2 gap-4">
+        {regularExpenseTypes.map((expenseType) => (
+          <div key={expenseType.value} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h4 className="font-medium text-gray-900 mb-3">{expenseType.label}</h4>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                  <Input
+                    type="text"
+                    placeholder="Amount"
+                    value={amounts[expenseType.value] || ''}
+                    onChange={(e) => handleAmountChange(expenseType.value, e.target.value)}
+                    className="pl-8 bg-white"
+                  />
+                </div>
+              </div>
               <Button
-                type="submit"
-                size="sm"
-                className="flex-1 h-8 text-xs"
-                disabled={addExpenseMutation.isPending || !amount}
-              >
-                {addExpenseMutation.isPending ? "Adding..." : "Add Expense"}
-              </Button>
-              <Button
-                type="button"
+                onClick={() => handleAddExpense(expenseType.value)}
+                disabled={addExpenseMutation.isPending}
                 variant="outline"
-                size="sm"
-                onClick={() => {
-                  setShowAmountInput(false);
-                  setSelectedType("");
-                  setAmount("");
-                }}
-                className="h-8 text-xs"
+                className="ml-3 px-4"
               >
-                Cancel
+                <Plus className="w-4 h-4 mr-1" />
+                Add
               </Button>
             </div>
-          </form>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="border-2 border-blue-200">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900">Select Expense Type</h3>
-          <Button
-            onClick={() => {
-              setIsExpanded(false);
-              setSelectedType("");
-              setAmount("");
-            }}
-            size="sm"
-            variant="ghost"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-
-        <div className="space-y-2 max-h-64 overflow-y-auto">
-          {expenseTypes.map((type) => {
-            const IconComponent = type.icon;
-            return (
-              <Button
-                key={type.value}
-                onClick={() => handleExpenseTypeClick(type.value)}
-                variant="outline"
-                className="w-full h-10 text-sm flex items-center justify-start space-x-3 hover:bg-gray-50"
-              >
-                <div className={`w-6 h-6 rounded ${type.color} flex items-center justify-center`}>
-                  <IconComponent className="w-3 h-3 text-white" />
-                </div>
-                <span>{type.label}</span>
-              </Button>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
