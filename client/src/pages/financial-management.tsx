@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { TrendingUp, DollarSign, Download, RotateCcw, BarChart3, PieChart, TrendingDown, Shield } from "lucide-react";
+import { TrendingUp, DollarSign, Download, RotateCcw, BarChart3, PieChart, TrendingDown, Shield, ChevronDown, ChevronUp } from "lucide-react";
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { getAuthHeaders } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
@@ -20,6 +20,7 @@ export default function FinancialManagement() {
   const queryClient = useQueryClient();
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [confirmationText, setConfirmationText] = useState("");
+  const [expandedJourneys, setExpandedJourneys] = useState<Set<number>>(new Set());
   
   const { data: financialStats, isLoading } = useQuery({
     queryKey: ["/api/dashboard/financial"],
@@ -470,26 +471,60 @@ export default function FinancialManagement() {
                 <p className="text-sm text-gray-500 mb-6">Expenses organized by journey</p>
                 
                 <div className="h-96 overflow-y-auto space-y-4 pr-2">
-                  {journeys?.filter((journey: any) => journey.totalExpenses > 0).map((journey: any) => {
+                  {journeys?.map((journey: any) => {
                     // Get expenses for this journey from allExpenses
                     const journeyExpenses = allExpenses?.filter((expense: any) => expense.journeyId === journey.id) || [];
                     const totalJourneyExpenses = journeyExpenses.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+                    const isExpanded = expandedJourneys.has(journey.id);
+                    
+                    const toggleExpanded = () => {
+                      const newExpanded = new Set(expandedJourneys);
+                      if (isExpanded) {
+                        newExpanded.delete(journey.id);
+                      } else {
+                        newExpanded.add(journey.id);
+                      }
+                      setExpandedJourneys(newExpanded);
+                    };
                     
                     return (
                       <div key={journey.id} className="border rounded-lg p-4 bg-gray-50">
                         <div className="flex items-center justify-between mb-3">
-                          <div>
+                          <div className="flex-1">
                             <h4 className="font-semibold text-base">{journey.startLocation} → {journey.destination}</h4>
                             <p className="text-sm text-gray-600">{journey.licensePlate} • {new Date(journey.startTime).toLocaleDateString()}</p>
+                            <p className="text-xs text-gray-500 mt-1">Status: {journey.status}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-lg text-red-600">₹{totalJourneyExpenses.toLocaleString()}</p>
+                            <p className={`font-bold text-lg ${totalJourneyExpenses > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                              ₹{totalJourneyExpenses.toLocaleString()}
+                            </p>
                             <p className="text-xs text-gray-500">{journeyExpenses.length} expenses</p>
+                            {journeyExpenses.length > 0 && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={toggleExpanded}
+                                className="mt-1 h-6 px-2 text-xs"
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <ChevronUp className="w-3 h-3 mr-1" />
+                                    Show Less
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="w-3 h-3 mr-1" />
+                                    View More
+                                  </>
+                                )}
+                              </Button>
+                            )}
                           </div>
                         </div>
                         
-                        {journeyExpenses.length > 0 && (
-                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                        {journeyExpenses.length > 0 && isExpanded && (
+                          <div className="space-y-2 max-h-48 overflow-y-auto">
                             {journeyExpenses.map((expense: any) => (
                               <div key={expense.id} className="flex items-center justify-between text-sm bg-white p-2 rounded">
                                 <div>
@@ -508,13 +543,19 @@ export default function FinancialManagement() {
                             ))}
                           </div>
                         )}
+                        
+                        {journeyExpenses.length === 0 && (
+                          <div className="text-center py-2">
+                            <p className="text-xs text-gray-400">No expenses recorded for this journey</p>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
                   
-                  {(!journeys || journeys.filter((journey: any) => journey.totalExpenses > 0).length === 0) && (
+                  {(!journeys || journeys.length === 0) && (
                     <div className="text-center py-8">
-                      <p className="text-gray-500">No journeys with expenses found</p>
+                      <p className="text-gray-500">No journeys found</p>
                     </div>
                   )}
                 </div>
