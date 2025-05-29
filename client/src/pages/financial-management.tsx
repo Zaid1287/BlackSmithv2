@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, DollarSign, Route, ArrowUpRight, X, MapPin, Clock, User } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
 import {
   Dialog,
@@ -17,6 +18,7 @@ import ExpenseQuickEntry from "@/components/expense-quick-entry";
 export default function FinancialManagement() {
   const [location] = useLocation();
   const [selectedJourney, setSelectedJourney] = useState<any>(null);
+  const { user } = useAuth();
   
   const { data: financialStats, isLoading } = useQuery({
     queryKey: ["/api/dashboard/financial"],
@@ -288,6 +290,36 @@ export default function FinancialManagement() {
                       </Badge>
                     </div>
                   </div>
+
+                  {/* Expense Breakdown - Left Side */}
+                  <div className="mt-8">
+                    <h3 className="text-lg font-semibold mb-4">Expense Breakdown</h3>
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {journeyExpenses && journeyExpenses.length > 0 ? (
+                        journeyExpenses
+                          .filter((expense: any) => {
+                            // Role-based filtering for left side
+                            if (user?.role === 'admin') return true;
+                            return expense.category !== 'toll' && expense.category !== 'hyd_inward';
+                          })
+                          .map((expense: any) => (
+                            <div key={expense.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                              <span className="text-sm font-medium">
+                                {expense.category.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                              </span>
+                              <span className={`text-sm font-semibold ${
+                                expense.category === 'hyd_inward' || expense.category === 'top_up' 
+                                  ? 'text-green-600' : 'text-gray-900'
+                              }`}>
+                                {expense.category === 'hyd_inward' || expense.category === 'top_up' ? '+' : ''}₹{parseFloat(expense.amount).toLocaleString()}
+                              </span>
+                            </div>
+                          ))
+                      ) : (
+                        <p className="text-sm text-gray-500">No expenses recorded yet</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Right Column - Financial Information */}
@@ -344,6 +376,33 @@ export default function FinancialManagement() {
                         <p><strong>Working Balance:</strong> ₹{selectedJourney.pouch} (pouch) - ₹{selectedJourney.totalExpenses || 0} (expenses) {topUpAmount > 0 ? `+ ₹${topUpAmount} (top-ups)` : ''} = ₹{(parseFloat(selectedJourney.balance || "0") + topUpAmount).toFixed(2)}</p>
                         <p><strong>Security Deposit:</strong> ₹{selectedJourney.security} (separate from balance, added to profit when journey completes)</p>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Financial Expense Breakdown - Right Side */}
+                  <div className="mt-8">
+                    <h3 className="text-lg font-semibold mb-4">Financial Summary</h3>
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {journeyExpenses && journeyExpenses.length > 0 ? (
+                        journeyExpenses
+                          .filter((expense: any) => {
+                            // Role-based filtering for right side - show financial categories
+                            if (user?.role === 'admin') return expense.category === 'hyd_inward' || expense.category === 'top_up' || expense.category === 'toll';
+                            return expense.category === 'top_up'; // Drivers only see top-ups
+                          })
+                          .map((expense: any) => (
+                            <div key={`financial-${expense.id}`} className="flex justify-between items-center p-2 bg-green-50 rounded border border-green-200">
+                              <span className="text-sm font-medium text-green-700">
+                                {expense.category.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                              </span>
+                              <span className="text-sm font-semibold text-green-600">
+                                +₹{parseFloat(expense.amount).toLocaleString()}
+                              </span>
+                            </div>
+                          ))
+                      ) : (
+                        <p className="text-sm text-gray-500">No financial entries yet</p>
+                      )}
                     </div>
                   </div>
                 </div>
