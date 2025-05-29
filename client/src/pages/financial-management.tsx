@@ -463,30 +463,60 @@ export default function FinancialManagement() {
 
         <TabsContent value="breakdown" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Expense Breakdown */}
+            {/* Journey-wise Expense Breakdown */}
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-2">Expense Breakdown</h3>
-                <p className="text-sm text-gray-500 mb-6">Detailed expense analysis by category</p>
+                <h3 className="text-lg font-semibold mb-2">Journey-wise Expenses</h3>
+                <p className="text-sm text-gray-500 mb-6">Expenses organized by journey</p>
                 
-                <div className="space-y-4">
-                  <h4 className="font-medium">Recent Expenses</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm border-b pb-2">
-                      <span className="font-medium">TYPE</span>
-                      <span className="font-medium">AMOUNT</span>
-                      <span className="font-medium">NOTES</span>
-                      <span className="font-medium">TIME</span>
-                    </div>
-                    {recentExpenses.map((expense, index) => (
-                      <div key={index} className="grid grid-cols-4 gap-4 text-sm py-2">
-                        <span className="font-medium">{expense.type}</span>
-                        <span className="font-semibold">₹{expense.amount.toLocaleString()}</span>
-                        <span className="text-gray-600 text-xs">{expense.notes}</span>
-                        <span className="text-gray-500 text-xs">{expense.time}</span>
+                <div className="h-96 overflow-y-auto space-y-4 pr-2">
+                  {journeys?.filter((journey: any) => journey.totalExpenses > 0).map((journey: any) => {
+                    // Get expenses for this journey from allExpenses
+                    const journeyExpenses = allExpenses?.filter((expense: any) => expense.journeyId === journey.id) || [];
+                    const totalJourneyExpenses = journeyExpenses.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+                    
+                    return (
+                      <div key={journey.id} className="border rounded-lg p-4 bg-gray-50">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-semibold text-base">{journey.startLocation} → {journey.destination}</h4>
+                            <p className="text-sm text-gray-600">{journey.licensePlate} • {new Date(journey.startTime).toLocaleDateString()}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-lg text-red-600">₹{totalJourneyExpenses.toLocaleString()}</p>
+                            <p className="text-xs text-gray-500">{journeyExpenses.length} expenses</p>
+                          </div>
+                        </div>
+                        
+                        {journeyExpenses.length > 0 && (
+                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                            {journeyExpenses.map((expense: any) => (
+                              <div key={expense.id} className="flex items-center justify-between text-sm bg-white p-2 rounded">
+                                <div>
+                                  <span className="font-medium capitalize">
+                                    {expense.category.split('_').join(' ')}
+                                  </span>
+                                  {expense.description && (
+                                    <p className="text-xs text-gray-500 mt-1">{expense.description}</p>
+                                  )}
+                                </div>
+                                <div className="text-right">
+                                  <span className="font-semibold">₹{parseFloat(expense.amount).toLocaleString()}</span>
+                                  <p className="text-xs text-gray-500">{new Date(expense.timestamp).toLocaleDateString()}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
+                  
+                  {(!journeys || journeys.filter((journey: any) => journey.totalExpenses > 0).length === 0) && (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No journeys with expenses found</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
