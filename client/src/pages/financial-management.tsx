@@ -368,12 +368,12 @@ export default function FinancialManagement() {
                     
                     <div className="pt-4 border-t">
                       <p className="text-sm text-gray-500 mb-2">Current Balance</p>
-                      <p className={`text-2xl font-bold ${(parseFloat(selectedJourney.balance || "0") + topUpAmount) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        ₹{(parseFloat(selectedJourney.balance || "0") + topUpAmount).toLocaleString()}
+                      <p className={`text-2xl font-bold ${parseFloat(selectedJourney.balance || "0") >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        ₹{parseFloat(selectedJourney.balance || "0").toLocaleString()}
                       </p>
                       
                       <div className="mt-3 text-xs text-gray-500 space-y-1">
-                        <p><strong>Working Balance:</strong> ₹{selectedJourney.pouch} (pouch) - ₹{selectedJourney.totalExpenses || 0} (expenses) {topUpAmount > 0 ? `+ ₹${topUpAmount} (top-ups)` : ''} = ₹{(parseFloat(selectedJourney.balance || "0") + topUpAmount).toFixed(2)}</p>
+                        <p><strong>Working Balance:</strong> ₹{selectedJourney.pouch} (pouch) - ₹{selectedJourney.totalExpenses || 0} (expenses) {topUpAmount > 0 ? `+ ₹${topUpAmount} (top-ups)` : ''} = ₹{parseFloat(selectedJourney.balance || "0").toFixed(2)}</p>
                         <p><strong>Security Deposit:</strong> ₹{selectedJourney.security} (separate from balance, added to profit when journey completes)</p>
                       </div>
                     </div>

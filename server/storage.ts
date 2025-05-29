@@ -266,13 +266,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFinancialStats(): Promise<any> {
-    // Calculate HYD Inward revenue separately
-    const [hydInwardStats] = await db
+    // Calculate HYD Inward and Top-up revenue separately
+    const [revenueStats] = await db
       .select({
-        hydInwardRevenue: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
+        hydInwardRevenue: sql<number>`COALESCE(SUM(${expenses.amount}) FILTER (WHERE ${expenses.category} = 'hyd_inward'), 0)`,
+        topUpRevenue: sql<number>`COALESCE(SUM(${expenses.amount}) FILTER (WHERE ${expenses.category} = 'top_up'), 0)`,
       })
-      .from(expenses)
-      .where(eq(expenses.category, 'hyd_inward'));
+      .from(expenses);
 
     // Calculate revenue and security deposits from journeys
     const [journeyStats] = await db
@@ -290,12 +290,12 @@ export class DatabaseStorage implements IStorage {
       })
       .from(salaryPayments);
 
-    // Net Profit = (Revenue + Security Deposits - Expenses) - Salary Payments + Salary Refunds + HYD Inward
+    // Net Profit = (Revenue + Security Deposits - Expenses) - Salary Payments + Salary Refunds + HYD Inward + Top-ups
     const baseProfit = (journeyStats.totalRevenue || 0) + (journeyStats.totalSecurity || 0) - (journeyStats.totalExpenses || 0);
     const salaryAdjustment = -(salaryStats.paidAmount || 0); // Subtract salary payments (refunds would be added)
-    const hydInwardBonus = hydInwardStats.hydInwardRevenue || 0;
+    const additionalRevenue = (revenueStats.hydInwardRevenue || 0) + (revenueStats.topUpRevenue || 0);
     
-    const netProfit = baseProfit + salaryAdjustment + hydInwardBonus;
+    const netProfit = baseProfit + salaryAdjustment + additionalRevenue;
 
     return {
       revenue: (journeyStats.totalRevenue || 0) + (journeyStats.totalSecurity || 0),
