@@ -176,7 +176,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   private async updateJourneyTotals(journeyId: number): Promise<void> {
-    // Calculate actual expenses (excluding HYD Inward and Top Up which are revenue)
+    // Calculate actual expenses (excluding HYD Inward which goes directly to profit)
     const [expenseResult] = await db
       .select({
         totalExpenses: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
@@ -184,26 +184,14 @@ export class DatabaseStorage implements IStorage {
       .from(expenses)
       .where(and(
         eq(expenses.journeyId, journeyId), 
-        not(eq(expenses.category, 'hyd_inward')),
-        not(eq(expenses.category, 'top_up'))
-      ));
-
-    // Calculate Top Up separately (this adds to balance)
-    const [topUpResult] = await db
-      .select({
-        topUpAmount: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
-      })
-      .from(expenses)
-      .where(and(
-        eq(expenses.journeyId, journeyId), 
-        eq(expenses.category, 'top_up')
+        not(eq(expenses.category, 'hyd_inward'))
       ));
 
     const [journey] = await db.select().from(journeys).where(eq(journeys.id, journeyId));
     
     if (journey) {
-      // Balance = pouch - actual expenses + top up (HYD Inward goes directly to profit, not balance)
-      const balance = parseFloat(journey.pouch) - parseFloat(expenseResult.totalExpenses.toString()) + parseFloat(topUpResult.topUpAmount.toString());
+      // Balance = pouch - actual expenses (excluding HYD Inward which goes directly to profit)
+      const balance = parseFloat(journey.pouch) - parseFloat(expenseResult.totalExpenses.toString());
       
       await db.update(journeys).set({
         totalExpenses: expenseResult.totalExpenses.toString(),
