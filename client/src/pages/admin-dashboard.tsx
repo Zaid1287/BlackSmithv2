@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Truck, Route, UserCheck, TrafficCone, Search, X, Plus } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
 import AddExpenseModal from "@/components/add-expense-modal";
+import QuickAddExpense from "@/components/quick-add-expense";
 
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -240,51 +241,57 @@ export default function AdminDashboard() {
                     journey.driverName?.toLowerCase().includes(searchTerm.toLowerCase())
                   )
                   .slice(0, 12).map((journey: any, index: number) => (
-                  <Card 
-                    key={journey.id} 
-                    className={`cursor-pointer hover-lift border-l-4 slide-up mobile-card ${
-                      journey.status === 'active' ? 'border-l-blue-500' : 
-                      journey.status === 'completed' ? 'border-l-green-500' : 'border-l-gray-500'
-                    }`}
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                    onClick={() => setSelectedJourney(journey)}
-                  >
-                    <CardContent className="p-3 md:p-4">
-                      <div className="space-y-2 md:space-y-3">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-semibold text-base md:text-lg truncate mobile-text">{journey.destination}</h4>
-                          <span className={`px-2 py-1 rounded-full text-xs capitalize scale-in ${
-                            journey.status === 'active' ? 'bg-blue-100 text-blue-700' :
-                            journey.status === 'completed' ? 'bg-green-100 text-green-700' :
-                            'bg-gray-100 text-gray-700'
-                          }`}>
-                            {journey.status}
-                          </span>
-                        </div>
-                        
-                        <div className="space-y-1 md:space-y-2">
-                          <div className="flex items-center justify-between text-xs md:text-sm">
-                            <span className="text-gray-500">License Plate:</span>
-                            <span className="font-medium">{journey.licensePlate}</span>
-                          </div>
-                          
-                          <div className="flex items-center justify-between text-xs md:text-sm">
-                            <span className="text-gray-500">Balance:</span>
-                            <span className={`font-medium ${
-                              parseFloat(journey.balance) >= 0 ? 'profit-green' : 'loss-red'
+                  <div key={journey.id} className="space-y-2">
+                    <Card 
+                      className={`cursor-pointer hover-lift border-l-4 slide-up mobile-card ${
+                        journey.status === 'active' ? 'border-l-blue-500' : 
+                        journey.status === 'completed' ? 'border-l-green-500' : 'border-l-gray-500'
+                      }`}
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                      onClick={() => setSelectedJourney(journey)}
+                    >
+                      <CardContent className="p-3 md:p-4">
+                        <div className="space-y-2 md:space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold text-base md:text-lg truncate mobile-text">{journey.destination}</h4>
+                            <span className={`px-2 py-1 rounded-full text-xs capitalize scale-in ${
+                              journey.status === 'active' ? 'bg-blue-100 text-blue-700' :
+                              journey.status === 'completed' ? 'bg-green-100 text-green-700' :
+                              'bg-gray-100 text-gray-700'
                             }`}>
-                              ₹{parseFloat(journey.balance).toLocaleString()}
+                              {journey.status}
                             </span>
                           </div>
                           
-                          <div className="flex items-center justify-between text-xs md:text-sm">
-                            <span className="text-gray-500">Speed:</span>
-                            <span className="font-medium">{journey.speed || 0} km/h</span>
+                          <div className="space-y-1 md:space-y-2">
+                            <div className="flex items-center justify-between text-xs md:text-sm">
+                              <span className="text-gray-500">License Plate:</span>
+                              <span className="font-medium">{journey.licensePlate}</span>
+                            </div>
+                            
+                            <div className="flex items-center justify-between text-xs md:text-sm">
+                              <span className="text-gray-500">Balance:</span>
+                              <span className={`font-medium ${
+                                parseFloat(journey.balance) >= 0 ? 'profit-green' : 'loss-red'
+                              }`}>
+                                ₹{parseFloat(journey.balance).toLocaleString()}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center justify-between text-xs md:text-sm">
+                              <span className="text-gray-500">Speed:</span>
+                              <span className="font-medium">{journey.speed || 0} km/h</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Quick Add Expense for each journey */}
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <QuickAddExpense journeyId={journey.id} />
+                    </div>
+                  </div>
                 ))
               )}
             </div>
