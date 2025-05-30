@@ -218,7 +218,7 @@ export default function AdminDashboard() {
                     <SelectItem value="all">All Journeys</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="hyd_inward_missing">Missing HYD Inward</SelectItem>
+                    <SelectItem value="hyd_inward_missing">HYD Inward not added</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
