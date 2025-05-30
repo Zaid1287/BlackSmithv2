@@ -14,6 +14,7 @@ const authenticateToken = async (req: any, res: any, next: any) => {
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
+    console.log('No token provided for:', req.path);
     return res.status(401).json({ message: 'Access token required' });
   }
 
@@ -21,11 +22,13 @@ const authenticateToken = async (req: any, res: any, next: any) => {
     const decoded: any = jwt.verify(token, JWT_SECRET);
     const user = await storage.getUser(decoded.userId);
     if (!user) {
+      console.log('User not found for token:', decoded.userId);
       return res.status(401).json({ message: 'Invalid token' });
     }
     req.user = user;
     next();
   } catch (error) {
+    console.log('Token verification failed for:', req.path, error);
     return res.status(403).json({ message: 'Invalid token' });
   }
 };
