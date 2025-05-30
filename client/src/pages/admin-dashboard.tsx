@@ -123,7 +123,7 @@ export default function AdminDashboard() {
     <div className="p-3 md:p-6 mobile-optimized">
       <div className="flex items-center justify-between mb-4 md:mb-8 fade-in">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900">BlackSmith Logistics</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-sm md:text-base text-gray-500 hidden md:block">Complete overview of your logistics operations</p>
           <div className="flex items-center mt-2 text-xs text-gray-400">
             <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
@@ -131,7 +131,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
-
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8 mobile-grid">
         <Card className="bs-gradient-indigo text-white hover-lift scale-in mobile-card">
@@ -170,7 +169,6 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-
       {/* Tabs */}
       <Card>
         <Tabs defaultValue="overview" className="w-full">
@@ -462,7 +460,6 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </Card>
-
       {/* Journey Details Modal */}
       <Dialog open={!!selectedJourney} onOpenChange={() => setSelectedJourney(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mobile-modal scale-in">
@@ -625,7 +622,6 @@ export default function AdminDashboard() {
           )}
         </DialogContent>
       </Dialog>
-
       {/* Add Expense Modal */}
       {selectedJourney && (
         <AddExpenseModal
