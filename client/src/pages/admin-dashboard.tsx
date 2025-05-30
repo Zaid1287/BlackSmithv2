@@ -198,20 +198,24 @@ export default function AdminDashboard() {
           </div>
 
           <TabsContent value="overview" className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold">Journeys</h3>
-              <div className="flex items-center space-x-4">
-                <div className="relative">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Journeys</h3>
+              </div>
+              
+              {/* Search and Filter - Mobile Optimized */}
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                <div className="relative flex-1 sm:max-w-xs">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input 
                     placeholder="Search by driver or vehicle..." 
-                    className="pl-10 w-64"
+                    className="pl-10 w-full"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full sm:w-48">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
