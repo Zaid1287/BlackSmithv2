@@ -56,8 +56,8 @@ export default function AdminDashboard() {
       if (!response.ok) throw new Error("Failed to fetch journeys");
       return response.json();
     },
-    refetchInterval: 5000, // Refresh every 5 seconds for faster journey updates
-    staleTime: 2000, // Consider data stale after 2 seconds
+    refetchInterval: 15000, // Refresh every 15 seconds to reduce load
+    staleTime: 10000, // Consider data stale after 10 seconds
     refetchOnWindowFocus: true, // Refetch when user focuses the window
   });
 
