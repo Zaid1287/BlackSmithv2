@@ -487,9 +487,9 @@ export default function FinancialManagement() {
         </TabsList>
 
         <TabsContent value="breakdown" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="w-full">
             {/* Journey-wise Expense Breakdown */}
-            <Card className="lg:col-span-2">
+            <Card className="w-full">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-2">Journey-wise Expenses</h3>
                 <p className="text-sm text-gray-500 mb-6">Expenses organized by journey</p>
