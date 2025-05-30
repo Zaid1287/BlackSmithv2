@@ -52,7 +52,7 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
         body: JSON.stringify({
           journeyId: journeyId,
           category: data.type,
-          amount: data.amount.toString(),
+          amount: data.amount,
           description: `${regularExpenseTypes.find(t => t.value === data.type)?.label || data.type} expense`,
         }),
       });
