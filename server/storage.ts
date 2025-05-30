@@ -400,9 +400,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async resetSalaryData(): Promise<void> {
-    // Reset salary payment records - this will affect net profit calculation
-    // as it removes salary expenses from the system
-    await db.delete(salaryPayments);
+    // Only reset user salary balances to base amount, keep payment history for profit calculation
+    const users = await this.getAllUsers();
+    
+    for (const user of users) {
+      if (user.salary) {
+        // Reset balance to full salary amount and paid to 0
+        await db.update(users).set({
+          salaryBalance: user.salary,
+          salaryPaid: "0"
+        }).where(eq(users.id, user.id));
+      }
+    }
+    
+    // Keep salaryPayments table intact for accurate profit calculations
+    // This preserves the payment history while resetting display balances
   }
 }
 
