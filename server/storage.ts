@@ -364,29 +364,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async resetSalaryData(): Promise<void> {
-    // Calculate current salary impact before deletion
-    const [salaryStats] = await db
-      .select({
-        totalPayments: sql<number>`COALESCE(SUM(${salaryPayments.amount}) FILTER (WHERE ${salaryPayments.amount} > 0), 0)`,
-        totalDebts: sql<number>`COALESCE(SUM(ABS(${salaryPayments.amount})) FILTER (WHERE ${salaryPayments.amount} < 0), 0)`,
-      })
-      .from(salaryPayments);
-
-    const netSalaryImpact = (salaryStats.totalPayments || 0) - (salaryStats.totalDebts || 0);
-    
-    // Delete all salary payment records
     await db.delete(salaryPayments);
-    
-    // If there was a net salary impact, create a compensating expense to maintain net profit
-    if (netSalaryImpact > 0) {
-      await db.insert(expenses).values({
-        journeyId: 1, // Use the first journey as a placeholder
-        category: 'other',
-        amount: netSalaryImpact,
-        description: 'Salary adjustment to maintain financial balance',
-        timestamp: new Date(),
-      });
-    }
   }
 }
 
