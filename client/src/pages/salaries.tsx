@@ -445,15 +445,11 @@ export default function Salaries() {
                       
                       <div className="space-y-2 mb-4">
                         <div className="flex justify-between">
-                          <span className="text-sm text-gray-500">Base Salary:</span>
+                          <span className="text-sm text-gray-500">Salary:</span>
                           <span className="text-sm font-medium">₹{parseFloat(driver.salary || 0).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm text-gray-500">Total Advance:</span>
-                          <span className="text-sm font-medium text-green-600">₹{driverData.totalPaid.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-gray-500">Balance:</span>
+                          <span className="text-sm text-gray-500">Balance Remaining:</span>
                           <span className={`text-sm font-medium ${driverData.statusColor}`}>
                             ₹{driverData.balance.toLocaleString()}
                           </span>
