@@ -1,4 +1,4 @@
-const CACHE_NAME = 'blacksmith-traders-v2';
+const CACHE_NAME = 'blacksmith-traders-v3';
 const urlsToCache = [
   '/',
   '/manifest.json',

@@ -1,16 +1,30 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="512" height="512" fill="#f3f4f6"/>
-  <g transform="translate(56, 128)">
-    <!-- B -->
-    <path d="M20 40 L20 200 L120 200 Q160 200 160 160 Q160 140 140 130 Q160 120 160 100 Q160 60 120 60 L20 60 Z M60 80 L110 80 Q120 80 120 90 Q120 100 110 100 L60 100 Z M60 120 L115 120 Q130 120 130 130 Q130 140 115 140 L60 140 Z" fill="#000000"/>
+  
+  <!-- Main Logo positioned to match your design -->
+  <g transform="translate(64, 160)">
+    <!-- Large B (top left) -->
+    <path d="M0 0 L0 128 L64 128 Q86 128 86 107 Q86 96 75 91 Q86 85 86 75 Q86 53 64 53 L0 53 Z M21 75 L53 75 Q64 75 64 80 Q64 85 53 85 L21 85 Z M21 96 L59 96 Q69 96 69 101 Q69 107 59 107 L21 107 Z" fill="#000000"/>
     
-    <!-- Vertical Line -->
-    <rect x="190" y="40" width="8" height="160" fill="#000000"/>
+    <!-- Vertical divider line -->
+    <rect x="181" y="0" width="8" height="128" fill="#000000"/>
     
-    <!-- S -->
-    <path d="M240 80 Q240 40 280 40 L350 40 Q390 40 390 80 Q390 100 370 110 Q390 120 390 140 Q390 160 370 170 Q390 180 390 200 Q390 240 350 240 L280 240 Q240 240 240 200 L270 200 Q270 210 280 210 L350 210 Q360 210 360 200 Q360 190 350 190 L300 190 Q260 190 260 150 Q260 130 280 120 Q260 110 260 90 Q260 50 300 50 L350 50 Q390 50 390 90 L360 90 Q360 80 350 80 L280 80 Q270 80 270 90 Q270 100 280 100 L330 100 Q370 100 370 140 Q370 160 350 170 Q370 180 370 200 Q370 240 330 240 L280 240 Q240 240 240 200 Z" fill="#000000"/>
+    <!-- Large S (top right) -->
+    <path d="M232 32 Q232 0 264 0 L320 0 Q352 0 352 32 Q352 43 341 48 Q352 53 352 64 Q352 75 341 80 Q352 85 352 96 Q352 128 320 128 L264 128 Q232 128 232 96 L253 96 Q253 107 264 107 L320 107 Q331 107 331 96 Q331 85 320 85 L280 85 Q248 85 248 53 Q248 43 264 37 Q248 32 248 21 Q248 -11 280 -11 L320 -11 Q352 -11 352 21 L331 21 Q331 11 320 11 L264 11 Q253 11 253 21 Q253 32 264 32 L304 32 Q336 32 336 64 Q336 75 320 80 Q336 85 336 96 Q336 128 304 128 L264 128 Q232 128 232 96 Z" fill="#000000"/>
   </g>
   
-  <!-- Company Name -->
-  <text x="256" y="320" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#000000" text-anchor="middle">BLACKSMITH TRADERS</text>
+  <!-- BLACKSMITH TRADERS text -->
+  <text x="256" y="346" font-family="Arial, sans-serif" font-size="32" font-weight="normal" letter-spacing="5" fill="#000000" text-anchor="middle">BLACKSMITH TRADERS</text>
+  
+  <!-- Mirrored B|S at bottom -->
+  <g transform="translate(64, 374)">
+    <!-- Bottom B -->
+    <path d="M0 0 L0 128 L64 128 Q86 128 86 107 Q86 96 75 91 Q86 85 86 75 Q86 53 64 53 L0 53 Z M21 75 L53 75 Q64 75 64 80 Q64 85 53 85 L21 85 Z M21 96 L59 96 Q69 96 69 101 Q69 107 59 107 L21 107 Z" fill="#000000"/>
+    
+    <!-- Bottom divider line -->
+    <rect x="181" y="0" width="8" height="128" fill="#000000"/>
+    
+    <!-- Bottom S -->
+    <path d="M232 32 Q232 0 264 0 L320 0 Q352 0 352 32 Q352 43 341 48 Q352 53 352 64 Q352 75 341 80 Q352 85 352 96 Q352 128 320 128 L264 128 Q232 128 232 96 L253 96 Q253 107 264 107 L320 107 Q331 107 331 96 Q331 85 320 85 L280 85 Q248 85 248 53 Q248 43 264 37 Q248 32 248 21 Q248 -11 280 -11 L320 -11 Q352 -11 352 21 L331 21 Q331 11 320 11 L264 11 Q253 11 253 21 Q253 32 264 32 L304 32 Q336 32 336 64 Q336 75 320 80 Q336 85 336 96 Q336 128 304 128 L264 128 Q232 128 232 96 Z" fill="#000000"/>
+  </g>
 </svg>
