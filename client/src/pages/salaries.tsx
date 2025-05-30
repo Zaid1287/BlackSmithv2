@@ -311,7 +311,7 @@ export default function Salaries() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -324,26 +324,22 @@ export default function Salaries() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
+        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-green-100 text-sm font-medium">Total Paid</p>
-                <p className="text-2xl font-bold">₹{summaryStats.totalPaidAmount.toLocaleString()}</p>
+                <p className="text-purple-100 text-sm font-medium">Net Payments</p>
+                <div className="flex items-center gap-4">
+                  <div>
+                    <p className="text-lg text-green-200">+₹{summaryStats.totalPaidAmount.toLocaleString()}</p>
+                    <p className="text-lg text-red-200">-₹{summaryStats.totalDeductions.toLocaleString()}</p>
+                  </div>
+                  <div className="border-l border-purple-300 pl-4">
+                    <p className="text-2xl font-bold">₹{(summaryStats.totalPaidAmount - summaryStats.totalDeductions).toLocaleString()}</p>
+                  </div>
+                </div>
               </div>
-              <TrendingUp className="w-8 h-8 text-green-200" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-red-100 text-sm font-medium">Total Deductions</p>
-                <p className="text-2xl font-bold">₹{summaryStats.totalDeductions.toLocaleString()}</p>
-              </div>
-              <TrendingDown className="w-8 h-8 text-red-200" />
+              <TrendingUp className="w-8 h-8 text-purple-200" />
             </div>
           </CardContent>
         </Card>
