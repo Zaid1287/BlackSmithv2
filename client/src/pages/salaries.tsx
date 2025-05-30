@@ -59,7 +59,7 @@ export default function Salaries() {
       .reduce((sum: number, p: any) => sum + Math.abs(parseFloat(p.amount)), 0),
   };
 
-  summaryStats.totalRemainingBalance = summaryStats.totalSalaryAmount - summaryStats.totalPaidAmount + summaryStats.totalDeductions;
+  const totalRemainingBalance = summaryStats.totalSalaryAmount - summaryStats.totalPaidAmount + summaryStats.totalDeductions;
 
   // Calculate individual employee data
   const getEmployeeData = (employee: any) => {
@@ -353,7 +353,7 @@ export default function Salaries() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-amber-100 text-sm font-medium">Remaining Balance</p>
-                <p className="text-2xl font-bold">₹{summaryStats.totalRemainingBalance.toLocaleString()}</p>
+                <p className="text-2xl font-bold">₹{totalRemainingBalance.toLocaleString()}</p>
               </div>
               <Wallet className="w-8 h-8 text-amber-200" />
             </div>
@@ -472,7 +472,7 @@ export default function Salaries() {
                     </div>
                     <div>
                       <span className="text-gray-500">Current Salary:</span>
-                      <p className="font-medium">₹{parseFloat(selectedEmployee.salary || 0).toLocaleString()}</p>
+                      <p className="font-medium">₹{parseFloat(selectedEmployee.salary || '0').toLocaleString()}</p>
                     </div>
                     <div>
                       <span className="text-gray-500">Last Updated:</span>
@@ -558,14 +558,26 @@ export default function Salaries() {
                                 </div>
                               </div>
                             </div>
-                            <Button
-                              onClick={() => removePaymentEntry(entry.id)}
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <div className="flex flex-col gap-2">
+                              <Button
+                                onClick={addPaymentEntry}
+                                variant="outline"
+                                size="sm"
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                title="Add another entry"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                onClick={() => removePaymentEntry(entry.id)}
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                title="Remove this entry"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
