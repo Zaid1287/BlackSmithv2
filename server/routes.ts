@@ -345,6 +345,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/salaries/reset", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      await storage.resetSalaryData();
+      res.json({ message: "Salary data reset successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to reset salary data" });
+    }
+  });
+
   // Dashboard stats routes
   app.get("/api/dashboard/stats", authenticateToken, async (req, res) => {
     try {

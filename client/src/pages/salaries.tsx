@@ -106,24 +106,9 @@ export default function Salaries() {
     mutationFn: async (driver: any) => {
       const currentDate = new Date();
       
-      // Calculate current balance correctly
-      const driverPayments = salaryPayments.filter((payment: any) => payment.userId === driver.id);
-      const totalPaid = driverPayments
-        .filter((payment: any) => parseFloat(payment.amount) > 0)
-        .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
-      const totalDebts = driverPayments
-        .filter((payment: any) => parseFloat(payment.amount) < 0)
-        .reduce((sum: number, payment: any) => sum + Math.abs(parseFloat(payment.amount)), 0);
-      const currentBalance = parseFloat(driver.salary || 0) - totalPaid + totalDebts;
-      
-      // Only pay if there's a positive balance remaining
-      if (currentBalance <= 0) {
-        throw new Error("No remaining balance to pay");
-      }
-      
       const response = await apiRequest("POST", "/api/salaries/pay", {
         userId: driver.id,
-        amount: currentBalance.toString(),
+        amount: driver.salary,
         description: `Full salary payment - ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`,
         transactionType: 'advance',
         month: currentDate.toLocaleString('default', { month: 'long' }),
@@ -143,6 +128,65 @@ export default function Salaries() {
       toast({
         title: "Payment Failed",
         description: error.message || "Failed to process salary payment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation for paying all drivers
+  const payAllDriversMutation = useMutation({
+    mutationFn: async () => {
+      const currentDate = new Date();
+      const responses = await Promise.all(
+        drivers.map(async (driver: any) => {
+          const response = await apiRequest("POST", "/api/salaries/pay", {
+            userId: driver.id,
+            amount: driver.salary,
+            description: `Full salary payment - ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`,
+            transactionType: 'advance',
+            month: currentDate.toLocaleString('default', { month: 'long' }),
+            year: currentDate.getFullYear(),
+          });
+          return response.json();
+        })
+      );
+      return responses;
+    },
+    onSuccess: () => {
+      toast({
+        title: "All Salaries Paid",
+        description: `Successfully paid all ${drivers.length} drivers`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/salaries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process salary payments",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation to reset all salary data
+  const resetSalaryDataMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/salaries/reset");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Salary Data Reset",
+        description: "All salary advance records have been cleared",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/salaries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Reset Failed",
+        description: error.message || "Failed to reset salary data",
         variant: "destructive",
       });
     },
@@ -270,14 +314,31 @@ export default function Salaries() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Salary Management</h1>
-        <Button
-          onClick={() => setShowHistoryDialog(true)}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <History className="w-4 h-4" />
-          Advance History
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => payAllDriversMutation.mutate()}
+            disabled={payAllDriversMutation.isPending || drivers.length === 0}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            {payAllDriversMutation.isPending ? "Processing..." : "Pay All Drivers"}
+          </Button>
+          <Button
+            onClick={() => resetSalaryDataMutation.mutate()}
+            disabled={resetSalaryDataMutation.isPending}
+            variant="outline"
+            className="text-red-600 border-red-600 hover:bg-red-50"
+          >
+            {resetSalaryDataMutation.isPending ? "Resetting..." : "Reset Salary Data"}
+          </Button>
+          <Button
+            onClick={() => setShowHistoryDialog(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <History className="w-4 h-4" />
+            Advance History
+          </Button>
+        </div>
       </div>
 
       {/* Salary Overview Cards */}

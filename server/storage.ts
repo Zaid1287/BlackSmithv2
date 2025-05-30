@@ -42,6 +42,7 @@ export interface IStorage {
   
   // Reset methods
   resetAllFinancialData(): Promise<void>;
+  resetSalaryData(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -360,6 +361,10 @@ export class DatabaseStorage implements IStorage {
     
     // Reset vehicle statuses to available
     await db.update(vehicles).set({ status: 'available' });
+  }
+
+  async resetSalaryData(): Promise<void> {
+    await db.delete(salaryPayments);
   }
 }
 
