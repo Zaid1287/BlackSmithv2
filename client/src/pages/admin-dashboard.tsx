@@ -205,11 +205,10 @@ export default function AdminDashboard() {
               
               {/* Search and Filter - Mobile Optimized */}
               <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                <div className="relative flex-1 sm:max-w-xs">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <div className="flex-1 sm:max-w-xs">
                   <Input 
                     placeholder="Search by driver or vehicle..." 
-                    className="pl-11 pr-4 w-full"
+                    className="w-full"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
