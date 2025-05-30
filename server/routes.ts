@@ -50,14 +50,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.resolve(process.cwd(), 'client/manifest.json'));
   });
 
-  app.get('/icon-192.svg', (req, res) => {
-    res.setHeader('Content-Type', 'image/svg+xml');
-    res.sendFile(path.resolve(process.cwd(), 'client/icon-192.svg'));
+  app.get('/icon-192.png', (req, res) => {
+    res.setHeader('Content-Type', 'image/png');
+    res.sendFile(path.resolve(process.cwd(), 'client/icon-192.png'));
   });
 
-  app.get('/icon-512.svg', (req, res) => {
-    res.setHeader('Content-Type', 'image/svg+xml');
-    res.sendFile(path.resolve(process.cwd(), 'client/icon-512.svg'));
+  app.get('/icon-512.png', (req, res) => {
+    res.setHeader('Content-Type', 'image/png');
+    res.sendFile(path.resolve(process.cwd(), 'client/icon-512.png'));
   });
 
   app.get('/sw.js', (req, res) => {
