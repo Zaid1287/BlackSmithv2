@@ -43,7 +43,7 @@ export default function Sidebar() {
       <div className={`${isCollapsed ? 'p-2' : 'p-6'} border-b border-gray-700`}>
         {isCollapsed ? (
           <div className="flex flex-col items-center space-y-2">
-            <Link href="/dashboard">
+            <Link href="/admin-dashboard">
               <div className="flex items-center justify-center cursor-pointer hover:bg-slate-700/50 p-1 rounded-lg transition-colors">
                 <span className="text-sm font-serif font-bold text-white">B</span>
                 <div className="w-0.5 h-4 bg-white mx-0.5"></div>
@@ -61,7 +61,7 @@ export default function Sidebar() {
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <Link href="/dashboard">
+            <Link href="/admin-dashboard">
               <div className="flex items-center cursor-pointer hover:bg-slate-700/50 p-2 rounded-lg transition-colors">
                 <div className="flex items-center justify-center mr-3">
                   <span className="text-2xl font-serif font-bold text-white">B</span>
