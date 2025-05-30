@@ -337,11 +337,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/salaries/pay", authenticateToken, async (req, res) => {
     try {
-      const paymentData = insertSalaryPaymentSchema.parse(req.body);
+      console.log("Salary payment request body:", req.body);
+      
+      // Convert amount to string if it's a number
+      const requestBody = {
+        ...req.body,
+        amount: typeof req.body.amount === 'number' ? req.body.amount.toString() : req.body.amount
+      };
+      
+      console.log("Processed salary payment data:", requestBody);
+      const paymentData = insertSalaryPaymentSchema.parse(requestBody);
+      console.log("Validated payment data:", paymentData);
       const payment = await storage.createSalaryPayment(paymentData);
+      console.log("Created payment:", payment);
       res.json(payment);
     } catch (error) {
+      console.error("Salary payment error:", error);
       if (error instanceof z.ZodError) {
+        console.error("Validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid payment data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to process salary payment" });
