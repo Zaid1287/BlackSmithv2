@@ -48,6 +48,54 @@
     padding: 0.75rem !important;
   }
   
+  /* Smaller text sizes for mobile */
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.125rem !important; }
+  
+  /* Compact cards */
+  .card {
+    padding: 0.75rem !important;
+    margin: 0.5rem 0 !important;
+  }
+  
+  /* Smaller buttons */
+  .btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Compact table cells */
+  td, th {
+    padding: 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Smaller form inputs */
+  input, select, textarea {
+    padding: 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Compact sidebar */
+  .sidebar {
+    width: 240px !important;
+  }
+  
+  /* Reduce margins and spacing */
+  .space-y-6 > * + * {
+    margin-top: 1rem !important;
+  }
+  
+  .space-y-4 > * + * {
+    margin-top: 0.75rem !important;
+  }
+  
+  /* Smaller grid gaps */
+  .grid {
+    gap: 0.75rem !important;
+  }
+  
   .mobile-card {
     margin-bottom: 0.75rem !important;
     padding: 1rem !important;

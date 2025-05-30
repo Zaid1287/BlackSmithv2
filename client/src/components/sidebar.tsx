@@ -38,7 +38,7 @@ export default function Sidebar() {
   );
 
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-64'} sidebar-dark text-white flex flex-col transition-all duration-300`}>
+    <div className={`${isCollapsed ? 'w-12 md:w-16' : 'w-48 md:w-64'} sidebar-dark text-white flex flex-col transition-all duration-300`}>
       {/* Logo and Toggle */}
       <div className="p-6 border-b border-gray-700">
         {isCollapsed ? (
