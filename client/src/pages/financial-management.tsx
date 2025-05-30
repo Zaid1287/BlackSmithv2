@@ -24,6 +24,7 @@ export default function FinancialManagement() {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [exportStartDate, setExportStartDate] = useState("");
   const [exportEndDate, setExportEndDate] = useState("");
+  const [selectedLicensePlateFilter, setSelectedLicensePlateFilter] = useState<string>("all");
   
   const { data: financialStats, isLoading } = useQuery({
     queryKey: ["/api/dashboard/financial"],
@@ -256,6 +257,11 @@ export default function FinancialManagement() {
     );
   }
 
+  // Filter journeys based on selected license plate
+  const filteredJourneys = journeys ? journeys.filter((journey: any) => 
+    selectedLicensePlateFilter === "all" || journey.licensePlate === selectedLicensePlateFilter
+  ) : [];
+
   const totalRevenue = parseFloat(financialStats?.revenue?.toString() || "0") || 0;
   const totalExpenses = parseFloat(financialStats?.expenses?.toString() || "0") || 0;
   const netProfit = parseFloat(financialStats?.netProfit?.toString() || "0") || 0;
@@ -341,7 +347,25 @@ export default function FinancialManagement() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Financial Management</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Financial Management</h1>
+          <div className="mt-2">
+            <label htmlFor="licensePlateFilter" className="text-sm font-medium text-gray-700 mr-3">Filter by License Plate:</label>
+            <select
+              id="licensePlateFilter"
+              value={selectedLicensePlateFilter}
+              onChange={(e) => setSelectedLicensePlateFilter(e.target.value)}
+              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Vehicles</option>
+              {journeys && [...new Set(journeys.map((j: any) => j.licensePlate))].filter(Boolean).map((plate: string) => (
+                <option key={plate} value={plate}>
+                  {plate}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div className="flex items-center space-x-3">
           <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
             <Download className="w-4 h-4 mr-2" />
