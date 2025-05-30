@@ -21,6 +21,9 @@ export default function FinancialManagement() {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [confirmationText, setConfirmationText] = useState("");
   const [expandedJourneys, setExpandedJourneys] = useState<Set<number>>(new Set());
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportStartDate, setExportStartDate] = useState("");
+  const [exportEndDate, setExportEndDate] = useState("");
   
   const { data: financialStats, isLoading } = useQuery({
     queryKey: ["/api/dashboard/financial"],
@@ -93,11 +96,12 @@ export default function FinancialManagement() {
     }
   };
 
-  const handleExportToExcel = async () => {
+  const handleExportToExcel = async (startDate?: string, endDate?: string) => {
     try {
+      const dateRange = startDate && endDate ? ` (${startDate} to ${endDate})` : "";
       toast({
         title: "Exporting Data",
-        description: "Preparing Excel file with all financial data...",
+        description: `Preparing Excel file with financial data${dateRange}...`,
       });
 
       // Fetch all necessary data for export
@@ -118,6 +122,26 @@ export default function FinancialManagement() {
           return res.json();
         }).catch(() => [])
       ]);
+
+      // Filter data by date range if provided
+      let filteredJourneys = journeysData;
+      let filteredExpenses = allExpenses;
+      
+      if (startDate || endDate) {
+        const start = startDate ? new Date(startDate) : new Date(0);
+        const end = endDate ? new Date(endDate) : new Date();
+        end.setHours(23, 59, 59, 999); // Include the entire end date
+        
+        filteredJourneys = journeysData.filter((journey: any) => {
+          const journeyDate = new Date(journey.startTime);
+          return journeyDate >= start && journeyDate <= end;
+        });
+        
+        filteredExpenses = allExpenses.filter((expense: any) => {
+          const expenseDate = new Date(expense.timestamp);
+          return expenseDate >= start && expenseDate <= end;
+        });
+      }
 
       // Create workbook with enhanced formatting
       const workbook = XLSX.utils.book_new();
@@ -145,7 +169,7 @@ export default function FinancialManagement() {
         "Total Expenses", "Current Balance"
       ];
       
-      const journeyData = journeysData.map((journey: any) => [
+      const journeyData = filteredJourneys.map((journey: any) => [
         journey.id,
         journey.licensePlate,
         journey.destination,
@@ -168,7 +192,7 @@ export default function FinancialManagement() {
           "Expense ID", "Journey ID", "Category", "Amount", "Description", "Date", "Driver"
         ];
         
-        const expenseData = allExpenses.map((expense: any) => [
+        const expenseData = filteredExpenses.map((expense: any) => [
           expense.id,
           expense.journeyId,
           expense.category.replace('_', ' ').toUpperCase(),

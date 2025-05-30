@@ -110,8 +110,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllJourneys(): Promise<Journey[]> {
-    // Limit to recent 50 journeys for better performance
-    return await db.select().from(journeys).orderBy(desc(journeys.startTime)).limit(50);
+    // Limit to recent 90 journeys for better performance
+    return await db.select().from(journeys).orderBy(desc(journeys.startTime)).limit(90);
   }
 
   async getActiveJourneys(): Promise<Journey[]> {
@@ -119,8 +119,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getJourneysByDriver(driverId: number): Promise<Journey[]> {
-    // Limit to recent 30 journeys for better performance
-    return await db.select().from(journeys).where(eq(journeys.driverId, driverId)).orderBy(desc(journeys.startTime)).limit(30);
+    // Limit to recent 20 journeys for better performance
+    return await db.select().from(journeys).where(eq(journeys.driverId, driverId)).orderBy(desc(journeys.startTime)).limit(20);
   }
 
   async updateJourneyStatus(id: number, status: string): Promise<void> {
