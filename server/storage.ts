@@ -215,7 +215,7 @@ export class DatabaseStorage implements IStorage {
       const topUpAmount = Number(topUpResult.totalTopUp) || 0;
       const expenseAmount = Number(expenseResult.totalExpenses) || 0;
       
-      // Balance = pouch + top_up - actual expenses (excluding HYD Inward and Top Up)
+      // Balance = pouch + top_up - actual expenses (security deposit is NOT included in balance)
       const balance = pouchAmount + topUpAmount - expenseAmount;
       
       await db.update(journeys).set({
