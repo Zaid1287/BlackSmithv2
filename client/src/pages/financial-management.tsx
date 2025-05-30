@@ -144,83 +144,109 @@ export default function FinancialManagement() {
         });
       }
 
-      // Create workbook with enhanced formatting
+      // Create workbook with single comprehensive sheet
       const workbook = XLSX.utils.book_new();
 
-      // Summary Sheet
-      const summaryData = [
+      // Build single sheet data with proper spacing
+      const sheetData = [
+        // Header Section
         ["BlackSmith Traders - Financial Report"],
         ["Generated on:", new Date().toLocaleDateString()],
+        ["Date Range:", dateRange || "All Data"],
         [""],
-        ["Financial Summary"],
-        ["Total Revenue", `₹${totalRevenue.toLocaleString()}`],
-        ["Total Expenses", `₹${totalExpenses.toLocaleString()}`],
-        ["Net Profit", `₹${netProfit.toLocaleString()}`],
-        ["Security Deposits", `₹${securityDeposits.toLocaleString()}`],
-        ["Salary Payments", `₹${salaryPayments.toLocaleString()}`],
-        ["HYD Inward", `₹${hydInwardRevenue.toLocaleString()}`],
-      ];
-      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-      XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
-
-      // Journeys Sheet
-      const journeyHeaders = [
-        "Journey ID", "License Plate", "Destination", "Driver", "Status", 
-        "Start Date", "End Date", "Pouch Amount", "Security Deposit", 
-        "Total Expenses", "Current Balance"
-      ];
-      
-      const journeyData = filteredJourneys.map((journey: any) => [
-        journey.id,
-        journey.licensePlate,
-        journey.destination,
-        journey.driverName || "N/A",
-        journey.status,
-        journey.startTime ? new Date(journey.startTime).toLocaleDateString() : "",
-        journey.endTime ? new Date(journey.endTime).toLocaleDateString() : "",
-        parseFloat(journey.pouch || 0),
-        parseFloat(journey.security || 0),
-        parseFloat(journey.totalExpenses || 0),
-        parseFloat(journey.balance || 0)
-      ]);
-
-      const journeySheet = XLSX.utils.aoa_to_sheet([journeyHeaders, ...journeyData]);
-      XLSX.utils.book_append_sheet(workbook, journeySheet, "Journeys");
-
-      // Expenses Sheet (if data available)
-      if (allExpenses.length > 0) {
-        const expenseHeaders = [
-          "Expense ID", "Journey ID", "Category", "Amount", "Description", "Date", "Driver"
-        ];
+        [""],
         
-        const expenseData = filteredExpenses.map((expense: any) => [
-          expense.id,
+        // Financial Summary Section
+        ["FINANCIAL SUMMARY"],
+        [""],
+        ["Metric", "Amount"],
+        ["Total Revenue", totalRevenue],
+        ["Total Expenses", totalExpenses],
+        ["Net Profit", netProfit],
+        ["Security Deposits", securityDeposits],
+        ["Salary Payments", salaryPayments],
+        ["HYD Inward Revenue", hydInwardRevenue],
+        ["Top-up Revenue", topUpRevenue],
+        [""],
+        [""],
+        
+        // Journey Summary Section
+        ["JOURNEY SUMMARY"],
+        [""],
+        ["Journey ID", "License Plate", "Destination", "Driver", "Status", "Start Date", "End Date", "Pouch Amount", "Security Deposit", "Total Expenses", "Current Balance"]
+      ];
+
+      // Add journey data
+      filteredJourneys.forEach((journey: any) => {
+        sheetData.push([
+          journey.id,
+          journey.licensePlate,
+          journey.destination,
+          journey.driverName || "N/A",
+          journey.status,
+          journey.startTime ? new Date(journey.startTime).toLocaleDateString() : "",
+          journey.endTime ? new Date(journey.endTime).toLocaleDateString() : "",
+          parseFloat(journey.pouch || 0),
+          parseFloat(journey.security || 0),
+          parseFloat(journey.totalExpenses || 0),
+          parseFloat(journey.balance || 0)
+        ]);
+      });
+
+      // Add spacing and expenses section
+      sheetData.push([""], [""], ["DETAILED EXPENSES"], [""]);
+      sheetData.push(["Journey ID", "License Plate", "Category", "Amount", "Description", "Date", "Driver"]);
+
+      // Add expense data
+      filteredExpenses.forEach((expense: any) => {
+        const journey = filteredJourneys.find((j: any) => j.id === expense.journeyId);
+        sheetData.push([
           expense.journeyId,
+          journey?.licensePlate || "N/A",
           expense.category.replace('_', ' ').toUpperCase(),
           parseFloat(expense.amount),
           expense.description || "",
           new Date(expense.timestamp).toLocaleDateString(),
           expense.driverName || "N/A"
         ]);
+      });
 
-        const expenseSheet = XLSX.utils.aoa_to_sheet([expenseHeaders, ...expenseData]);
-        XLSX.utils.book_append_sheet(workbook, expenseSheet, "Expenses");
-      }
-
-      // Category-wise expense summary
+      // Add category-wise summary at the end
       const categoryTotals: { [key: string]: number } = {};
-      allExpenses.forEach((expense: any) => {
+      filteredExpenses.forEach((expense: any) => {
         const category = expense.category.replace('_', ' ').toUpperCase();
         categoryTotals[category] = (categoryTotals[category] || 0) + parseFloat(expense.amount);
       });
 
-      const categoryData = [
-        ["Category", "Total Amount"],
-        ...Object.entries(categoryTotals).map(([category, amount]) => [category, amount])
-      ];
+      // Add spacing and category summary section
+      sheetData.push([""], [""], ["EXPENSE CATEGORIES SUMMARY"], [""]);
+      sheetData.push(["Category", "Total Amount"]);
       
-      const categorySheet = XLSX.utils.aoa_to_sheet(categoryData);
-      XLSX.utils.book_append_sheet(workbook, categorySheet, "Category Summary");
+      Object.entries(categoryTotals).forEach(([category, amount]) => {
+        sheetData.push([category, amount]);
+      });
+
+      // Create single worksheet
+      const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+      
+      // Set column widths for better formatting
+      const colWidths = [
+        { wch: 12 }, // Journey ID
+        { wch: 15 }, // License Plate
+        { wch: 20 }, // Destination/Category
+        { wch: 15 }, // Driver/Amount
+        { wch: 12 }, // Status/Description
+        { wch: 12 }, // Start Date
+        { wch: 12 }, // End Date
+        { wch: 15 }, // Pouch Amount
+        { wch: 15 }, // Security Deposit
+        { wch: 15 }, // Total Expenses
+        { wch: 15 }  // Current Balance
+      ];
+      worksheet['!cols'] = colWidths;
+
+      // Add the single sheet to workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Financial Report");
 
       // Generate and download file
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
