@@ -209,7 +209,7 @@ export default function AdminDashboard() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input 
                     placeholder="Search by driver or vehicle..." 
-                    className="pl-10 w-full"
+                    className="pl-11 pr-4 w-full"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
