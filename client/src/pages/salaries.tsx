@@ -101,6 +101,45 @@ export default function Salaries() {
     },
   });
 
+  // Mutation for processing full salary payment
+  const processFullSalaryMutation = useMutation({
+    mutationFn: async (driver: any) => {
+      const currentDate = new Date();
+      const remainingBalance = parseFloat(driver.salary || 0) - 
+        salaryPayments
+          .filter((p: any) => p.userId === driver.id && parseFloat(p.amount) > 0)
+          .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0) +
+        salaryPayments
+          .filter((p: any) => p.userId === driver.id && parseFloat(p.amount) < 0)
+          .reduce((sum: number, p: any) => sum + Math.abs(parseFloat(p.amount)), 0);
+      
+      const response = await apiRequest("POST", "/api/salaries/pay", {
+        userId: driver.id,
+        amount: remainingBalance.toString(),
+        description: `Full salary payment - ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`,
+        transactionType: 'advance',
+        month: currentDate.toLocaleString('default', { month: 'long' }),
+        year: currentDate.getFullYear(),
+      });
+      return response.json();
+    },
+    onSuccess: (_, driver) => {
+      toast({
+        title: "Salary Paid",
+        description: `Full salary payment processed for ${driver.name}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/salaries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process salary payment",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Helper functions for advance management
   const addAdvanceEntry = () => {
     const newEntry: AdvanceEntry = {
@@ -323,9 +362,16 @@ export default function Salaries() {
                           <h3 className="font-semibold text-gray-900">{driver.name}</h3>
                           <p className="text-sm text-gray-500">{driver.username}</p>
                         </div>
-                        <Badge variant={driverData.status === 'paid' ? "default" : driverData.status === 'partial' ? "secondary" : "destructive"}>
-                          {driverData.statusText}
-                        </Badge>
+                        {driverData.balance > 0 && (
+                          <Button
+                            onClick={() => processFullSalaryMutation.mutate(driver)}
+                            disabled={processFullSalaryMutation.isPending}
+                            className="bg-black hover:bg-gray-800 text-white px-4 py-1 text-sm"
+                            size="sm"
+                          >
+                            {processFullSalaryMutation.isPending ? "Processing..." : "Pay"}
+                          </Button>
+                        )}
                       </div>
                       
                       <div className="space-y-2 mb-4">
