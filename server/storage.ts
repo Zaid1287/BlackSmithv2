@@ -335,8 +335,8 @@ export class DatabaseStorage implements IStorage {
     const hydInward = parseFloat(revenueStats.hydInwardRevenue?.toString() || '0');
     const topUp = parseFloat(revenueStats.topUpRevenue?.toString() || '0');
     
-    // Calculate business net profit without salary impacts
-    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses + hydInward + topUp);
+    // Calculate net profit including salary expenses
+    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp);
 
     return {
       revenue: totalRevenue + totalSecurity,
@@ -370,6 +370,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async resetSalaryData(): Promise<void> {
+    // Reset salary payment records - this will affect net profit calculation
+    // as it removes salary expenses from the system
     await db.delete(salaryPayments);
   }
 }
