@@ -82,6 +82,27 @@
     width: 240px !important;
   }
   
+  /* Mobile sidebar expand arrow - more prominent */
+  .sidebar-dark button[aria-label="expand"] {
+    background-color: rgba(51, 65, 85, 0.8) !important;
+    border: 2px solid rgba(148, 163, 184, 0.6) !important;
+    padding: 0.75rem !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  .sidebar-dark button[aria-label="expand"]:hover {
+    background-color: rgba(71, 85, 105, 0.9) !important;
+    border-color: rgba(148, 163, 184, 0.8) !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  .sidebar-dark button[aria-label="expand"] svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke-width: 2.5 !important;
+  }
+  
   /* Reduce margins and spacing */
   .space-y-6 > * + * {
     margin-top: 1rem !important;

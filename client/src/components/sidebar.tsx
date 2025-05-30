@@ -55,6 +55,7 @@ export default function Sidebar() {
               size="sm"
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="text-white hover:text-white hover:bg-slate-600/70 p-2 rounded-lg bg-slate-700/30 border border-slate-600/50"
+              aria-label="expand"
             >
               <ChevronRight size={16} className="font-bold" />
             </Button>
