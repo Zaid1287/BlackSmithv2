@@ -332,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/salaries/pay", authenticateToken, requireAdmin, async (req, res) => {
+  app.post("/api/salaries/pay", authenticateToken, async (req, res) => {
     try {
       const paymentData = insertSalaryPaymentSchema.parse(req.body);
       const payment = await storage.createSalaryPayment(paymentData);
@@ -345,7 +345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/salaries/reset", authenticateToken, requireAdmin, async (req, res) => {
+  app.post("/api/salaries/reset", authenticateToken, async (req, res) => {
     try {
       await storage.resetSalaryData();
       res.json({ message: "Salary data reset successfully" });
@@ -355,7 +355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update user salary
-  app.put("/api/users/:id", authenticateToken, requireAdmin, async (req, res) => {
+  app.put("/api/users/:id", authenticateToken, async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       const { salary } = req.body;
