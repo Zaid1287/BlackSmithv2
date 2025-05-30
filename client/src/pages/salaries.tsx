@@ -46,7 +46,7 @@ export default function Salaries() {
   // Fetch salary payments
   const { data: salaryPayments = [], isLoading: paymentsLoading } = useQuery({
     queryKey: ["/api/salaries"],
-  });
+  }) as { data: any[], isLoading: boolean };
 
   // Calculate summary statistics
   const summaryStats = {
@@ -148,9 +148,11 @@ export default function Salaries() {
           const amount = payment.type === 'deduction' ? `-${payment.amount}` : payment.amount;
           const response = await apiRequest("POST", "/api/salaries/pay", {
             userId: data.employeeId,
-            amount: amount,
+            amount: amount.toString(),
             description: payment.description || `${payment.type === 'deduction' ? 'Deduction' : 'Payment'} - ${new Date().toLocaleDateString()}`,
-            transactionType: payment.type,
+            transactionType: 'advance',
+            month: new Date().toLocaleString('default', { month: 'long' }),
+            year: new Date().getFullYear(),
           });
           return response.json();
         })
@@ -384,7 +386,7 @@ export default function Salaries() {
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <h3 className="font-semibold text-gray-900">{employee.name}</h3>
-                          <p className="text-sm text-gray-500">@{employee.username}</p>
+                          <p className="text-sm text-gray-500">{employee.username}</p>
                         </div>
                         <Badge className={employeeData.statusColor}>
                           {employeeData.status.charAt(0).toUpperCase() + employeeData.status.slice(1)}
@@ -466,7 +468,7 @@ export default function Salaries() {
                     </div>
                     <div>
                       <span className="text-gray-500">Username:</span>
-                      <p className="font-medium">@{selectedEmployee.username}</p>
+                      <p className="font-medium">{selectedEmployee.username}</p>
                     </div>
                     <div>
                       <span className="text-gray-500">Current Salary:</span>
