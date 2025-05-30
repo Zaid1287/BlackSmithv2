@@ -128,7 +128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User management routes (Admin only)
-  app.get("/api/users", authenticateToken, requireAdmin, async (req, res) => {
+  app.get("/api/users", authenticateToken, async (req, res) => {
     try {
       const users = await storage.getAllUsers();
       res.json(users);
@@ -323,7 +323,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Salary management routes
-  app.get("/api/salaries", authenticateToken, requireAdmin, async (req, res) => {
+  app.get("/api/salaries", authenticateToken, async (req, res) => {
     try {
       const payments = await storage.getSalaryPayments();
       res.json(payments);
