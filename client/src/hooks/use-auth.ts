@@ -14,6 +14,7 @@ export function useAuth() {
       const currentUser = await authService.getCurrentUser();
       setUser(currentUser);
     } catch (error) {
+      console.error("Auth check failed:", error);
       setUser(null);
     } finally {
       setLoading(false);
