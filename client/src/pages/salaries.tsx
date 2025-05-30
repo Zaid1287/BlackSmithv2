@@ -431,16 +431,14 @@ export default function Salaries() {
                           <h3 className="font-semibold text-gray-900">{driver.name}</h3>
                           <p className="text-sm text-gray-500">{driver.username}</p>
                         </div>
-                        {driverData.balance > 0 && (
-                          <Button
-                            onClick={() => processFullSalaryMutation.mutate(driver)}
-                            disabled={processFullSalaryMutation.isPending}
-                            className="bg-black hover:bg-gray-800 text-white px-4 py-1 text-sm"
-                            size="sm"
-                          >
-                            {processFullSalaryMutation.isPending ? "Processing..." : "Pay"}
-                          </Button>
-                        )}
+                        <Button
+                          onClick={() => processFullSalaryMutation.mutate(driver)}
+                          disabled={processFullSalaryMutation.isPending}
+                          className="bg-black hover:bg-gray-800 text-white px-4 py-1 text-sm"
+                          size="sm"
+                        >
+                          {processFullSalaryMutation.isPending ? "Processing..." : "Pay"}
+                        </Button>
                       </div>
                       
                       <div className="space-y-2 mb-4">
