@@ -105,40 +105,25 @@ export default function FinancialManagement() {
         description: `Preparing Excel file with financial data${dateRange}...`,
       });
 
-      // Fetch all necessary data for export
-      const [journeysData, allExpenses] = await Promise.all([
-        fetch("/api/journeys", {
-          headers: getAuthHeaders(),
-          credentials: "include",
-        }).then(res => {
-          if (!res.ok) throw new Error("Failed to fetch journeys");
-          return res.json();
-        }),
-        
-        fetch("/api/expenses/all", {
-          headers: getAuthHeaders(),
-          credentials: "include",
-        }).then(res => {
-          if (!res.ok) throw new Error("Failed to fetch expenses");
-          return res.json();
-        }).catch(() => [])
-      ]);
+      // Use current filtered data for export
+      const journeysData = filteredJourneys;
+      const expensesData = filteredExpenses;
 
       // Filter data by date range if provided
-      let filteredJourneys = journeysData;
-      let filteredExpenses = allExpenses;
+      let finalJourneys = journeysData;
+      let finalExpenses = expensesData;
       
       if (startDate || endDate) {
         const start = startDate ? new Date(startDate) : new Date(0);
         const end = endDate ? new Date(endDate) : new Date();
         end.setHours(23, 59, 59, 999); // Include the entire end date
         
-        filteredJourneys = journeysData.filter((journey: any) => {
+        finalJourneys = journeysData.filter((journey: any) => {
           const journeyDate = new Date(journey.startTime);
           return journeyDate >= start && journeyDate <= end;
         });
         
-        filteredExpenses = allExpenses.filter((expense: any) => {
+        finalExpenses = expensesData.filter((expense: any) => {
           const expenseDate = new Date(expense.timestamp);
           return expenseDate >= start && expenseDate <= end;
         });
@@ -177,7 +162,7 @@ export default function FinancialManagement() {
       ];
 
       // Add journey data
-      filteredJourneys.forEach((journey: any) => {
+      finalJourneys.forEach((journey: any) => {
         sheetData.push([
           journey.id,
           journey.licensePlate,
@@ -198,8 +183,8 @@ export default function FinancialManagement() {
       sheetData.push(["Journey ID", "License Plate", "Category", "Amount", "Description", "Date", "Driver"]);
 
       // Add expense data
-      filteredExpenses.forEach((expense: any) => {
-        const journey = filteredJourneys.find((j: any) => j.id === expense.journeyId);
+      finalExpenses.forEach((expense: any) => {
+        const journey = finalJourneys.find((j: any) => j.id === expense.journeyId);
         sheetData.push([
           expense.journeyId,
           journey?.licensePlate || "N/A",
@@ -213,7 +198,7 @@ export default function FinancialManagement() {
 
       // Add category-wise summary at the end
       const categoryTotals: { [key: string]: number } = {};
-      filteredExpenses.forEach((expense: any) => {
+      finalExpenses.forEach((expense: any) => {
         const category = expense.category.replace('_', ' ').toUpperCase();
         categoryTotals[category] = (categoryTotals[category] || 0) + parseFloat(expense.amount);
       });
@@ -288,19 +273,42 @@ export default function FinancialManagement() {
     selectedLicensePlateFilter === "all" || journey.licensePlate === selectedLicensePlateFilter
   ) : [];
 
-  const totalRevenue = parseFloat(financialStats?.revenue?.toString() || "0") || 0;
-  const totalExpenses = parseFloat(financialStats?.expenses?.toString() || "0") || 0;
-  const netProfit = parseFloat(financialStats?.netProfit?.toString() || "0") || 0;
+  // Filter expenses based on selected license plate
+  const filteredExpenses = allExpenses ? allExpenses.filter((expense: any) => {
+    if (selectedLicensePlateFilter === "all") return true;
+    const journey = journeys?.find((j: any) => j.id === expense.journeyId);
+    return journey?.licensePlate === selectedLicensePlateFilter;
+  }) : [];
+
+  // Calculate filtered financial stats
+  const filteredRevenue = filteredJourneys.reduce((sum: number, journey: any) => {
+    return sum + parseFloat(journey.pouch || 0) + parseFloat(journey.security || 0);
+  }, 0) + filteredExpenses.filter((exp: any) => exp.category === 'hyd_inward' || exp.category === 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+
+  const filteredTotalExpenses = filteredExpenses.filter((exp: any) => exp.category !== 'hyd_inward' && exp.category !== 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+
+  const filteredNetProfit = filteredRevenue - filteredTotalExpenses;
+
+  // Use filtered or total stats based on filter selection
+  const totalRevenue = selectedLicensePlateFilter === "all" ? parseFloat(financialStats?.revenue?.toString() || "0") || 0 : filteredRevenue;
+  const totalExpenses = selectedLicensePlateFilter === "all" ? parseFloat(financialStats?.expenses?.toString() || "0") || 0 : filteredTotalExpenses;
+  const netProfit = selectedLicensePlateFilter === "all" ? parseFloat(financialStats?.netProfit?.toString() || "0") || 0 : filteredNetProfit;
   
-  // Calculate breakdown from actual data with proper fallbacks
+  // Calculate breakdown from filtered data
+  const filteredJourneyRevenue = filteredJourneys.reduce((sum: number, journey: any) => sum + parseFloat(journey.pouch || 0), 0);
+  const filteredSecurityDeposits = filteredJourneys.reduce((sum: number, journey: any) => sum + parseFloat(journey.security || 0), 0);
+  const filteredHydInwardRevenue = filteredExpenses.filter((exp: any) => exp.category === 'hyd_inward').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+  const filteredTopUpRevenue = filteredExpenses.filter((exp: any) => exp.category === 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+
+  // Use filtered or total breakdown based on filter selection
   const breakdown = financialStats?.breakdown || {};
-  const journeyRevenue = parseFloat(breakdown.journeyRevenue?.toString() || "0") || 0;
-  const securityDeposits = parseFloat(breakdown.securityDeposits?.toString() || "0") || 0;
-  const hydInwardRevenue = parseFloat(breakdown.hydInwardRevenue?.toString() || "0") || 0;
-  const topUpRevenue = parseFloat(breakdown.topUpRevenue?.toString() || "0") || 0;
-  const journeyExpenses = parseFloat(breakdown.journeyExpenses?.toString() || "0") || 0;
-  const salaryPayments = parseFloat(breakdown.salaryPayments?.toString() || "0") || 0;
-  const salaryDebts = parseFloat(breakdown.salaryDebts?.toString() || "0") || 0;
+  const journeyRevenue = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.journeyRevenue?.toString() || "0") || 0 : filteredJourneyRevenue;
+  const securityDeposits = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.securityDeposits?.toString() || "0") || 0 : filteredSecurityDeposits;
+  const hydInwardRevenue = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.hydInwardRevenue?.toString() || "0") || 0 : filteredHydInwardRevenue;
+  const topUpRevenue = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.topUpRevenue?.toString() || "0") || 0 : filteredTopUpRevenue;
+  const journeyExpenses = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.journeyExpenses?.toString() || "0") || 0 : filteredTotalExpenses;
+  const salaryPayments = parseFloat(breakdown.salaryPayments?.toString() || "0") || 0; // Salaries are not vehicle-specific
+  const salaryDebts = parseFloat(breakdown.salaryDebts?.toString() || "0") || 0; // Salary debts are not vehicle-specific
 
   // Prepare chart data
   const revenueChartData = [
@@ -310,8 +318,8 @@ export default function FinancialManagement() {
     { name: 'Top-ups', value: topUpRevenue, color: '#f59e0b' },
   ].filter(item => item.value > 0);
 
-  // Calculate individual expense type totals from all expenses
-  const expenseTypeBreakdown = allExpenses?.reduce((acc: any, expense: any) => {
+  // Calculate individual expense type totals from filtered expenses
+  const expenseTypeBreakdown = filteredExpenses?.reduce((acc: any, expense: any) => {
     const category = expense.category;
     const amount = parseFloat(expense.amount || 0);
     
