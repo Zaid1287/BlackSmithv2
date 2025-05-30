@@ -411,8 +411,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.resetAllFinancialData();
       res.json({ message: "Financial data reset successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Reset financial data error:", error);
+      if (error.message && error.message.includes('unpaid salary obligations')) {
+        return res.status(400).json({ message: error.message });
+      }
       res.status(500).json({ message: "Failed to reset financial data" });
     }
   });

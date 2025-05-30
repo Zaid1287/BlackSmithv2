@@ -360,6 +360,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async resetAllFinancialData(): Promise<void> {
+    // Check for unpaid salary obligations before reset
+    const users = await this.getAllUsers();
+    const salaryPayments = await this.getSalaryPayments();
+    
+    let hasUnpaidSalaries = false;
+    for (const user of users) {
+      if (user.role === 'driver' && parseFloat(user.salary || '0') > 0) {
+        const userPayments = salaryPayments.filter(p => p.userId === user.id);
+        const totalPaid = userPayments
+          .filter(p => parseFloat(p.amount) > 0)
+          .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+        const totalDeductions = userPayments
+          .filter(p => parseFloat(p.amount) < 0)
+          .reduce((sum, p) => sum + Math.abs(parseFloat(p.amount)), 0);
+        const balance = parseFloat(user.salary || '0') - totalPaid + totalDeductions;
+        
+        if (balance > 0) {
+          hasUnpaidSalaries = true;
+          break;
+        }
+      }
+    }
+    
+    if (hasUnpaidSalaries) {
+      throw new Error('Cannot reset financial data while there are unpaid salary obligations. Please pay all salaries first.');
+    }
+    
     // Delete all financial data in the correct order (respecting foreign key constraints)
     await db.delete(expenses);
     await db.delete(journeys);
