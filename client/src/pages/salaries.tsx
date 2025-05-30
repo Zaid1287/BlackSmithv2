@@ -105,17 +105,25 @@ export default function Salaries() {
   const processFullSalaryMutation = useMutation({
     mutationFn: async (driver: any) => {
       const currentDate = new Date();
-      const remainingBalance = parseFloat(driver.salary || 0) - 
-        salaryPayments
-          .filter((p: any) => p.userId === driver.id && parseFloat(p.amount) > 0)
-          .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0) +
-        salaryPayments
-          .filter((p: any) => p.userId === driver.id && parseFloat(p.amount) < 0)
-          .reduce((sum: number, p: any) => sum + Math.abs(parseFloat(p.amount)), 0);
+      
+      // Calculate current balance correctly
+      const driverPayments = salaryPayments.filter((payment: any) => payment.userId === driver.id);
+      const totalPaid = driverPayments
+        .filter((payment: any) => parseFloat(payment.amount) > 0)
+        .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
+      const totalDebts = driverPayments
+        .filter((payment: any) => parseFloat(payment.amount) < 0)
+        .reduce((sum: number, payment: any) => sum + Math.abs(parseFloat(payment.amount)), 0);
+      const currentBalance = parseFloat(driver.salary || 0) - totalPaid + totalDebts;
+      
+      // Only pay if there's a positive balance remaining
+      if (currentBalance <= 0) {
+        throw new Error("No remaining balance to pay");
+      }
       
       const response = await apiRequest("POST", "/api/salaries/pay", {
         userId: driver.id,
-        amount: remainingBalance.toString(),
+        amount: currentBalance.toString(),
         description: `Full salary payment - ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`,
         transactionType: 'advance',
         month: currentDate.toLocaleString('default', { month: 'long' }),
