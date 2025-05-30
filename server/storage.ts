@@ -335,7 +335,8 @@ export class DatabaseStorage implements IStorage {
     const hydInward = parseFloat(revenueStats.hydInwardRevenue?.toString() || '0');
     const topUp = parseFloat(revenueStats.topUpRevenue?.toString() || '0');
     
-    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp);
+    // Calculate business net profit without salary impacts
+    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses + hydInward + topUp);
 
     return {
       revenue: totalRevenue + totalSecurity,
