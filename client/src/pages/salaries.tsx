@@ -229,9 +229,12 @@ export default function Salaries() {
     },
   });
 
-  // Export data to Excel
+  // Export data to Excel with separate sheets for each user
   const exportToExcel = () => {
-    const exportData = employees.map((employee: any) => {
+    const workbook = XLSX.utils.book_new();
+
+    // Create summary sheet with all employees
+    const summaryData = employees.map((employee: any) => {
       const employeeData = getEmployeeData(employee);
       return {
         'Employee Name': employee.name,
@@ -244,10 +247,83 @@ export default function Salaries() {
       };
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Salary Report');
-    XLSX.writeFile(workbook, `salary-report-${new Date().toISOString().split('T')[0]}.xlsx`);
+    const summaryWorksheet = XLSX.utils.json_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Summary');
+
+    // Create individual sheet for each employee
+    employees.forEach((employee: any) => {
+      const employeePayments = salaryPayments
+        .filter((payment: any) => payment.userId === employee.id)
+        .map((payment: any) => ({
+          'Date': new Date(payment.createdAt).toLocaleDateString(),
+          'Description': payment.description || 'Salary Payment',
+          'Amount': parseFloat(payment.amount),
+          'Type': parseFloat(payment.amount) >= 0 ? 'Payment' : 'Deduction',
+          'Running Balance': parseFloat(payment.amount)
+        }));
+
+      // Calculate running balance
+      let runningBalance = parseFloat(employee.salary || 0);
+      employeePayments.forEach((payment: any, index: number) => {
+        runningBalance += payment.Amount;
+        payment['Running Balance'] = runningBalance;
+      });
+
+      // Add employee header information
+      const employeeData = getEmployeeData(employee);
+      const sheetData = [
+        ['Employee Information'],
+        ['Name', employee.name],
+        ['Username', employee.username],
+        ['Base Salary', parseFloat(employee.salary || 0)],
+        ['Total Paid', employeeData.totalPaid],
+        ['Total Deductions', employeeData.totalDeductions],
+        ['Current Balance', employeeData.balance],
+        ['Status', employeeData.status],
+        [''],
+        ['Payment History']
+      ];
+
+      if (employeePayments.length > 0) {
+        // Add headers for payment history
+        sheetData.push(['Date', 'Description', 'Amount', 'Type', 'Running Balance']);
+        
+        // Add payment data
+        employeePayments.forEach((payment: any) => {
+          sheetData.push([
+            payment.Date,
+            payment.Description,
+            payment.Amount,
+            payment.Type,
+            payment['Running Balance']
+          ]);
+        });
+      } else {
+        sheetData.push(['No payment history available']);
+      }
+
+      const employeeWorksheet = XLSX.utils.aoa_to_sheet(sheetData);
+      
+      // Set column widths for better formatting
+      employeeWorksheet['!cols'] = [
+        { wch: 15 }, // Date/Label
+        { wch: 25 }, // Description/Value
+        { wch: 12 }, // Amount
+        { wch: 12 }, // Type
+        { wch: 15 }  // Running Balance
+      ];
+
+      // Use employee name for sheet name (Excel sheet names have character limits)
+      const sheetName = employee.name.substring(0, 31).replace(/[\/\\\?\*\[\]]/g, '');
+      XLSX.utils.book_append_sheet(workbook, employeeWorksheet, sheetName);
+    });
+
+    XLSX.writeFile(workbook, `salary-detailed-report-${new Date().toISOString().split('T')[0]}.xlsx`);
+    
+    toast({
+      title: "Export Successful",
+      description: `Created Excel file with ${employees.length + 1} sheets (1 summary + ${employees.length} individual employee sheets)`,
+    });
   };
 
   // Handle salary update form submission
