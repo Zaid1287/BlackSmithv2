@@ -361,13 +361,13 @@ export class DatabaseStorage implements IStorage {
 
   async resetAllFinancialData(): Promise<void> {
     // Check for unpaid salary obligations before reset
-    const users = await this.getAllUsers();
-    const salaryPayments = await this.getSalaryPayments();
+    const allUsers = await this.getAllUsers();
+    const allSalaryPayments = await this.getSalaryPayments();
     
     let hasUnpaidSalaries = false;
-    for (const user of users) {
+    for (const user of allUsers) {
       if (user.role === 'driver' && parseFloat(user.salary || '0') > 0) {
-        const userPayments = salaryPayments.filter(p => p.userId === user.id);
+        const userPayments = allSalaryPayments.filter(p => p.userId === user.id);
         const totalPaid = userPayments
           .filter(p => parseFloat(p.amount) > 0)
           .reduce((sum, p) => sum + parseFloat(p.amount), 0);
@@ -388,8 +388,11 @@ export class DatabaseStorage implements IStorage {
     }
     
     // Delete all financial data in the correct order (respecting foreign key constraints)
+    // 1. Delete expenses first (they reference journeys)
     await db.delete(expenses);
+    // 2. Delete journeys (they reference users and vehicles)  
     await db.delete(journeys);
+    // 3. Delete salary payments (they reference users)
     await db.delete(salaryPayments);
     
     // Reset vehicle statuses to available
