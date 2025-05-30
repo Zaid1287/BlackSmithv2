@@ -767,7 +767,7 @@ export default function FinancialManagement() {
                 Cancel
               </Button>
               <Button
-                onClick={handleResetFinancialData}
+                onClick={handleResetConfirm}
                 variant="destructive"
               >
                 Reset Data

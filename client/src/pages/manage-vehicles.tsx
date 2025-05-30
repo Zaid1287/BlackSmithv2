@@ -125,8 +125,8 @@ export default function ManageVehicles() {
   };
 
   const fleetAvailability = dashboardStats?.vehicles?.total > 0 
-    ? Math.round((dashboardStats.vehicles.available / dashboardStats.vehicles.total) * 100)
-    : 100;
+    ? Math.round(((dashboardStats.vehicles.available || 0) / dashboardStats.vehicles.total) * 100)
+    : 0;
 
   if (isLoading) {
     return (
