@@ -265,11 +265,6 @@ export default function AdminDashboard() {
                               ₹{parseFloat(journey.balance).toLocaleString()}
                             </span>
                           </div>
-                          
-                          <div className="flex items-center justify-between text-xs md:text-sm">
-                            <span className="text-gray-500">Speed:</span>
-                            <span className="font-medium">{journey.speed || 0} km/h</span>
-                          </div>
                         </div>
                       </div>
                     </CardContent>

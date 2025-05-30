@@ -210,11 +210,16 @@ export class DatabaseStorage implements IStorage {
     const [journey] = await db.select().from(journeys).where(eq(journeys.id, journeyId));
     
     if (journey) {
+      // Ensure all values are properly converted to numbers to avoid string concatenation
+      const pouchAmount = Number(journey.pouch) || 0;
+      const topUpAmount = Number(topUpResult.totalTopUp) || 0;
+      const expenseAmount = Number(expenseResult.totalExpenses) || 0;
+      
       // Balance = pouch + top_up - actual expenses (excluding HYD Inward and Top Up)
-      const balance = parseFloat(journey.pouch) + parseFloat(topUpResult.totalTopUp.toString()) - parseFloat(expenseResult.totalExpenses.toString());
+      const balance = pouchAmount + topUpAmount - expenseAmount;
       
       await db.update(journeys).set({
-        totalExpenses: expenseResult.totalExpenses.toString(),
+        totalExpenses: expenseAmount.toString(),
         balance: balance.toString(),
       }).where(eq(journeys.id, journeyId));
     }
