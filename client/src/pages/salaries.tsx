@@ -49,22 +49,25 @@ export default function Salaries() {
     queryKey: ["/api/salaries"],
   }) as { data: any[], isLoading: boolean };
 
-  // Calculate summary statistics
+  // Filter out archived payments for salary balance calculations
+  const activeSalaryPayments = salaryPayments.filter((p: any) => p.transactionType !== 'reset_archived');
+
+  // Calculate summary statistics using only active payments
   const summaryStats = {
     totalSalaryAmount: employees.reduce((sum: number, emp: any) => sum + parseFloat(emp.salary || 0), 0),
-    totalPaidAmount: salaryPayments
+    totalPaidAmount: activeSalaryPayments
       .filter((p: any) => parseFloat(p.amount) > 0)
       .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0),
-    totalDeductions: salaryPayments
+    totalDeductions: activeSalaryPayments
       .filter((p: any) => parseFloat(p.amount) < 0)
       .reduce((sum: number, p: any) => sum + Math.abs(parseFloat(p.amount)), 0),
   };
 
   const totalRemainingBalance = summaryStats.totalSalaryAmount - summaryStats.totalPaidAmount + summaryStats.totalDeductions;
 
-  // Calculate individual employee data
+  // Calculate individual employee data using only active payments
   const getEmployeeData = (employee: any) => {
-    const employeePayments = salaryPayments.filter((p: any) => p.userId === employee.id);
+    const employeePayments = activeSalaryPayments.filter((p: any) => p.userId === employee.id);
     const totalPaid = employeePayments
       .filter((p: any) => parseFloat(p.amount) > 0)
       .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
@@ -252,7 +255,7 @@ export default function Salaries() {
 
     // Create individual sheet for each employee
     employees.forEach((employee: any) => {
-      const employeePayments = salaryPayments
+      const employeePayments = activeSalaryPayments
         .filter((payment: any) => payment.userId === employee.id)
         .map((payment: any) => ({
           'Date': new Date(payment.createdAt).toLocaleDateString(),
