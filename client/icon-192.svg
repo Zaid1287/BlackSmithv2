@@ -1,0 +1,16 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" fill="#f3f4f6"/>
+  <g transform="translate(16, 48)">
+    <!-- B -->
+    <path d="M8 16 L8 80 L48 80 Q64 80 64 64 Q64 56 56 52 Q64 48 64 40 Q64 24 48 24 L8 24 Z M24 32 L44 32 Q48 32 48 36 Q48 40 44 40 L24 40 Z M24 48 L46 48 Q52 48 52 52 Q52 56 46 56 L24 56 Z" fill="#000000"/>
+    
+    <!-- Vertical Line -->
+    <rect x="76" y="16" width="4" height="64" fill="#000000"/>
+    
+    <!-- S -->
+    <path d="M96 32 Q96 16 112 16 L140 16 Q156 16 156 32 Q156 40 148 44 Q156 48 156 56 Q156 64 148 68 Q156 72 156 80 Q156 96 140 96 L112 96 Q96 96 96 80 L108 80 Q108 84 112 84 L140 84 Q144 84 144 80 Q144 76 140 76 L120 76 Q104 76 104 60 Q104 52 112 48 Q104 44 104 36 Q104 20 120 20 L140 20 Q156 20 156 36 L144 36 Q144 32 140 32 L112 32 Q108 32 108 36 Q108 40 112 40 L132 40 Q148 40 148 56 Q148 64 140 68 Q148 72 148 80 Q148 96 132 96 L112 96 Q96 96 96 80 Z" fill="#000000"/>
+  </g>
+  
+  <!-- Company Name -->
+  <text x="96" y="120" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000000" text-anchor="middle">BLACKSMITH TRADERS</text>
+</svg>
