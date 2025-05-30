@@ -103,7 +103,7 @@ export class DatabaseStorage implements IStorage {
       .insert(journeys)
       .values({
         ...journey,
-        balance: journey.pouch + (journey.security || 0),
+        balance: parseFloat(journey.pouch.toString()) + parseFloat((journey.security || 0).toString()),
       })
       .returning();
     
