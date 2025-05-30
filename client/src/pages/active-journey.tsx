@@ -49,7 +49,7 @@ export default function ActiveJourney() {
   const userActiveJourney = activeJourneys.find((journey: any) => journey.driverId === user?.id);
 
   const { data: expenses = [] } = useQuery({
-    queryKey: [`/api/journeys/${userActiveJourney?.id}/expenses`],
+    queryKey: ["/api/journeys/expenses", userActiveJourney?.id],
     queryFn: async () => {
       if (!userActiveJourney?.id) return [];
       const response = await fetch(`/api/journeys/${userActiveJourney.id}/expenses`, {
