@@ -1,11 +1,9 @@
-const CACHE_NAME = 'blacksmith-traders-v1';
+const CACHE_NAME = 'blacksmith-traders-v2';
 const urlsToCache = [
   '/',
-  '/src/main.tsx',
-  '/src/index.css',
   '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  '/icon-192.svg',
+  '/icon-512.svg'
 ];
 
 // Install service worker
@@ -46,16 +44,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle other requests with cache-first strategy
+  // Skip caching for development assets (CSS, JS, etc) to prevent UI breaking
+  if (event.request.url.includes('/src/') || 
+      event.request.url.includes('.css') || 
+      event.request.url.includes('.js') ||
+      event.request.url.includes('.tsx') ||
+      event.request.url.includes('@vite') ||
+      event.request.url.includes('?v=')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Handle other requests with network-first strategy for development
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
+        return response;
       })
       .catch(() => {
-        // If both cache and network fail, return offline page
-        return caches.match('/');
+        // If network fails, try cache
+        return caches.match(event.request) || caches.match('/');
       })
   );
 });
