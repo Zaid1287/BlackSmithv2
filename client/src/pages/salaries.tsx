@@ -116,11 +116,14 @@ export default function Salaries() {
   // Process salary payment mutation
   const processSalaryPaymentMutation = useMutation({
     mutationFn: async (employee: Employee) => {
+      const currentDate = new Date();
       const response = await apiRequest("POST", "/api/salaries/pay", {
         userId: employee.id,
         amount: parseFloat(String(employee.salary || "0")).toFixed(2),
-        description: `Full salary payment - ${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
+        description: `Full salary payment - ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`,
         transactionType: 'payment',
+        month: currentDate.toLocaleString('default', { month: 'long' }),
+        year: currentDate.getFullYear(),
       });
       return response.json();
     },
@@ -175,13 +178,16 @@ export default function Salaries() {
   // Pay all employees mutation
   const payAllEmployeesMutation = useMutation({
     mutationFn: async () => {
+      const currentDate = new Date();
       const responses = await Promise.all(
         employees.map(async (employee: any) => {
           const response = await apiRequest("POST", "/api/salaries/pay", {
             userId: employee.id,
             amount: parseFloat(String(employee.salary || "0")).toFixed(2),
-            description: `Full salary payment - ${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
+            description: `Full salary payment - ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`,
             transactionType: 'payment',
+            month: currentDate.toLocaleString('default', { month: 'long' }),
+            year: currentDate.getFullYear(),
           });
           return response.json();
         })
