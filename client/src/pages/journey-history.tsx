@@ -29,9 +29,9 @@ export default function JourneyHistory() {
 
   // Fetch all expenses to check for HYD Inward entries
   const { data: allExpenses = [] } = useQuery({
-    queryKey: ["/api/expenses"],
+    queryKey: ["/api/expenses/all"],
     queryFn: async () => {
-      const response = await fetch("/api/expenses", {
+      const response = await fetch("/api/expenses/all", {
         headers: getAuthHeaders(),
         credentials: "include",
       });
