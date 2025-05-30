@@ -118,7 +118,7 @@ export default function Salaries() {
     mutationFn: async (employee: Employee) => {
       const response = await apiRequest("POST", "/api/salaries/pay", {
         userId: employee.id,
-        amount: employee.salary,
+        amount: parseFloat(String(employee.salary || "0")).toFixed(2),
         description: `Full salary payment - ${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
         transactionType: 'payment',
       });
@@ -179,7 +179,7 @@ export default function Salaries() {
         employees.map(async (employee: any) => {
           const response = await apiRequest("POST", "/api/salaries/pay", {
             userId: employee.id,
-            amount: employee.salary,
+            amount: parseFloat(String(employee.salary || "0")).toFixed(2),
             description: `Full salary payment - ${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
             transactionType: 'payment',
           });
