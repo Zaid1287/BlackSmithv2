@@ -354,6 +354,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user salary
+  app.put("/api/users/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { salary } = req.body;
+      
+      if (!salary || isNaN(parseFloat(salary))) {
+        return res.status(400).json({ message: "Valid salary amount is required" });
+      }
+
+      await storage.updateUserSalary(userId, salary);
+      res.json({ message: "User salary updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update user salary" });
+    }
+  });
+
   // Dashboard stats routes
   app.get("/api/dashboard/stats", authenticateToken, async (req, res) => {
     try {

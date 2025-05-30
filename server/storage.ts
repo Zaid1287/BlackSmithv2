@@ -10,6 +10,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   deleteUser(id: number): Promise<void>;
   getAllUsers(): Promise<User[]>;
+  updateUserSalary(id: number, salary: string): Promise<void>;
   
   // Vehicle methods
   createVehicle(vehicle: InsertVehicle): Promise<Vehicle>;
@@ -71,6 +72,10 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async updateUserSalary(id: number, salary: string): Promise<void> {
+    await db.update(users).set({ salary }).where(eq(users.id, id));
   }
 
   async createVehicle(vehicle: InsertVehicle): Promise<Vehicle> {
