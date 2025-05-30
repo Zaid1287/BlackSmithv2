@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { insertUserSchema, insertVehicleSchema, insertJourneySchema, insertExpenseSchema, insertSalaryPaymentSchema } from "@shared/schema";
 import { z } from "zod";
+import path from "path";
 
 const JWT_SECRET = process.env.JWT_SECRET || "blacksmith-traders-secret";
 
@@ -42,6 +43,27 @@ const requireAdmin = (req: any, res: any, next: any) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Serve PWA assets with correct MIME types
+  app.get('/manifest.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.sendFile(path.resolve(process.cwd(), 'client/manifest.json'));
+  });
+
+  app.get('/icon-192.svg', (req, res) => {
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.sendFile(path.resolve(process.cwd(), 'client/icon-192.svg'));
+  });
+
+  app.get('/icon-512.svg', (req, res) => {
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.sendFile(path.resolve(process.cwd(), 'client/icon-512.svg'));
+  });
+
+  app.get('/sw.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.resolve(process.cwd(), 'client/sw.js'));
+  });
   
   // Initialize admin user if not exists
   app.post("/api/init", async (req, res) => {

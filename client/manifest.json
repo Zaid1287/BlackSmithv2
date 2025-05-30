@@ -1,6 +1,6 @@
 {
-  "name": "BlackSmith Traders",
-  "short_name": "BS Traders",
+  "name": "BlackSmith",
+  "short_name": "BlackSmith",
   "description": "Comprehensive logistics and expense management system for BlackSmith Traders",
   "start_url": "/",
   "display": "standalone",
