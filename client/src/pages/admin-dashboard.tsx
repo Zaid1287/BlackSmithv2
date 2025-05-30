@@ -74,6 +74,20 @@ export default function AdminDashboard() {
     staleTime: 30000, // Vehicles don't change often, cache for 30 seconds
   });
 
+  // Fetch all expenses for HYD Inward filtering
+  const { data: allExpenses = [] } = useQuery({
+    queryKey: ["/api/expenses/all"],
+    queryFn: async () => {
+      const response = await fetch("/api/expenses/all", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch expenses");
+      return response.json();
+    },
+    staleTime: 10000,
+  });
+
   const { data: selectedJourneyExpenses = [] } = useQuery({
     queryKey: ["/api/journeys", selectedJourney?.id, "expenses"],
     queryFn: async () => {
@@ -204,6 +218,7 @@ export default function AdminDashboard() {
                     <SelectItem value="all">All Journeys</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="hyd_inward_missing">Missing HYD Inward</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -219,9 +234,17 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 journeys
-                  .filter((journey: any) => 
-                    statusFilter === 'all' || journey.status === statusFilter
-                  )
+                  .filter((journey: any) => {
+                    if (statusFilter === 'all') return true;
+                    if (statusFilter === 'hyd_inward_missing') {
+                      // Check if journey has any HYD Inward expenses
+                      const hasHydInward = allExpenses.some((expense: any) => 
+                        expense.journeyId === journey.id && expense.category === 'hyd_inward'
+                      );
+                      return !hasHydInward && journey.status === 'completed';
+                    }
+                    return journey.status === statusFilter;
+                  })
                   .filter((journey: any) =>
                     searchTerm === '' || 
                     journey.destination?.toLowerCase().includes(searchTerm.toLowerCase()) ||
