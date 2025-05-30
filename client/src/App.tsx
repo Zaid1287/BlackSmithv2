@@ -44,14 +44,6 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode;
     <div className="min-h-screen flex">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm border-b px-6 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">BlackSmith Traders</h1>
-            <div className="flex items-center space-x-4">
-              <div className="text-sm font-medium" style={{ color: 'hsl(220 39% 11%)' }}>Welcome back, {user.name}!</div>
-            </div>
-          </div>
-        </header>
         <main className="flex-1 overflow-y-auto custom-scrollbar">
           {children}
         </main>

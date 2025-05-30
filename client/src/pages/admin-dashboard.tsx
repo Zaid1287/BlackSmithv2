@@ -124,7 +124,6 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-between mb-4 md:mb-8 fade-in">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm md:text-base text-gray-500 hidden md:block">Complete overview of your logistics operations</p>
           <div className="flex items-center mt-2 text-xs text-gray-400">
             <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
             Live data - Updates every 5 seconds
