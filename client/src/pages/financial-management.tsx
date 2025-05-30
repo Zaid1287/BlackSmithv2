@@ -343,7 +343,7 @@ export default function FinancialManagement() {
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Financial Management</h1>
         <div className="flex items-center space-x-3">
-          <Button variant="outline" size="sm" onClick={handleExportToExcel}>
+          <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
             <Download className="w-4 h-4 mr-2" />
             Export to Excel
           </Button>
@@ -678,6 +678,104 @@ export default function FinancialManagement() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Export Dialog with Date Filter */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Export Financial Report</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Start Date (Optional)
+              </label>
+              <Input
+                type="date"
+                value={exportStartDate}
+                onChange={(e) => setExportStartDate(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                End Date (Optional)
+              </label>
+              <Input
+                type="date"
+                value={exportEndDate}
+                onChange={(e) => setExportEndDate(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div className="text-sm text-gray-500">
+              Leave dates empty to export all data. Date range filters journeys and expenses.
+            </div>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowExportDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  handleExportToExcel(exportStartDate, exportEndDate);
+                  setShowExportDialog(false);
+                  setExportStartDate("");
+                  setExportEndDate("");
+                }}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Excel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Dialog */}
+      <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Reset Financial Data</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              This action will permanently delete all financial data including journeys, expenses, and salary payments. This cannot be undone.
+            </p>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Type "RESET FINANCIAL DATA" to confirm:
+              </label>
+              <Input
+                value={confirmationText}
+                onChange={(e) => setConfirmationText(e.target.value)}
+                placeholder="RESET FINANCIAL DATA"
+                className="w-full"
+              />
+            </div>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowResetDialog(false);
+                  setConfirmationText("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleResetFinancialData}
+                variant="destructive"
+              >
+                Reset Data
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
