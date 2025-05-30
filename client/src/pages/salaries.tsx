@@ -36,6 +36,7 @@ export default function Salaries() {
   const [showHistoryDialog, setShowHistoryDialog] = useState(false);
   const [paymentEntries, setPaymentEntries] = useState<PaymentEntry[]>([]);
   const [newSalaryAmount, setNewSalaryAmount] = useState("");
+  const [selectedUserFilter, setSelectedUserFilter] = useState<string>("all");
 
   // Fetch employees (drivers)
   const { data: employees = [], isLoading: employeesLoading } = useQuery({
@@ -629,6 +630,23 @@ export default function Salaries() {
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* User Filter */}
+            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+              <Label htmlFor="userFilter" className="font-medium">Filter by User:</Label>
+              <select
+                id="userFilter"
+                value={selectedUserFilter}
+                onChange={(e) => setSelectedUserFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Users</option>
+                {employees.map((employee: any) => (
+                  <option key={employee.id} value={employee.id.toString()}>
+                    {employee.name} ({employee.username})
+                  </option>
+                ))}
+              </select>
+            </div>
             {salaryPayments.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <History className="w-12 h-12 mx-auto mb-4 text-gray-300" />
@@ -636,7 +654,12 @@ export default function Salaries() {
               </div>
             ) : (
               <div className="space-y-3">
-                {salaryPayments.map((payment: any) => {
+                {salaryPayments
+                  .filter((payment: any) => {
+                    if (selectedUserFilter === "all") return true;
+                    return payment.userId.toString() === selectedUserFilter;
+                  })
+                  .map((payment: any) => {
                   const employee = employees.find((emp: any) => emp.id === payment.userId);
                   const isDeduction = parseFloat(payment.amount) < 0;
                   
