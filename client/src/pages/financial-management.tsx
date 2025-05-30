@@ -358,7 +358,9 @@ export default function FinancialManagement() {
               className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Vehicles</option>
-              {journeys && [...new Set(journeys.map((j: any) => j.licensePlate))].filter(Boolean).map((plate: string) => (
+              {journeys && journeys.map((j: any) => j.licensePlate).filter((plate: string, index: number, arr: string[]) => 
+                plate && arr.indexOf(plate) === index
+              ).map((plate: string) => (
                 <option key={plate} value={plate}>
                   {plate}
                 </option>
@@ -519,7 +521,7 @@ export default function FinancialManagement() {
                 <p className="text-sm text-gray-500 mb-6">Expenses organized by journey</p>
                 
                 <div className="h-96 overflow-y-auto space-y-4 pr-2">
-                  {journeys?.map((journey: any) => {
+                  {filteredJourneys?.map((journey: any) => {
                     // Get expenses for this journey from allExpenses
                     const journeyExpenses = allExpenses?.filter((expense: any) => expense.journeyId === journey.id) || [];
                     const totalJourneyExpenses = journeyExpenses.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
@@ -601,9 +603,14 @@ export default function FinancialManagement() {
                     );
                   })}
                   
-                  {(!journeys || journeys.length === 0) && (
+                  {(!filteredJourneys || filteredJourneys.length === 0) && (
                     <div className="text-center py-8">
-                      <p className="text-gray-500">No journeys found</p>
+                      <p className="text-gray-500">
+                        {selectedLicensePlateFilter === "all" 
+                          ? "No journeys found" 
+                          : `No journeys found for license plate: ${selectedLicensePlateFilter}`
+                        }
+                      </p>
                     </div>
                   )}
                 </div>
