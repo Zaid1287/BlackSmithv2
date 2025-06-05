@@ -26,6 +26,8 @@ const regularExpenseTypes = [
   { value: "food", label: "Food" },
   { value: "maintenance", label: "Maintenance" },
   { value: "nzb_unloading", label: "NZB Unloading" },
+  { value: "fines", label: "Fines" },
+  { value: "driver_fees", label: "Driver Fees" },
   { value: "miscellaneous", label: "Miscellaneous" },
   { value: "electrical", label: "Electrical" },
   { value: "tires_air", label: "Tires Air" },
