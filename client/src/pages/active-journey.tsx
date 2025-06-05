@@ -306,37 +306,6 @@ export default function ActiveJourney() {
 
         </div>
 
-        {/* Financial Summary Panel */}
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Financial Summary</h3>
-              
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Initial Pouch</span>
-                  <span className="font-semibold">₹{parseFloat(userActiveJourney.pouch).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Security Deposit</span>
-                  <span className="font-semibold">₹{parseFloat(userActiveJourney.security).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Total Expenses</span>
-                  <span className="font-semibold text-red-600">-₹{totalExpenses.toLocaleString()}</span>
-                </div>
-                <div className="border-t pt-3">
-                  <div className="flex justify-between">
-                    <span className="font-semibold">Current Balance</span>
-                    <span className={`font-bold text-lg ${currentBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      ₹{currentBalance.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
 
       {userActiveJourney && (
