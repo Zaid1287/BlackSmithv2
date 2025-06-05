@@ -156,9 +156,9 @@ export default function ActiveJourney() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Journey Status Panel */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-5 space-y-6">
           {/* Journey Header */}
           <Card>
             <CardContent className="p-6">
@@ -187,9 +187,9 @@ export default function ActiveJourney() {
 
           {/* Quick Expense Entry */}
           <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold flex items-center mb-6">
-                <DollarSign className="text-green-600 mr-2" size={20} />
+            <CardContent className="p-6 md:p-10 lg:p-14 w-full">
+              <h3 className="text-xl md:text-2xl font-bold flex items-center mb-8">
+                <DollarSign className="text-green-600 mr-3 md:mr-4 w-6 h-6 md:w-8 md:h-8" />
                 Quick Expense Entry
               </h3>
               <ExpenseQuickEntry journeyId={userActiveJourney.id} />
