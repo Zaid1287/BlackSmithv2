@@ -338,12 +338,12 @@ export class DatabaseStorage implements IStorage {
       })
       .from(emiResetHistory);
 
-    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups - EMI Payments + Reset Amounts
-    // EMI payments reduce profit when made, but reset amounts prevent adding money back
+    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups - EMI Payments
+    // EMI payments reduce profit when made, resets only clear records without affecting profit
     const baseProfit = (journeyStats.totalRevenue || 0) + (journeyStats.completedSecurity || 0) - (journeyStats.totalExpenses || 0);
     const salaryAdjustment = -(salaryStats.totalPayments || 0) + (salaryStats.totalDebts || 0); // Subtract payments, add debts
     const additionalRevenue = (revenueStats.hydInwardRevenue || 0) + (revenueStats.topUpRevenue || 0);
-    const emiAdjustment = -(emiStats.totalEmiPayments || 0) + (emiResetStats.totalResetAmount || 0); // Subtract payments, add back reset amounts
+    const emiAdjustment = -(emiStats.totalEmiPayments || 0); // Only subtract current EMI payments
     
     const netProfit = baseProfit + salaryAdjustment + additionalRevenue + emiAdjustment;
 
@@ -364,9 +364,8 @@ export class DatabaseStorage implements IStorage {
     const topUp = parseFloat(revenueStats.topUpRevenue?.toString() || '0');
     const totalEmiPayments = parseFloat(emiStats.totalEmiPayments?.toString() || '0');
     
-    // Calculate net profit including salary expenses and EMI adjustments
-    const totalEmiResetAmount = parseFloat(emiResetStats.totalResetAmount?.toString() || '0');
-    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp - totalEmiPayments + totalEmiResetAmount);
+    // Calculate net profit including salary expenses and EMI payments
+    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp - totalEmiPayments);
 
     return {
       revenue: totalRevenue + totalSecurity,
@@ -467,21 +466,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async resetEmiData(): Promise<void> {
-    // Calculate total EMI payments before reset
-    const [totalPaid] = await db
-      .select({
-        total: sql<number>`COALESCE(SUM(${emiPayments.amount}), 0)`
-      })
-      .from(emiPayments);
-    
-    // Record the reset amount to prevent adding money back to profit
-    if (totalPaid.total > 0) {
-      await db.insert(emiResetHistory).values({
-        totalAmountReset: totalPaid.total.toString(),
-      });
-    }
-    
-    // Delete all EMI payment records
+    // Simple reset - delete all EMI payment records (like salary reset)
     await db.delete(emiPayments);
   }
 }
