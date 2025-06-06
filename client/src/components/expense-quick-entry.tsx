@@ -32,6 +32,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
     { value: "nzb_unloading", label: "NZB Unloading" },
     { value: "miscellaneous", label: "Miscellaneous" },
     { value: "mechanical", label: "Mechanical" },
+    { value: "electrical", label: "Electrical" },
     { value: "body_works", label: "Body Works" },
     { value: "tires_air", label: "Tires Air" },
     { value: "weighment", label: "Weighment" },
@@ -96,12 +97,24 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
     },
   });
 
+  const categoriesRequiringDescription = ['miscellaneous', 'maintenance', 'mechanical', 'electrical', 'body_works'];
+
   const handleAddExpense = (category: string) => {
     const amount = parseFloat(amounts[category] || "0");
     if (amount <= 0) {
       toast({
         title: "Invalid Amount",
         description: "Please enter a valid amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if this category requires a description
+    if (categoriesRequiringDescription.includes(category)) {
+      toast({
+        title: "Description Required",
+        description: "This expense type requires a description. Please use the 'Add Expense' button above for detailed entry.",
         variant: "destructive",
       });
       return;
@@ -122,8 +135,13 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
   const topUpCategory = expenseCategories.find(cat => cat.value === 'top_up');
   const regularCategories = expenseCategories.filter(cat => cat.value !== 'hyd_inward' && cat.value !== 'top_up');
 
-  const renderCategoryCard = (category: any, isFullWidth = false) => (
-    <Card key={category.value} className={`p-3 border ${category.isRevenue ? 'border-green-300 bg-green-50' : 'border-gray-200'} ${isFullWidth ? 'col-span-full' : ''}`}>
+  const renderCategoryCard = (category: any, isFullWidth = false) => {
+    const requiresDescription = categoriesRequiringDescription.includes(category.value);
+    return (
+    <Card key={category.value} className={`p-3 border ${
+      category.isRevenue ? 'border-green-300 bg-green-50' : 
+      requiresDescription ? 'border-orange-300 bg-orange-50' : 'border-gray-200'
+    } ${isFullWidth ? 'col-span-full' : ''}`}>
       {/* Mobile Layout: Stack vertically */}
       <div className="flex flex-col space-y-3 sm:hidden">
         <div className={`font-medium ${category.isRevenue ? 'text-green-700' : 'text-gray-700'}`}>

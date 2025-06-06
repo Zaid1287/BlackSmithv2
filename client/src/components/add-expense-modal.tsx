@@ -30,6 +30,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 
+const categoriesRequiringDescription = ['miscellaneous', 'maintenance', 'mechanical', 'electrical', 'body_works'];
+
 const expenseSchema = z.object({
   journeyId: z.number(),
   category: z.string().min(1, "Please select a category"),
@@ -38,9 +40,16 @@ const expenseSchema = z.object({
     .regex(/^\d+(\.\d{1,2})?$/, "Please enter a valid amount (e.g., 100 or 100.50)")
     .refine((val) => parseFloat(val) > 0, "Amount must be greater than 0")
     .refine((val) => parseFloat(val) <= 100000, "Amount cannot exceed ₹1,00,000"),
-  description: z.string()
-    .min(3, "Description must be at least 3 characters")
-    .max(200, "Description cannot exceed 200 characters"),
+  description: z.string().max(200, "Description cannot exceed 200 characters"),
+}).refine((data) => {
+  // Make description required for specific categories
+  if (categoriesRequiringDescription.includes(data.category)) {
+    return data.description.trim().length >= 3;
+  }
+  return true;
+}, {
+  message: "Description is required for this category (minimum 3 characters)",
+  path: ["description"],
 });
 
 type ExpenseFormData = z.infer<typeof expenseSchema>;
@@ -63,6 +72,7 @@ const allExpenseCategories = [
   { value: "hyd_inward", label: "HYD Inward", adminOnly: true },
   { value: "miscellaneous", label: "Miscellaneous" },
   { value: "mechanical", label: "Mechanical" },
+  { value: "electrical", label: "Electrical" },
   { value: "body_works", label: "Body Works" },
   { value: "tires_air", label: "Tires Air" },
   { value: "weighment", label: "Weighment" },
@@ -195,19 +205,28 @@ export default function AddExpenseModal({ open, onOpenChange, journeyId }: AddEx
             <FormField
               control={form.control}
               name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      {...field} 
-                      placeholder="Enter expense description (optional)" 
-                      rows={3}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const selectedCategory = form.watch('category');
+                const isRequired = categoriesRequiringDescription.includes(selectedCategory);
+                return (
+                  <FormItem>
+                    <FormLabel>
+                      Description {isRequired && <span className="text-red-500">*</span>}
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder={isRequired 
+                          ? "Please provide details about this expense (required)" 
+                          : "Enter expense description (optional)"
+                        } 
+                        rows={3}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             <div className="flex space-x-3 pt-4">
