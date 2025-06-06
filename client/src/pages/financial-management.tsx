@@ -446,16 +446,17 @@ export default function FinancialManagement() {
         title: "Export Successful",
         description: `Generated complete report with ${Object.keys(vehicleGroups).length} vehicle tabs.`,
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Excel export error:', error);
       toast({
         title: "Export Failed",
-        description: "Failed to generate Excel reports. Please try again.",
+        description: `Failed to generate Excel reports: ${error?.message || 'Please try again.'}`,
         variant: "destructive",
       });
     }
   };
 
-  const createVehicleTab = (workbook: any, licensePlate: string, vehicleJourneys: any[], allExpenses: any[], reportDate: string, dateRange: string) => {
+  const createVehicleTab = (mainWorkbook: any, licensePlate: string, vehicleJourneys: any[], allExpenses: any[], reportDate: string, dateRange: string) => {
     // Filter expenses for this vehicle's journeys
     const vehicleExpenses = allExpenses.filter((expense: any) => 
       vehicleJourneys.some((journey: any) => journey.id === expense.journeyId)
