@@ -373,7 +373,7 @@ export default function FinancialManagement() {
         { wch: 25 }, { wch: 18 }, { wch: 20 }, { wch: 20 }, { wch: 18 }
       ];
 
-      // Group journeys by vehicle for separate files
+      // Group journeys by vehicle for separate tabs
       const vehicleGroups = finalJourneys.reduce((groups: any, journey: any) => {
         const licensePlate = journey.licensePlate || 'Unknown';
         if (!groups[licensePlate]) {
@@ -383,14 +383,68 @@ export default function FinancialManagement() {
         return groups;
       }, {});
 
-      // Create separate file for each vehicle
-      for (const [licensePlate, vehicleJourneys] of Object.entries(vehicleGroups)) {
-        await createVehicleReport(licensePlate, vehicleJourneys as any[], finalExpenses, dateRange);
-      }
+      // Create single Excel file with multiple tabs for vehicles
+      const mainWorkbook = XLSX.utils.book_new();
+      const reportDate = new Date().toISOString().split('T')[0];
+
+      // Add a summary tab first
+      const overallSummaryData = [
+        [`BlackSmith Traders - Overall Financial Report`],
+        [`Report Generated: ${reportDate}`],
+        [`Date Range: ${dateRange || "All Data"}`],
+        [""],
+        ["OVERALL FINANCIAL SUMMARY"],
+        [""],
+        ["Metric", "Amount (₹)"],
+        ["Total Revenue", totalRevenue],
+        ["Total Expenses", totalExpenses],
+        ["Net Profit", netProfit],
+        ["Security Deposits", securityDeposits],
+        ["Salary Payments", salaryPayments],
+        ["EMI Payments", emiPaymentTotal],
+        [""],
+        [""],
+        ["VEHICLE BREAKDOWN"],
+        [""],
+        ["Vehicle", "Total Journeys", "Total Expenses", "Vehicle Revenue"]
+      ];
+
+      // Add vehicle summary to overall tab
+      Object.entries(vehicleGroups).forEach(([licensePlate, vehicleJourneys]: [string, any]) => {
+        const vehicleExpenses = finalExpenses.filter((expense: any) => 
+          vehicleJourneys.some((journey: any) => journey.id === expense.journeyId)
+        );
+        const totalVehicleExpenses = vehicleExpenses.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+        const vehicleRevenue = vehicleExpenses.filter((exp: any) => ['hyd_inward', 'top_up'].includes(exp.category))
+          .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+
+        overallSummaryData.push([
+          licensePlate,
+          vehicleJourneys.length,
+          totalVehicleExpenses,
+          vehicleRevenue
+        ]);
+      });
+
+      const overallSummaryWS = XLSX.utils.aoa_to_sheet(overallSummaryData);
+      overallSummaryWS['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
+      XLSX.utils.book_append_sheet(mainWorkbook, overallSummaryWS, "Overall Summary");
+
+      // Create individual tabs for each vehicle
+      Object.entries(vehicleGroups).forEach(([licensePlate, vehicleJourneys]: [string, any]) => {
+        createVehicleTab(mainWorkbook, licensePlate, vehicleJourneys, finalExpenses, reportDate, dateRange);
+      });
+
+      // Generate and download the single file
+      const excelBuffer = XLSX.write(mainWorkbook, { bookType: 'xlsx', type: 'array' });
+      const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+      const fileName = `BlackSmith_Traders_Complete_Report_${reportDate}.xlsx`;
+      saveAs(data, fileName);
 
       toast({
         title: "Export Successful",
-        description: `Generated separate reports for ${Object.keys(vehicleGroups).length} vehicles.`,
+        description: `Generated complete report with ${Object.keys(vehicleGroups).length} vehicle tabs.`,
       });
     } catch (error) {
       toast({
@@ -401,10 +455,7 @@ export default function FinancialManagement() {
     }
   };
 
-  const createVehicleReport = async (licensePlate: string, vehicleJourneys: any[], allExpenses: any[], dateRange: string) => {
-    const workbook = XLSX.utils.book_new();
-    const reportDate = new Date().toISOString().split('T')[0];
-    
+  const createVehicleTab = (workbook: any, licensePlate: string, vehicleJourneys: any[], allExpenses: any[], reportDate: string, dateRange: string) => {
     // Filter expenses for this vehicle's journeys
     const vehicleExpenses = allExpenses.filter((expense: any) => 
       vehicleJourneys.some((journey: any) => journey.id === expense.journeyId)
@@ -412,17 +463,12 @@ export default function FinancialManagement() {
 
     // Calculate vehicle totals
     const totalVehicleExpenses = vehicleExpenses.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
-    const totalVehicleRevenue = vehicleJourneys.reduce((sum: number, journey: any) => {
-      const hydInward = vehicleExpenses.filter(exp => exp.journeyId === journey.id && exp.category === 'hyd_inward')
-        .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
-      const topUp = vehicleExpenses.filter(exp => exp.journeyId === journey.id && exp.category === 'top_up')
-        .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
-      return sum + hydInward + topUp;
-    }, 0);
+    const totalVehicleRevenue = vehicleExpenses.filter(exp => ['hyd_inward', 'top_up'].includes(exp.category))
+      .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
 
-    // Vehicle Summary Sheet
-    const vehicleSummaryData = [
-      [`BlackSmith Traders - Vehicle Report: ${licensePlate}`],
+    // Vehicle Summary Data
+    const vehicleData = [
+      [`${licensePlate} - Vehicle Report`],
       [`Report Generated: ${reportDate}`],
       [`Date Range: ${dateRange || "All Data"}`],
       [""],
@@ -437,19 +483,20 @@ export default function FinancialManagement() {
       [""],
       ["JOURNEY DETAILS"],
       [""],
-      ["Journey ID", "Driver Name", "Route", "Start Date", "End Date", "Status", "Total Expenses", "Journey Revenue"]
+      ["Journey ID", "Driver Name", "Destination", "Start Date", "End Date", "Status", "Expenses", "Revenue"]
     ];
 
+    // Add journey details
     vehicleJourneys.forEach((journey: any) => {
       const journeyExpenses = vehicleExpenses.filter((exp: any) => exp.journeyId === journey.id);
       const journeyExpenseTotal = journeyExpenses.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
       const journeyRevenue = journeyExpenses.filter(exp => ['hyd_inward', 'top_up'].includes(exp.category))
         .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
 
-      vehicleSummaryData.push([
+      vehicleData.push([
         journey.id,
         journey.driverName || "Unknown Driver",
-        `${journey.startLocation || ''} → ${journey.destination || ''}`,
+        journey.destination || "",
         journey.startTime ? new Date(journey.startTime).toLocaleDateString() : "",
         journey.endTime ? new Date(journey.endTime).toLocaleDateString() : "Ongoing",
         journey.status,
@@ -458,51 +505,32 @@ export default function FinancialManagement() {
       ]);
     });
 
-    // Detailed Expenses Sheet
-    const vehicleExpenseData = [
-      [`${licensePlate} - Detailed Expense Records`],
-      [`Report Generated: ${reportDate}`],
-      [""],
-      ["Date", "Journey ID", "Driver", "Category", "Amount (₹)", "Description", "Added By"]
-    ];
+    // Add expense details section
+    vehicleData.push([""], [""], ["DETAILED EXPENSES"], [""]);
+    vehicleData.push(["Date", "Journey ID", "Driver", "Category", "Amount (₹)", "Description"]);
 
     vehicleExpenses.forEach((expense: any) => {
       const journey = vehicleJourneys.find((j: any) => j.id === expense.journeyId);
-      vehicleExpenseData.push([
+      vehicleData.push([
         new Date(expense.timestamp).toLocaleDateString(),
         expense.journeyId,
         journey?.driverName || "Unknown Driver",
         expense.category.replace('_', ' ').toUpperCase(),
         parseFloat(expense.amount),
-        expense.description || "-",
-        expense.addedBy || "System"
+        expense.description || "-"
       ]);
     });
 
-    // Create worksheets
-    const summaryWS = XLSX.utils.aoa_to_sheet(vehicleSummaryData);
-    const expenseWS = XLSX.utils.aoa_to_sheet(vehicleExpenseData);
-
-    // Set column widths
-    summaryWS['!cols'] = [
-      { wch: 15 }, { wch: 20 }, { wch: 25 }, { wch: 12 }, { wch: 12 }, 
-      { wch: 12 }, { wch: 15 }, { wch: 15 }
-    ];
-    expenseWS['!cols'] = [
-      { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 20 }, { wch: 12 }, 
-      { wch: 30 }, { wch: 15 }
+    // Create worksheet for this vehicle
+    const vehicleWS = XLSX.utils.aoa_to_sheet(vehicleData);
+    vehicleWS['!cols'] = [
+      { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 12 }, { wch: 12 }, 
+      { wch: 12 }, { wch: 12 }, { wch: 12 }
     ];
 
-    // Add sheets to workbook
-    XLSX.utils.book_append_sheet(workbook, summaryWS, "Vehicle Summary");
-    XLSX.utils.book_append_sheet(workbook, expenseWS, "Expense Details");
-
-    // Generate and download file
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    
-    const fileName = `BlackSmith_Traders_${licensePlate}_Report_${reportDate}.xlsx`;
-    saveAs(data, fileName);
+    // Add as a new tab - sanitize license plate for sheet name
+    const sanitizedName = licensePlate.replace(/[^a-zA-Z0-9]/g, '').substring(0, 31);
+    XLSX.utils.book_append_sheet(workbook, vehicleWS, sanitizedName || 'Vehicle');
   };
 
   if (isLoading) {
