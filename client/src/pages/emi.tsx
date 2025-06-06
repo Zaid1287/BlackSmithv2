@@ -366,79 +366,114 @@ export default function EmiManagement() {
         </CardContent>
       </Card>
 
-      {/* Vehicle List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Truck className="w-5 h-5 mr-2" />
-            Vehicle EMI Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {filteredVehicles.map((vehicle: any) => {
-              const vehicleData = getVehicleData(vehicle);
-              return (
-                <div key={vehicle.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Truck className="w-5 h-5 text-blue-600" />
+      {/* Vehicle Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredVehicles.map((vehicle: any) => {
+          const vehicleData = getVehicleData(vehicle);
+          return (
+            <Card key={vehicle.id} className="hover:shadow-lg transition-shadow duration-200">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Truck className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">{vehicle.licensePlate}</h3>
+                      <CardTitle className="text-lg">{vehicle.licensePlate}</CardTitle>
                       <p className="text-sm text-gray-500">{vehicle.model}</p>
-                      <p className="text-xs text-gray-400">Monthly EMI: ₹{parseFloat(vehicle.monthlyEmi || 0).toLocaleString()}</p>
                     </div>
                   </div>
-
-                  <div className="flex items-center space-x-4">
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500">Paid: ₹{vehicleData.totalPaid.toLocaleString()}</p>
-                      <p className="text-sm text-gray-500">Advances: ₹{vehicleData.totalAdvances.toLocaleString()}</p>
-                      <p className={`text-sm font-medium ${
-                        vehicleData.balance < 0 ? 'text-red-600' : 
-                        vehicleData.balance === 0 ? 'text-green-600' : 'text-amber-600'
-                      }`}>
-                        Balance: ₹{vehicleData.balance.toLocaleString()}
-                      </p>
+                  <Badge className={vehicleData.statusColor}>
+                    {vehicleData.status.charAt(0).toUpperCase() + vehicleData.status.slice(1)}
+                  </Badge>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                {/* EMI Details */}
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Monthly EMI</span>
+                    <span className="font-semibold text-lg">₹{parseFloat(vehicle.monthlyEmi || 0).toLocaleString()}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Paid</span>
+                    <span className="font-medium text-green-600">₹{vehicleData.totalPaid.toLocaleString()}</span>
+                  </div>
+                  
+                  {vehicleData.totalAdvances > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Advances</span>
+                      <span className="font-medium text-red-600">₹{vehicleData.totalAdvances.toLocaleString()}</span>
                     </div>
-                    <Badge className={vehicleData.statusColor}>
-                      {vehicleData.status}
-                    </Badge>
-                    <div className="flex space-x-2">
-                      <Button
-                        size="sm"
-                        onClick={() => processEmiPaymentMutation.mutate(vehicle)}
-                        disabled={processEmiPaymentMutation.isPending || vehicleData.balance <= 0}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        <IndianRupee className="w-4 h-4 mr-1" />
-                        Pay
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => openVehicleDialog(vehicle)}
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        <User className="w-4 h-4 mr-1" />
-                        Manage
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => viewVehicleHistory(vehicle)}
-                      >
-                        <History className="w-4 h-4 mr-1" />
-                        History
-                      </Button>
-                    </div>
+                  )}
+                  
+                  <div className="flex justify-between items-center pt-2 border-t">
+                    <span className="text-sm font-medium">Current Balance</span>
+                    <span className={`font-bold text-lg ${
+                      vehicleData.balance > 0 ? 'text-red-600' : 
+                      vehicleData.balance < 0 ? 'text-blue-600' : 'text-green-600'
+                    }`}>
+                      ₹{Math.abs(vehicleData.balance).toLocaleString()}
+                      {vehicleData.balance < 0 && ' (Overpaid)'}
+                    </span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                
+                {/* Action Buttons */}
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => viewVehicleHistory(vehicle)}
+                    className="flex-1"
+                  >
+                    <History className="w-4 h-4 mr-2" />
+                    History
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openVehicleDialog(vehicle)}
+                    className="flex-1"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Manage
+                  </Button>
+                </div>
+                
+                {vehicleData.balance > 0 && (
+                  <Button
+                    size="sm"
+                    onClick={() => processEmiPaymentMutation.mutate(vehicle)}
+                    disabled={processEmiPaymentMutation.isPending}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    <IndianRupee className="w-4 h-4 mr-2" />
+                    {processEmiPaymentMutation.isPending ? "Processing..." : `Pay ₹${Math.abs(vehicleData.balance).toLocaleString()}`}
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+      
+      {filteredVehicles.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Truck className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No vehicles found</h3>
+            <p className="text-gray-500">
+              {selectedVehicleFilter === "all" 
+                ? "No vehicles available for EMI management"
+                : `No vehicles with ${selectedVehicleFilter} status found`
+              }
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Manage Vehicle Dialog */}
       <Dialog open={showVehicleDialog} onOpenChange={setShowVehicleDialog}>
@@ -456,7 +491,7 @@ export default function EmiManagement() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Current Monthly Payment</Label>
-                  <p className="text-sm text-gray-600">₹{parseFloat(selectedVehicle?.monthlyEmi || 0).toLocaleString()}</p>
+                  <p className="text-sm text-gray-600">₹{parseFloat(String(selectedVehicle?.monthlyEmi || "0")).toLocaleString()}</p>
                 </div>
                 <div>
                   <Label>Monthly Payment Amount (₹)</Label>
