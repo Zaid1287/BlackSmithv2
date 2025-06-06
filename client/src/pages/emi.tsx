@@ -450,19 +450,19 @@ export default function EmiManagement() {
           </DialogHeader>
           
           <div className="space-y-6">
-            {/* Monthly EMI Update */}
+            {/* Monthly Payment Update */}
             <div className="p-4 border rounded-lg bg-gray-50">
-              <h3 className="text-lg font-semibold mb-3">Update Monthly EMI</h3>
+              <h3 className="text-lg font-semibold mb-3">Monthly Payment</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Current Monthly EMI</Label>
+                  <Label>Current Monthly Payment</Label>
                   <p className="text-sm text-gray-600">₹{parseFloat(selectedVehicle?.monthlyEmi || 0).toLocaleString()}</p>
                 </div>
                 <div>
-                  <Label>New Monthly EMI (₹)</Label>
+                  <Label>Monthly Payment Amount (₹)</Label>
                   <Input
                     type="number"
-                    placeholder="0"
+                    placeholder="Enter monthly payment amount"
                     value={newMonthlyEmi}
                     onChange={(e) => setNewMonthlyEmi(e.target.value)}
                   />
@@ -470,47 +470,65 @@ export default function EmiManagement() {
               </div>
             </div>
 
-            {/* Payment Entries */}
-            <div>
+            {/* Add Payment Entries */}
+            <div className="border rounded-lg p-4">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Payment Entries</h3>
-                <Button onClick={addPaymentEntry} size="sm">
+                <h3 className="text-lg font-semibold">Add Payment Entries</h3>
+                <Button onClick={addPaymentEntry} size="sm" className="bg-blue-600 hover:bg-blue-700">
                   <Plus className="w-4 h-4 mr-1" />
                   Add Entry
                 </Button>
               </div>
 
               {paymentEntries.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
                   <CreditCard className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No payment entries yet. Click "Add Entry" to start.</p>
+                  <p className="text-sm">No payment entries added yet.</p>
+                  <p className="text-xs text-gray-400">Click "Add Entry" to schedule EMI payments</p>
                 </div>
               ) : (
-                <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {paymentEntries.map((entry) => (
-                    <Card key={entry.id} className="p-4">
-                      <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-4 max-h-80 overflow-y-auto">
+                  {paymentEntries.map((entry, index) => (
+                    <Card key={entry.id} className="p-4 bg-blue-50 border-blue-200">
+                      <div className="flex justify-between items-start mb-3">
+                        <h4 className="font-medium text-blue-900">Payment Entry #{index + 1}</h4>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 hover:text-red-700 border-red-300"
+                          onClick={() => removePaymentEntry(entry.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <Label>Amount (₹)</Label>
+                          <Label className="text-sm font-medium">Amount (₹)</Label>
                           <Input
                             type="number"
-                            placeholder="0"
+                            placeholder="Enter amount"
                             value={entry.amount}
                             onChange={(e) => updatePaymentEntry(entry.id, 'amount', e.target.value)}
+                            className="mt-1"
                           />
                         </div>
                         <div>
-                          <Label>Due Date</Label>
+                          <Label className="text-sm font-medium">Due Date</Label>
                           <Input
                             type="date"
                             value={entry.dueDate}
                             onChange={(e) => updatePaymentEntry(entry.id, 'dueDate', e.target.value)}
+                            className="mt-1"
                           />
                         </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <Label>Month</Label>
+                          <Label className="text-sm font-medium">Month</Label>
                           <Select value={entry.month} onValueChange={(value) => updatePaymentEntry(entry.id, 'month', value)}>
-                            <SelectTrigger>
+                            <SelectTrigger className="mt-1">
                               <SelectValue placeholder="Select month" />
                             </SelectTrigger>
                             <SelectContent>
@@ -524,33 +542,27 @@ export default function EmiManagement() {
                           </Select>
                         </div>
                         <div>
-                          <Label>Year</Label>
+                          <Label className="text-sm font-medium">Year</Label>
                           <Input
                             type="number"
-                            placeholder="2024"
+                            placeholder="2025"
                             value={entry.year}
                             onChange={(e) => updatePaymentEntry(entry.id, 'year', parseInt(e.target.value))}
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <Label>Description (Optional)</Label>
-                          <Textarea
-                            placeholder="Additional notes..."
-                            value={entry.description}
-                            onChange={(e) => updatePaymentEntry(entry.id, 'description', e.target.value)}
-                            rows={2}
+                            className="mt-1"
                           />
                         </div>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="mt-2 text-red-600 hover:text-red-700"
-                        onClick={() => removePaymentEntry(entry.id)}
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Remove
-                      </Button>
+                      
+                      <div>
+                        <Label className="text-sm font-medium">Description (Optional)</Label>
+                        <Textarea
+                          placeholder="Add payment notes or details..."
+                          value={entry.description}
+                          onChange={(e) => updatePaymentEntry(entry.id, 'description', e.target.value)}
+                          rows={2}
+                          className="mt-1"
+                        />
+                      </div>
                     </Card>
                   ))}
                 </div>
