@@ -17,6 +17,7 @@ export interface IStorage {
   getAllVehicles(): Promise<Vehicle[]>;
   deleteVehicle(id: number): Promise<void>;
   updateVehicleStatus(id: number, status: string): Promise<void>;
+  updateVehicleMonthlyEmi(id: number, monthlyEmi: string): Promise<void>;
   
   // Journey methods
   createJourney(journey: InsertJourney): Promise<Journey>;
@@ -102,6 +103,10 @@ export class DatabaseStorage implements IStorage {
 
   async updateVehicleStatus(id: number, status: string): Promise<void> {
     await db.update(vehicles).set({ status }).where(eq(vehicles.id, id));
+  }
+
+  async updateVehicleMonthlyEmi(id: number, monthlyEmi: string): Promise<void> {
+    await db.update(vehicles).set({ monthlyEmi }).where(eq(vehicles.id, id));
   }
 
   async createJourney(journey: InsertJourney): Promise<Journey> {

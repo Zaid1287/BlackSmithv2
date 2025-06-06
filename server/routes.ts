@@ -218,6 +218,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/vehicles/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { monthlyEmi } = req.body;
+      
+      if (!monthlyEmi || isNaN(parseFloat(monthlyEmi))) {
+        return res.status(400).json({ message: "Valid monthly EMI amount is required" });
+      }
+
+      await storage.updateVehicleMonthlyEmi(id, monthlyEmi);
+      res.json({ message: "Vehicle monthly EMI updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update vehicle monthly EMI" });
+    }
+  });
+
   // Journey management routes
   app.get("/api/journeys", authenticateToken, async (req: any, res) => {
     try {

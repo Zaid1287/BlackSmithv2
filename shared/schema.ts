@@ -18,6 +18,7 @@ export const vehicles = pgTable("vehicles", {
   licensePlate: text("license_plate").notNull().unique(),
   model: text("model").notNull(),
   status: text("status").notNull().default("available"), // "available", "in_use"
+  monthlyEmi: decimal("monthly_emi", { precision: 15, scale: 2 }).default("0"),
   addedOn: timestamp("added_on").defaultNow(),
 });
 

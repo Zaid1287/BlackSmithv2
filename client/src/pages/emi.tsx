@@ -91,7 +91,7 @@ export default function EmiManagement() {
   // Open vehicle management dialog
   const openVehicleDialog = (vehicle: Vehicle) => {
     setSelectedVehicle(vehicle);
-    setNewMonthlyEmi(vehicle.monthlyEmi || "0");
+    setNewMonthlyEmi(vehicle.monthlyEmi?.toString() || "0");
     setPaymentEntries([]);
     setShowVehicleDialog(true);
   };
