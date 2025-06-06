@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,11 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
   CreditCard, Download, History, IndianRupee, Truck, Trash2, Plus, 
-  Clock, Calendar, CheckCircle, AlertTriangle, DollarSign 
+  Clock, User, Wallet, TrendingUp, TrendingDown, DollarSign 
 } from "lucide-react";
 import * as XLSX from 'xlsx';
 
-interface EmiEntry {
+interface PaymentEntry {
   id: string;
   amount: string;
   description: string;
@@ -30,6 +30,8 @@ interface Vehicle {
   licensePlate: string;
   model: string;
   status: string;
+  monthlyEmi?: string;
+  lastUpdated?: string;
 }
 
 export default function EmiManagement() {
@@ -37,7 +39,8 @@ export default function EmiManagement() {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [showVehicleDialog, setShowVehicleDialog] = useState(false);
   const [showHistoryDialog, setShowHistoryDialog] = useState(false);
-  const [emiEntries, setEmiEntries] = useState<EmiEntry[]>([]);
+  const [paymentEntries, setPaymentEntries] = useState<PaymentEntry[]>([]);
+  const [newMonthlyEmi, setNewMonthlyEmi] = useState("");
   const [selectedVehicleFilter, setSelectedVehicleFilter] = useState<string>("all");
 
   // Fetch vehicles
@@ -52,139 +55,164 @@ export default function EmiManagement() {
 
   // Calculate summary statistics
   const summaryStats = {
-    totalVehicles: (vehicles as any[]).length,
-    totalScheduledAmount: emiPayments.reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0),
+    totalVehicles: vehicles.length,
+    totalEmiAmount: vehicles.reduce((sum: number, vehicle: any) => sum + parseFloat(vehicle.monthlyEmi || 0), 0),
     totalPaidAmount: emiPayments
       .filter((p: any) => p.status === 'paid')
       .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0),
-    totalPendingAmount: emiPayments
-      .filter((p: any) => p.status === 'pending')
-      .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0),
-    overdueCount: emiPayments.filter((p: any) => {
-      if (p.status !== 'pending') return false;
-      return new Date(p.dueDate) < new Date();
-    }).length,
+    totalAdvances: emiPayments
+      .filter((p: any) => parseFloat(p.amount) < 0)
+      .reduce((sum: number, p: any) => sum + Math.abs(parseFloat(p.amount)), 0),
   };
 
-  const totalRemainingBalance = summaryStats.totalScheduledAmount - summaryStats.totalPaidAmount;
+  const totalRemainingBalance = summaryStats.totalEmiAmount - summaryStats.totalPaidAmount + summaryStats.totalAdvances;
 
   // Calculate individual vehicle data
   const getVehicleData = (vehicle: any) => {
     const vehiclePayments = emiPayments.filter((p: any) => p.vehicleId === vehicle.id);
-    const totalScheduled = vehiclePayments.reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
     const totalPaid = vehiclePayments
-      .filter((p: any) => p.status === 'paid')
+      .filter((p: any) => parseFloat(p.amount) > 0)
       .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
-    const totalPending = vehiclePayments
-      .filter((p: any) => p.status === 'pending')
-      .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
-    const balance = totalScheduled - totalPaid;
-    const overdueCount = vehiclePayments.filter((p: any) => {
-      if (p.status !== 'pending') return false;
-      return new Date(p.dueDate) < new Date();
-    }).length;
+    const totalAdvances = vehiclePayments
+      .filter((p: any) => parseFloat(p.amount) < 0)
+      .reduce((sum: number, p: any) => sum + Math.abs(parseFloat(p.amount)), 0);
+    const balance = parseFloat(vehicle.monthlyEmi || 0) - totalPaid + totalAdvances;
     
-    let status = 'current';
-    let statusColor = 'bg-green-100 text-green-800';
-    if (overdueCount > 0) {
-      status = 'overdue';
-      statusColor = 'bg-red-100 text-red-800';
-    } else if (balance <= 0) {
+    let status = 'pending';
+    let statusColor = 'bg-amber-100 text-amber-800';
+    if (balance <= 0) {
       status = balance < 0 ? 'overpaid' : 'paid';
       statusColor = balance < 0 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
-    } else if (totalPending > 0) {
-      status = 'pending';
-      statusColor = 'bg-amber-100 text-amber-800';
     }
 
-    return { totalScheduled, totalPaid, totalPending, balance, overdueCount, status, statusColor };
+    return { totalPaid, totalAdvances, balance, status, statusColor };
   };
 
   // Open vehicle management dialog
   const openVehicleDialog = (vehicle: Vehicle) => {
     setSelectedVehicle(vehicle);
-    setEmiEntries([]);
+    setNewMonthlyEmi(vehicle.monthlyEmi || "0");
+    setPaymentEntries([]);
     setShowVehicleDialog(true);
   };
 
-  // Add EMI entry
-  const addEmiEntry = () => {
-    const newEntry: EmiEntry = {
+  // Add payment entry
+  const addPaymentEntry = () => {
+    const newEntry: PaymentEntry = {
       id: Date.now().toString(),
-      amount: "",
-      description: "",
-      dueDate: "",
-      month: "",
-      year: new Date().getFullYear(),
+      amount: '',
+      description: '',
+      dueDate: '',
+      month: '',
+      year: new Date().getFullYear()
     };
-    setEmiEntries([...emiEntries, newEntry]);
+    setPaymentEntries([...paymentEntries, newEntry]);
   };
 
-  // Update EMI entry
-  const updateEmiEntry = (id: string, field: keyof EmiEntry, value: string | number) => {
-    setEmiEntries(emiEntries.map(entry => 
+  // Remove payment entry
+  const removePaymentEntry = (id: string) => {
+    setPaymentEntries(paymentEntries.filter(entry => entry.id !== id));
+  };
+
+  // Update payment entry
+  const updatePaymentEntry = (id: string, field: keyof PaymentEntry, value: string | number) => {
+    setPaymentEntries(paymentEntries.map(entry => 
       entry.id === id ? { ...entry, [field]: value } : entry
     ));
   };
 
-  // Remove EMI entry
-  const removeEmiEntry = (id: string) => {
-    setEmiEntries(emiEntries.filter(entry => entry.id !== id));
-  };
-
-  // Process EMI payments mutation
-  const processEmiMutation = useMutation({
-    mutationFn: async () => {
-      const validEntries = emiEntries.filter(entry => 
-        entry.amount && parseFloat(entry.amount) > 0 && entry.dueDate && entry.month
-      );
-
-      if (validEntries.length === 0) {
-        throw new Error("Please add at least one valid EMI entry");
-      }
-
-      const promises = validEntries.map(entry =>
-        apiRequest("POST", "/api/emi", {
-          vehicleId: selectedVehicle!.id,
-          amount: entry.amount,
-          description: entry.description,
-          dueDate: new Date(entry.dueDate).toISOString(),
-          month: entry.month,
-          year: entry.year,
-        })
-      );
-
-      await Promise.all(promises);
+  // Process EMI payment mutation (pay current balance)
+  const processEmiPaymentMutation = useMutation({
+    mutationFn: async (vehicle: Vehicle) => {
+      const currentDate = new Date();
+      const vehicleData = getVehicleData(vehicle);
+      
+      // Pay the remaining balance amount
+      const paymentAmount = Math.max(0, vehicleData.balance);
+      
+      const response = await apiRequest("POST", "/api/emi", {
+        vehicleId: vehicle.id,
+        amount: paymentAmount.toFixed(2),
+        description: `EMI payment - ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`,
+        dueDate: new Date().toISOString(),
+        month: currentDate.toLocaleString('default', { month: 'long' }),
+        year: currentDate.getFullYear(),
+      });
+      return response.json();
     },
     onSuccess: () => {
-      toast({
-        title: "EMI Payments Added",
-        description: "EMI payments have been scheduled successfully!",
-      });
+      toast({ title: "Payment Processed", description: "EMI payment completed successfully" });
       queryClient.invalidateQueries({ queryKey: ["/api/emi"] });
-      setShowVehicleDialog(false);
-      setEmiEntries([]);
     },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to process EMI payments",
-        variant: "destructive",
-      });
+    onError: () => {
+      toast({ title: "Payment Failed", description: "Failed to process EMI payment", variant: "destructive" });
     },
   });
 
-  // Mark payment as paid mutation
-  const markPaidMutation = useMutation({
-    mutationFn: async ({ id }: { id: number }) => {
-      await apiRequest("PATCH", `/api/emi/${id}/status`, { status: "paid" });
+  // Update vehicle EMI mutation
+  const updateVehicleEmiMutation = useMutation({
+    mutationFn: async (data: { vehicleId: number; newMonthlyEmi: string; payments: PaymentEntry[] }) => {
+      // Update monthly EMI amount
+      await apiRequest("PUT", `/api/vehicles/${data.vehicleId}`, {
+        monthlyEmi: data.newMonthlyEmi
+      });
+
+      // Process payment entries
+      const responses = await Promise.all(
+        data.payments.map(async (payment) => {
+          const response = await apiRequest("POST", "/api/emi", {
+            vehicleId: data.vehicleId,
+            amount: payment.amount,
+            description: payment.description || `EMI payment - ${new Date().toLocaleDateString()}`,
+            dueDate: new Date(payment.dueDate).toISOString(),
+            month: payment.month,
+            year: payment.year,
+          });
+          return response.json();
+        })
+      );
+
+      return responses;
     },
     onSuccess: () => {
-      toast({
-        title: "Payment Updated",
-        description: "EMI payment marked as paid!",
-      });
+      toast({ title: "Vehicle Updated", description: "EMI and payment information updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/vehicles"] });
       queryClient.invalidateQueries({ queryKey: ["/api/emi"] });
+      setShowVehicleDialog(false);
+    },
+    onError: () => {
+      toast({ title: "Update Failed", description: "Failed to update vehicle information", variant: "destructive" });
+    },
+  });
+
+  // Pay all vehicles mutation
+  const payAllVehiclesMutation = useMutation({
+    mutationFn: async () => {
+      const currentDate = new Date();
+      const responses = await Promise.all(
+        vehicles.map(async (vehicle: any) => {
+          const vehicleData = getVehicleData(vehicle);
+          const paymentAmount = Math.max(0, vehicleData.balance);
+          
+          const response = await apiRequest("POST", "/api/emi", {
+            vehicleId: vehicle.id,
+            amount: paymentAmount.toFixed(2),
+            description: `EMI payment - ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`,
+            dueDate: new Date().toISOString(),
+            month: currentDate.toLocaleString('default', { month: 'long' }),
+            year: currentDate.getFullYear(),
+          });
+          return response.json();
+        })
+      );
+      return responses;
+    },
+    onSuccess: () => {
+      toast({ title: "All Payments Processed", description: "EMI payments for all vehicles completed successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/emi"] });
+    },
+    onError: () => {
+      toast({ title: "Payment Failed", description: "Failed to process payments for all vehicles", variant: "destructive" });
     },
   });
 
@@ -197,7 +225,7 @@ export default function EmiManagement() {
   // Export data to Excel
   const exportToExcel = () => {
     const exportData = emiPayments.map((payment: any) => {
-      const vehicle = (vehicles as any[]).find((v: any) => v.id === payment.vehicleId);
+      const vehicle = vehicles.find((v: any) => v.id === payment.vehicleId);
       return {
         'Vehicle': vehicle?.licensePlate || 'Unknown',
         'Model': vehicle?.model || 'Unknown',
@@ -224,8 +252,8 @@ export default function EmiManagement() {
 
   // Filter vehicles based on selected filter
   const filteredVehicles = selectedVehicleFilter === "all" 
-    ? vehicles as any[]
-    : (vehicles as any[]).filter((vehicle: any) => {
+    ? vehicles
+    : vehicles.filter((vehicle: any) => {
         const vehicleData = getVehicleData(vehicle);
         return vehicleData.status === selectedVehicleFilter;
       });
@@ -256,42 +284,36 @@ export default function EmiManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">EMI Management</h1>
-          <p className="text-gray-500">Track monthly vehicle payment obligations</p>
+          <p className="text-gray-500">Manage monthly vehicle payment obligations</p>
         </div>
         <div className="flex space-x-3">
           <Button onClick={exportToExcel} variant="outline">
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>
+          <Button onClick={() => payAllVehiclesMutation.mutate()} disabled={payAllVehiclesMutation.isPending}>
+            <CreditCard className="w-4 h-4 mr-2" />
+            {payAllVehiclesMutation.isPending ? "Processing..." : "Pay All"}
+          </Button>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Vehicles</CardTitle>
-            <Truck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summaryStats.totalVehicles}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Scheduled</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Monthly EMI</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{summaryStats.totalScheduledAmount.toLocaleString()}</div>
+            <div className="text-2xl font-bold">₹{summaryStats.totalEmiAmount.toLocaleString()}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Paid Amount</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Paid Amount</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">₹{summaryStats.totalPaidAmount.toLocaleString()}</div>
@@ -300,8 +322,18 @@ export default function EmiManagement() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Advances</CardTitle>
+            <TrendingDown className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{summaryStats.totalAdvances.toLocaleString()}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Remaining Balance</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${
@@ -310,16 +342,6 @@ export default function EmiManagement() {
             }`}>
               ₹{totalRemainingBalance.toLocaleString()}
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overdue</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{summaryStats.overdueCount}</div>
           </CardContent>
         </Card>
       </div>
@@ -335,9 +357,7 @@ export default function EmiManagement() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Vehicles</SelectItem>
-                <SelectItem value="current">Current</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="overdue">Overdue</SelectItem>
                 <SelectItem value="paid">Paid</SelectItem>
                 <SelectItem value="overpaid">Overpaid</SelectItem>
               </SelectContent>
@@ -367,13 +387,14 @@ export default function EmiManagement() {
                     <div>
                       <h3 className="font-semibold">{vehicle.licensePlate}</h3>
                       <p className="text-sm text-gray-500">{vehicle.model}</p>
+                      <p className="text-xs text-gray-400">Monthly EMI: ₹{parseFloat(vehicle.monthlyEmi || 0).toLocaleString()}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
-                      <p className="text-sm text-gray-500">Scheduled: ₹{vehicleData.totalScheduled.toLocaleString()}</p>
                       <p className="text-sm text-gray-500">Paid: ₹{vehicleData.totalPaid.toLocaleString()}</p>
+                      <p className="text-sm text-gray-500">Advances: ₹{vehicleData.totalAdvances.toLocaleString()}</p>
                       <p className={`text-sm font-medium ${
                         vehicleData.balance < 0 ? 'text-red-600' : 
                         vehicleData.balance === 0 ? 'text-green-600' : 'text-amber-600'
@@ -387,11 +408,20 @@ export default function EmiManagement() {
                     <div className="flex space-x-2">
                       <Button
                         size="sm"
+                        onClick={() => processEmiPaymentMutation.mutate(vehicle)}
+                        disabled={processEmiPaymentMutation.isPending || vehicleData.balance <= 0}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <IndianRupee className="w-4 h-4 mr-1" />
+                        Pay
+                      </Button>
+                      <Button
+                        size="sm"
                         onClick={() => openVehicleDialog(vehicle)}
                         className="bg-blue-600 hover:bg-blue-700"
                       >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Add EMI
+                        <User className="w-4 h-4 mr-1" />
+                        Manage
                       </Button>
                       <Button
                         size="sm"
@@ -410,99 +440,122 @@ export default function EmiManagement() {
         </CardContent>
       </Card>
 
-      {/* Add EMI Dialog */}
+      {/* Manage Vehicle Dialog */}
       <Dialog open={showVehicleDialog} onOpenChange={setShowVehicleDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>
-              Add EMI Payments - {selectedVehicle?.licensePlate}
+              Manage Vehicle - {selectedVehicle?.licensePlate}
             </DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">EMI Entries</h3>
-              <Button onClick={addEmiEntry} size="sm">
-                <Plus className="w-4 h-4 mr-1" />
-                Add Entry
-              </Button>
+          <div className="space-y-6">
+            {/* Monthly EMI Update */}
+            <div className="p-4 border rounded-lg bg-gray-50">
+              <h3 className="text-lg font-semibold mb-3">Update Monthly EMI</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Current Monthly EMI</Label>
+                  <p className="text-sm text-gray-600">₹{parseFloat(selectedVehicle?.monthlyEmi || 0).toLocaleString()}</p>
+                </div>
+                <div>
+                  <Label>New Monthly EMI (₹)</Label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={newMonthlyEmi}
+                    onChange={(e) => setNewMonthlyEmi(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
 
-            {emiEntries.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <CreditCard className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No EMI entries yet. Click "Add Entry" to start.</p>
+            {/* Payment Entries */}
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Payment Entries</h3>
+                <Button onClick={addPaymentEntry} size="sm">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Entry
+                </Button>
               </div>
-            ) : (
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {emiEntries.map((entry) => (
-                  <Card key={entry.id} className="p-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Amount (₹)</Label>
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          value={entry.amount}
-                          onChange={(e) => updateEmiEntry(entry.id, 'amount', e.target.value)}
-                        />
+
+              {paymentEntries.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <CreditCard className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No payment entries yet. Click "Add Entry" to start.</p>
+                </div>
+              ) : (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {paymentEntries.map((entry) => (
+                    <Card key={entry.id} className="p-4">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <Label>Amount (₹)</Label>
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            value={entry.amount}
+                            onChange={(e) => updatePaymentEntry(entry.id, 'amount', e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label>Due Date</Label>
+                          <Input
+                            type="date"
+                            value={entry.dueDate}
+                            onChange={(e) => updatePaymentEntry(entry.id, 'dueDate', e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label>Month</Label>
+                          <Select value={entry.month} onValueChange={(value) => updatePaymentEntry(entry.id, 'month', value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select month" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[
+                                "January", "February", "March", "April", "May", "June",
+                                "July", "August", "September", "October", "November", "December"
+                              ].map((month) => (
+                                <SelectItem key={month} value={month}>{month}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Year</Label>
+                          <Input
+                            type="number"
+                            placeholder="2024"
+                            value={entry.year}
+                            onChange={(e) => updatePaymentEntry(entry.id, 'year', parseInt(e.target.value))}
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Label>Description (Optional)</Label>
+                          <Textarea
+                            placeholder="Additional notes..."
+                            value={entry.description}
+                            onChange={(e) => updatePaymentEntry(entry.id, 'description', e.target.value)}
+                            rows={2}
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <Label>Due Date</Label>
-                        <Input
-                          type="date"
-                          value={entry.dueDate}
-                          onChange={(e) => updateEmiEntry(entry.id, 'dueDate', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label>Month</Label>
-                        <Select value={entry.month} onValueChange={(value) => updateEmiEntry(entry.id, 'month', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select month" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {[
-                              "January", "February", "March", "April", "May", "June",
-                              "July", "August", "September", "October", "November", "December"
-                            ].map((month) => (
-                              <SelectItem key={month} value={month}>{month}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Year</Label>
-                        <Input
-                          type="number"
-                          placeholder="2024"
-                          value={entry.year}
-                          onChange={(e) => updateEmiEntry(entry.id, 'year', parseInt(e.target.value))}
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Label>Description (Optional)</Label>
-                        <Textarea
-                          placeholder="Additional notes..."
-                          value={entry.description}
-                          onChange={(e) => updateEmiEntry(entry.id, 'description', e.target.value)}
-                          rows={2}
-                        />
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="mt-2 text-red-600 hover:text-red-700"
-                      onClick={() => removeEmiEntry(entry.id)}
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Remove
-                    </Button>
-                  </Card>
-                ))}
-              </div>
-            )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-2 text-red-600 hover:text-red-700"
+                        onClick={() => removePaymentEntry(entry.id)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Remove
+                      </Button>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <div className="flex justify-end space-x-3 pt-4 border-t">
               <Button
@@ -512,11 +565,17 @@ export default function EmiManagement() {
                 Cancel
               </Button>
               <Button
-                onClick={() => processEmiMutation.mutate()}
-                disabled={processEmiMutation.isPending || emiEntries.length === 0}
+                onClick={() => updateVehicleEmiMutation.mutate({
+                  vehicleId: selectedVehicle!.id,
+                  newMonthlyEmi,
+                  payments: paymentEntries.filter(entry => 
+                    entry.amount && parseFloat(entry.amount) > 0 && entry.dueDate && entry.month
+                  )
+                })}
+                disabled={updateVehicleEmiMutation.isPending}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                {processEmiMutation.isPending ? "Processing..." : "Add EMI Payments"}
+                {updateVehicleEmiMutation.isPending ? "Updating..." : "Update Vehicle"}
               </Button>
             </div>
           </div>
@@ -541,47 +600,34 @@ export default function EmiManagement() {
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {filteredEmiPayments.map((payment: any) => {
-                  const dueDate = new Date(payment.dueDate);
-                  const isOverdue = dueDate < new Date() && payment.status === 'pending';
+                  const amount = parseFloat(payment.amount);
+                  const isAdvance = amount < 0;
                   
                   return (
                     <div key={payment.id} className={`p-4 border rounded-lg ${
-                      payment.status === 'paid' ? 'bg-green-50 border-green-200' : 
-                      isOverdue ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200'
+                      isAdvance ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'
                     }`}>
                       <div className="flex items-center justify-between">
                         <div>
-                          <h4 className="font-semibold">₹{parseFloat(payment.amount).toLocaleString()}</h4>
+                          <h4 className="font-semibold">
+                            {isAdvance ? 'Advance: ' : 'Payment: '}
+                            ₹{Math.abs(amount).toLocaleString()}
+                          </h4>
                           <p className="text-sm text-gray-600">{payment.month} {payment.year}</p>
-                          <p className="text-xs text-gray-500">Due: {dueDate.toLocaleDateString()}</p>
+                          <p className="text-xs text-gray-500">
+                            {payment.paidDate ? `Paid: ${new Date(payment.paidDate).toLocaleDateString()}` : 
+                             `Due: ${new Date(payment.dueDate).toLocaleDateString()}`}
+                          </p>
                           {payment.description && (
                             <p className="text-xs text-gray-600 mt-1">{payment.description}</p>
                           )}
                         </div>
-                        <div className="flex items-center space-x-3">
-                          <Badge className={
-                            payment.status === 'paid' ? 'bg-green-100 text-green-700' :
-                            isOverdue ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
-                          }>
-                            {payment.status === 'paid' ? 'Paid' : isOverdue ? 'Overdue' : 'Pending'}
-                          </Badge>
-                          {payment.status === 'pending' && (
-                            <Button
-                              size="sm"
-                              onClick={() => markPaidMutation.mutate({ id: payment.id })}
-                              disabled={markPaidMutation.isPending}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              Mark Paid
-                            </Button>
-                          )}
-                        </div>
+                        <Badge className={
+                          payment.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                        }>
+                          {payment.status}
+                        </Badge>
                       </div>
-                      {payment.paidDate && (
-                        <p className="text-xs text-green-600 mt-2">
-                          Paid on: {new Date(payment.paidDate).toLocaleDateString()}
-                        </p>
-                      )}
                     </div>
                   );
                 })}
