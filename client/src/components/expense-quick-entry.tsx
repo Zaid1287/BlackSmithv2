@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +20,9 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
   const { user } = useAuth();
   
   const [amounts, setAmounts] = useState<{ [key: string]: string }>({});
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+  const [pendingExpense, setPendingExpense] = useState<{category: string; amount: number} | null>(null);
+  const [description, setDescription] = useState("");
 
   // All expense categories with role-based filtering
   const allExpenseCategories = [
@@ -51,7 +56,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
   });
 
   const addExpenseMutation = useMutation({
-    mutationFn: async (data: { category: string; amount: number }) => {
+    mutationFn: async (data: { category: string; amount: number; description?: string }) => {
       const response = await fetch("/api/expenses", {
         method: "POST",
         headers: {
@@ -63,7 +68,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
           journeyId,
           category: data.category,
           amount: data.amount.toString(),
-          description: "",
+          description: data.description || "",
         }),
       });
       
@@ -112,15 +117,42 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
 
     // Check if this category requires a description
     if (categoriesRequiringDescription.includes(category)) {
+      setPendingExpense({ category, amount });
+      setShowDescriptionModal(true);
+      return;
+    }
+
+    addExpenseMutation.mutate({ category, amount });
+  };
+
+  const handleSubmitWithDescription = () => {
+    if (!pendingExpense) return;
+    
+    if (description.trim().length < 3) {
       toast({
         title: "Description Required",
-        description: "This expense type requires a description. Please use the 'Add Expense' button above for detailed entry.",
+        description: "Please provide at least 3 characters for the description",
         variant: "destructive",
       });
       return;
     }
 
-    addExpenseMutation.mutate({ category, amount });
+    addExpenseMutation.mutate({ 
+      category: pendingExpense.category, 
+      amount: pendingExpense.amount,
+      description: description.trim()
+    });
+    
+    // Close modal and reset state
+    setShowDescriptionModal(false);
+    setPendingExpense(null);
+    setDescription("");
+  };
+
+  const handleCancelDescription = () => {
+    setShowDescriptionModal(false);
+    setPendingExpense(null);
+    setDescription("");
   };
 
   const handleAmountChange = (category: string, value: string) => {
@@ -150,7 +182,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
       >
         {requiresDescription && (
           <div className="absolute top-1 right-1">
-            <span className="bg-orange-500 text-white text-xs px-1 py-0.5 rounded">Desc Required</span>
+            <span className="bg-orange-500 text-white text-xs px-1 py-0.5 rounded">Description</span>
           </div>
         )}
         
@@ -258,6 +290,61 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
           </div>
         </div>
       )}
+
+      {/* Description Modal */}
+      <Dialog open={showDescriptionModal} onOpenChange={setShowDescriptionModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Description</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-gray-600 mb-2">
+                Adding <strong>₹{pendingExpense?.amount}</strong> for <strong>{pendingExpense && allExpenseCategories.find(cat => cat.value === pendingExpense.category)?.label}</strong>
+              </p>
+              <p className="text-sm text-orange-600">
+                This category requires a description. Please provide details about this expense.
+              </p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description <span className="text-red-500">*</span>
+              </label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Please provide details about this expense..."
+                rows={3}
+                className="w-full"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Minimum 3 characters required
+              </p>
+            </div>
+            
+            <div className="flex space-x-3 pt-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="flex-1"
+                onClick={handleCancelDescription}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                onClick={handleSubmitWithDescription}
+                disabled={addExpenseMutation.isPending || description.trim().length < 3}
+              >
+                {addExpenseMutation.isPending ? "Adding..." : "Add Expense"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
