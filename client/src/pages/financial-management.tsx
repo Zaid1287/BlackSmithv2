@@ -507,7 +507,7 @@ export default function FinancialManagement() {
     
     // Create header for journey details with expense categories
     const journeyHeader = [
-      "Journey ID", "Driver Name", "Destination", "Start Date", "End Date", "Status"
+      "Journey ID", "Driver Name", "Destination", "Start Date", "End Date", "Status", "Pouch (₹)", "Security (₹)"
     ];
     
     // Add expense category headers
@@ -543,7 +543,9 @@ export default function FinancialManagement() {
         journey.destination || "",
         journey.startTime ? new Date(journey.startTime).toLocaleDateString() : "",
         journey.endTime ? new Date(journey.endTime).toLocaleDateString() : "Ongoing",
-        journey.status
+        journey.status,
+        journeyPouchRevenue,
+        journeySecurityRevenue
       ];
       
       // Add expense amounts for each category
@@ -566,6 +568,8 @@ export default function FinancialManagement() {
       { wch: 12 }, // Start Date
       { wch: 12 }, // End Date
       { wch: 12 }, // Status
+      { wch: 10 }, // Pouch
+      { wch: 10 }, // Security
     ];
     
     // Add widths for each expense category
