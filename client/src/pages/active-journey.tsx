@@ -148,12 +148,12 @@ export default function ActiveJourney() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Active Journey Tracking</h1>
-          <p className="text-gray-500">Monitor your current journey in real-time</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('activeJourney')}</h1>
+          <p className="text-gray-500">{t('noActiveJourneyMessage')}</p>
         </div>
         <div className="flex items-center space-x-4">
           <Badge variant="secondary" className="bg-green-100 text-green-700">
-            In Progress
+            {t('active')}
           </Badge>
         </div>
       </div>
@@ -166,21 +166,21 @@ export default function ActiveJourney() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900">Journey to {userActiveJourney.destination}</h2>
+                  <h2 className="text-xl font-semibold text-gray-900">{t('journeyDetails')} {t('to')} {userActiveJourney.destination}</h2>
                   <p className="text-gray-500">
-                    License Plate: {userActiveJourney.licensePlate} • Started: {new Date(userActiveJourney.startTime).toLocaleTimeString()}
+                    {t('licensePlate')}: {userActiveJourney.licensePlate} • {t('startJourney')}: {new Date(userActiveJourney.startTime).toLocaleTimeString()}
                   </p>
                 </div>
-                <Badge className="bg-green-100 text-green-700">In Progress</Badge>
+                <Badge className="bg-green-100 text-green-700">{t('active')}</Badge>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Initial Pouch</p>
+                  <p className="text-sm text-gray-500">{t('revenue')}</p>
                   <p className="font-semibold">₹{parseFloat(userActiveJourney.pouch).toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Security Deposit</p>
+                  <p className="text-sm text-gray-500">{t('security')}</p>
                   <p className="font-semibold">₹{parseFloat(userActiveJourney.security).toLocaleString()}</p>
                 </div>
               </div>
@@ -192,7 +192,7 @@ export default function ActiveJourney() {
             <CardContent className="p-6 md:p-10 lg:p-14 w-full">
               <h3 className="text-xl md:text-2xl font-bold flex items-center mb-8">
                 <DollarSign className="text-green-600 mr-3 md:mr-4 w-6 h-6 md:w-8 md:h-8" />
-                Quick Expense Entry
+                {t('quickExpenses')}
               </h3>
               <ExpenseQuickEntry journeyId={userActiveJourney.id} />
             </CardContent>

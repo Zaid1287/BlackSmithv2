@@ -8,6 +8,7 @@ import { Plus } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { getAuthHeaders } from "@/lib/auth";
 
 interface ExpenseQuickEntryProps {
@@ -18,20 +19,21 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { t } = useLanguage();
   
   const [amounts, setAmounts] = useState<{ [key: string]: string }>({});
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const [pendingExpense, setPendingExpense] = useState<{category: string; amount: number} | null>(null);
   const [description, setDescription] = useState("");
 
-  // All expense categories with role-based filtering
-  const allExpenseCategories = [
+  // All expense categories with role-based filtering and translations
+  const getExpenseCategories = () => [
     { value: "hyd_inward", label: "HYD Inward", adminOnly: true, isRevenue: true },
     { value: "loading", label: "Loading" },
     { value: "rope", label: "Rope" },
-    { value: "fuel", label: "Fuel" },
-    { value: "food", label: "Food" },
-    { value: "maintenance", label: "Maintenance" },
+    { value: "fuel", label: t('fuel') },
+    { value: "food", label: t('food') },
+    { value: "maintenance", label: t('maintenance') },
     { value: "rto", label: "RTO" },
     { value: "hyd_unloading", label: "HYD Unloading" },
     { value: "nzb_unloading", label: "NZB Unloading" },
@@ -44,13 +46,13 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
     { value: "adblue", label: "AdBlue" },
     { value: "fines", label: "Fines" },
     { value: "driver_fees", label: "Driver Fees" },
-    { value: "other", label: "Other" },
-    { value: "toll", label: "Toll", adminOnly: true },
+    { value: "other", label: t('other') },
+    { value: "toll", label: t('toll'), adminOnly: true },
     { value: "top_up", label: "Top Up", isRevenue: true },
   ];
 
   // Filter categories based on user role
-  const expenseCategories = allExpenseCategories.filter(category => {
+  const expenseCategories = getExpenseCategories().filter(category => {
     if (!category.adminOnly) return true;
     return user?.role === 'admin';
   });
