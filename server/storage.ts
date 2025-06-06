@@ -428,6 +428,9 @@ export class DatabaseStorage implements IStorage {
     await db.delete(journeys);
     // 3. Delete salary payments (they reference users)
     await db.delete(salaryPayments);
+    // 4. Delete EMI payments and reset history
+    await db.delete(emiPayments);
+    await db.delete(emiResetHistory);
     
     // Reset vehicle statuses to available
     await db.update(vehicles).set({ status: 'available' });
