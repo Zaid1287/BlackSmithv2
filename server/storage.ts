@@ -323,12 +323,20 @@ export class DatabaseStorage implements IStorage {
       })
       .from(salaryPayments);
 
-    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups
+    // Calculate total EMI payments
+    const [emiStats] = await db
+      .select({
+        totalEmiPayments: sql<number>`COALESCE(SUM(${emiPayments.amount}), 0)`,
+      })
+      .from(emiPayments);
+
+    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups - EMI Payments
     const baseProfit = (journeyStats.totalRevenue || 0) + (journeyStats.completedSecurity || 0) - (journeyStats.totalExpenses || 0);
     const salaryAdjustment = -(salaryStats.totalPayments || 0) + (salaryStats.totalDebts || 0); // Subtract payments, add debts
     const additionalRevenue = (revenueStats.hydInwardRevenue || 0) + (revenueStats.topUpRevenue || 0);
+    const emiDeduction = -(emiStats.totalEmiPayments || 0); // Subtract EMI payments
     
-    const netProfit = baseProfit + salaryAdjustment + additionalRevenue;
+    const netProfit = baseProfit + salaryAdjustment + additionalRevenue + emiDeduction;
 
     // Get total security deposits for revenue display
     const [allSecurityStats] = await db
@@ -345,9 +353,10 @@ export class DatabaseStorage implements IStorage {
     const totalDebts = parseFloat(salaryStats.totalDebts?.toString() || '0');
     const hydInward = parseFloat(revenueStats.hydInwardRevenue?.toString() || '0');
     const topUp = parseFloat(revenueStats.topUpRevenue?.toString() || '0');
+    const totalEmiPayments = parseFloat(emiStats.totalEmiPayments?.toString() || '0');
     
-    // Calculate net profit including salary expenses
-    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp);
+    // Calculate net profit including salary expenses and EMI deductions
+    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp - totalEmiPayments);
 
     return {
       revenue: totalRevenue + totalSecurity,
@@ -366,6 +375,10 @@ export class DatabaseStorage implements IStorage {
         journeyExpenses: totalExpenses,
         salaryPayments: totalPayments,
         salaryDebts: totalDebts,
+        emiPayments: totalEmiPayments,
+      },
+      emiStats: {
+        totalEmiPayments: totalEmiPayments,
       }
     };
   }

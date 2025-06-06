@@ -309,6 +309,7 @@ export default function FinancialManagement() {
   const journeyExpenses = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.journeyExpenses?.toString() || "0") || 0 : filteredTotalExpenses;
   const salaryPayments = parseFloat(breakdown.salaryPayments?.toString() || "0") || 0; // Salaries are not vehicle-specific
   const salaryDebts = parseFloat(breakdown.salaryDebts?.toString() || "0") || 0; // Salary debts are not vehicle-specific
+  const emiPayments = parseFloat(breakdown.emiPayments?.toString() || "0") || 0; // EMI payments are not vehicle-specific
 
   // Prepare chart data
   const revenueChartData = [
@@ -532,6 +533,7 @@ export default function FinancialManagement() {
                   <div>Security Deposits: ₹{securityDeposits.toLocaleString()}</div>
                   <div>Salary Payments: ₹{salaryPayments.toLocaleString()}</div>
                   <div>Salary Debts: +₹{salaryDebts.toLocaleString()}</div>
+                  <div>EMI Payments: ₹{emiPayments.toLocaleString()}</div>
                 </div>
               </div>
             </div>
