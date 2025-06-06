@@ -62,6 +62,30 @@ export default function FinancialManagement() {
     },
   });
 
+  const { data: emiPayments = [] } = useQuery({
+    queryKey: ["/api/emi"],
+    queryFn: async () => {
+      const response = await fetch("/api/emi", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch EMI payments");
+      return response.json();
+    },
+  });
+
+  const { data: vehicles = [] } = useQuery({
+    queryKey: ["/api/vehicles"],
+    queryFn: async () => {
+      const response = await fetch("/api/vehicles", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch vehicles");
+      return response.json();
+    },
+  });
+
   const resetFinancialDataMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("POST", "/api/reset-financial-data");
@@ -287,7 +311,16 @@ export default function FinancialManagement() {
 
   const filteredTotalExpenses = filteredExpenses.filter((exp: any) => exp.category !== 'hyd_inward' && exp.category !== 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
 
-  const filteredNetProfit = filteredRevenue - filteredTotalExpenses;
+  // Calculate filtered EMI payments for the selected vehicle
+  const filteredEmiPayments = selectedLicensePlateFilter === "all" ? 0 : (() => {
+    const selectedVehicle = vehicles.find((v: any) => v.licensePlate === selectedLicensePlateFilter);
+    if (!selectedVehicle) return 0;
+    return emiPayments
+      .filter((payment: any) => payment.vehicleId === selectedVehicle.id)
+      .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
+  })();
+
+  const filteredNetProfit = filteredRevenue - filteredTotalExpenses - filteredEmiPayments;
 
   // Use filtered or total stats based on filter selection
   const totalRevenue = selectedLicensePlateFilter === "all" ? parseFloat(financialStats?.revenue?.toString() || "0") || 0 : filteredRevenue;
@@ -309,7 +342,7 @@ export default function FinancialManagement() {
   const journeyExpenses = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.journeyExpenses?.toString() || "0") || 0 : filteredTotalExpenses;
   const salaryPayments = parseFloat(breakdown.salaryPayments?.toString() || "0") || 0; // Salaries are not vehicle-specific
   const salaryDebts = parseFloat(breakdown.salaryDebts?.toString() || "0") || 0; // Salary debts are not vehicle-specific
-  const emiPayments = parseFloat(breakdown.emiPayments?.toString() || "0") || 0; // EMI payments are not vehicle-specific
+  const emiPaymentTotal = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.emiPayments?.toString() || "0") || 0 : filteredEmiPayments;
 
   // Prepare chart data
   const revenueChartData = [
@@ -533,7 +566,7 @@ export default function FinancialManagement() {
                   <div>Security Deposits: ₹{securityDeposits.toLocaleString()}</div>
                   <div>Salary Payments: ₹{salaryPayments.toLocaleString()}</div>
                   <div>Salary Debts: +₹{salaryDebts.toLocaleString()}</div>
-                  <div>EMI Payments: ₹{emiPayments.toLocaleString()}</div>
+                  <div>EMI Payments: ₹{emiPaymentTotal.toLocaleString()}</div>
                 </div>
               </div>
             </div>
