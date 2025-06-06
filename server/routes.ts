@@ -454,13 +454,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/emi", authenticateToken, requireAdmin, async (req, res) => {
     try {
+      console.log("EMI request body:", req.body);
       const emiData = insertEmiPaymentSchema.parse(req.body);
+      console.log("Parsed EMI data:", emiData);
       const emiPayment = await storage.createEmiPayment(emiData);
       res.json(emiPayment);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.log("Validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid EMI data", errors: error.errors });
       }
+      console.log("EMI creation error:", error);
       res.status(500).json({ message: "Failed to create EMI payment" });
     }
   });

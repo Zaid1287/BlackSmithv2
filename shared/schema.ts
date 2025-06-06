@@ -152,8 +152,14 @@ export const insertSalaryPaymentSchema = createInsertSchema(salaryPayments).omit
 export const insertEmiPaymentSchema = createInsertSchema(emiPayments).omit({
   id: true,
   createdAt: true,
+  paidDate: true,
 }).extend({
   amount: z.string().regex(/^\d+(\.\d{1,2})?$/, "Please enter a valid amount"),
+  dueDate: z.string().transform((val) => new Date(val)),
+  vehicleId: z.number(),
+  month: z.string(),
+  year: z.number(),
+  description: z.string().optional(),
 });
 
 // Types
