@@ -427,7 +427,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllEmiPayments(): Promise<EmiPayment[]> {
-    return await db.select().from(emiPayments).orderBy(desc(emiPayments.dueDate));
+    return await db.select().from(emiPayments).orderBy(desc(emiPayments.createdAt));
   }
 
   async updateEmiPaymentStatus(id: number, status: string, paidDate?: Date): Promise<void> {
