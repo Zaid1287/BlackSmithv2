@@ -56,25 +56,17 @@ export default function EmiManagement() {
     totalVehicles: vehicles.length,
     totalEmiAmount: vehicles.reduce((sum: number, vehicle: any) => sum + parseFloat(vehicle.monthlyEmi || 0), 0),
     totalPaidAmount: emiPayments
-      .filter((p: any) => parseFloat(p.amount) > 0)
       .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0),
-    totalAdvances: emiPayments
-      .filter((p: any) => parseFloat(p.amount) < 0)
-      .reduce((sum: number, p: any) => sum + Math.abs(parseFloat(p.amount)), 0),
   };
 
-  const totalRemainingBalance = summaryStats.totalEmiAmount - summaryStats.totalPaidAmount + summaryStats.totalAdvances;
+  const totalRemainingBalance = summaryStats.totalEmiAmount - summaryStats.totalPaidAmount;
 
   // Calculate individual vehicle data
   const getVehicleData = (vehicle: any) => {
     const vehiclePayments = emiPayments.filter((p: any) => p.vehicleId === vehicle.id);
     const totalPaid = vehiclePayments
-      .filter((p: any) => parseFloat(p.amount) > 0)
       .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
-    const totalAdvances = vehiclePayments
-      .filter((p: any) => parseFloat(p.amount) < 0)
-      .reduce((sum: number, p: any) => sum + Math.abs(parseFloat(p.amount)), 0);
-    const balance = parseFloat(vehicle.monthlyEmi || 0) - totalPaid + totalAdvances;
+    const balance = parseFloat(vehicle.monthlyEmi || 0) - totalPaid;
     
     let status = 'pending';
     let statusColor = 'bg-amber-100 text-amber-800';
@@ -83,7 +75,7 @@ export default function EmiManagement() {
       statusColor = balance < 0 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
     }
 
-    return { totalPaid, totalAdvances, balance, status, statusColor };
+    return { totalPaid, balance, status, statusColor };
   };
 
   // Open vehicle management dialog
@@ -328,15 +320,7 @@ export default function EmiManagement() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Advances</CardTitle>
-            <TrendingDown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹{summaryStats.totalAdvances.toLocaleString()}</div>
-          </CardContent>
-        </Card>
+
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -410,12 +394,7 @@ export default function EmiManagement() {
                     <span className="font-medium text-green-600">₹{vehicleData.totalPaid.toLocaleString()}</span>
                   </div>
                   
-                  {vehicleData.totalAdvances > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Advances</span>
-                      <span className="font-medium text-red-600">₹{vehicleData.totalAdvances.toLocaleString()}</span>
-                    </div>
-                  )}
+
                   
                   <div className="flex justify-between items-center pt-2 border-t">
                     <span className="text-sm font-medium">Current Balance</span>
