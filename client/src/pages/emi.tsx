@@ -224,8 +224,8 @@ export default function EmiManagement() {
 
   // Filter vehicles based on selected filter
   const filteredVehicles = selectedVehicleFilter === "all" 
-    ? vehicles 
-    : vehicles.filter((vehicle: any) => {
+    ? vehicles as any[]
+    : (vehicles as any[]).filter((vehicle: any) => {
         const vehicleData = getVehicleData(vehicle);
         return vehicleData.status === selectedVehicleFilter;
       });
