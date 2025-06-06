@@ -312,7 +312,7 @@ export default function FinancialManagement() {
 
   const filteredTotalExpenses = filteredExpenses.filter((exp: any) => exp.category !== 'hyd_inward' && exp.category !== 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
 
-  // Calculate filtered EMI payments for the selected vehicle
+  // Calculate filtered EMI payments for the selected vehicle (for display purposes only)
   const filteredEmiPayments = selectedLicensePlateFilter === "all" ? 0 : (() => {
     const selectedVehicle = vehicles.find((v: any) => v.licensePlate === selectedLicensePlateFilter);
     if (!selectedVehicle) return 0;
@@ -321,8 +321,8 @@ export default function FinancialManagement() {
       .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
   })();
 
-  // EMI payments reduce business finances when paid
-  const filteredNetProfit = filteredRevenue - filteredTotalExpenses - filteredEmiPayments;
+  // EMI payments don't affect business profit calculations
+  const filteredNetProfit = filteredRevenue - filteredTotalExpenses;
 
   // Use filtered or total stats based on filter selection
   const totalRevenue = selectedLicensePlateFilter === "all" ? parseFloat(financialStats?.revenue?.toString() || "0") || 0 : filteredRevenue;
