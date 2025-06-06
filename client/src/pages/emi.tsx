@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
   CreditCard, Download, History, IndianRupee, Truck, Trash2, Plus, 
-  Clock, User, Wallet, TrendingUp, TrendingDown, DollarSign 
+  Clock, User, Wallet, TrendingUp, TrendingDown, DollarSign, RotateCcw, Shield
 } from "lucide-react";
 import * as XLSX from 'xlsx';
 
@@ -39,6 +39,8 @@ export default function EmiManagement() {
   const [paymentEntries, setPaymentEntries] = useState<PaymentEntry[]>([]);
   const [newMonthlyEmi, setNewMonthlyEmi] = useState("");
   const [selectedVehicleFilter, setSelectedVehicleFilter] = useState<string>("all");
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [confirmationText, setConfirmationText] = useState("");
 
   // Fetch vehicles
   const { data: vehicles = [], isLoading: vehiclesLoading } = useQuery({
@@ -201,6 +203,29 @@ export default function EmiManagement() {
     },
   });
 
+  // Reset EMI data mutation
+  const resetEmiDataMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/reset-emi-data");
+    },
+    onSuccess: () => {
+      toast({ title: "EMI Data Reset", description: "All EMI payment data has been cleared successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/emi"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
+      setShowResetDialog(false);
+      setConfirmationText("");
+    },
+    onError: () => {
+      toast({ title: "Reset Failed", description: "Failed to reset EMI data", variant: "destructive" });
+    },
+  });
+
+  const handleResetConfirm = () => {
+    if (confirmationText === "RESET EMI DATA") {
+      resetEmiDataMutation.mutate();
+    }
+  };
+
   // View vehicle EMI history
   const viewVehicleHistory = (vehicle: Vehicle) => {
     setSelectedVehicle(vehicle);
@@ -273,6 +298,14 @@ export default function EmiManagement() {
           <Button onClick={exportToExcel} variant="outline">
             <Download className="w-4 h-4 mr-2" />
             Export
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => setShowResetDialog(true)}
+            className="text-red-600 border-red-600 hover:bg-red-50"
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Reset EMI Data
           </Button>
           <Button onClick={() => payAllVehiclesMutation.mutate()} disabled={payAllVehiclesMutation.isPending}>
             <CreditCard className="w-4 h-4 mr-2" />
@@ -606,6 +639,57 @@ export default function EmiManagement() {
                 })}
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Confirmation Dialog */}
+      <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-red-600">
+              <Shield className="w-5 h-5" />
+              <span>Reset EMI Data</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-800">
+                <strong>Warning:</strong> This action will permanently delete all EMI payment records. 
+                This cannot be undone.
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="confirmation" className="text-sm font-medium">
+                Type "RESET EMI DATA" to confirm:
+              </Label>
+              <Input
+                id="confirmation"
+                value={confirmationText}
+                onChange={(e) => setConfirmationText(e.target.value)}
+                placeholder="RESET EMI DATA"
+                className="mt-2"
+              />
+            </div>
+            <div className="flex space-x-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowResetDialog(false);
+                  setConfirmationText("");
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleResetConfirm}
+                disabled={confirmationText !== "RESET EMI DATA" || resetEmiDataMutation.isPending}
+                className="flex-1 bg-red-600 hover:bg-red-700"
+              >
+                {resetEmiDataMutation.isPending ? "Resetting..." : "Reset Data"}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

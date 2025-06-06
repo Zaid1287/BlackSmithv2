@@ -508,6 +508,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/reset-emi-data", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      await storage.resetEmiData();
+      res.json({ message: "EMI data reset successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to reset EMI data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
