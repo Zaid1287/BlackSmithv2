@@ -55,7 +55,7 @@ export default function EmiManagement() {
     totalVehicles: vehicles.length,
     totalEmiAmount: vehicles.reduce((sum: number, vehicle: any) => sum + parseFloat(vehicle.monthlyEmi || 0), 0),
     totalPaidAmount: emiPayments
-      .filter((p: any) => p.status === 'paid')
+      .filter((p: any) => parseFloat(p.amount) > 0)
       .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0),
     totalAdvances: emiPayments
       .filter((p: any) => parseFloat(p.amount) < 0)
