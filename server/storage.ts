@@ -356,8 +356,8 @@ export class DatabaseStorage implements IStorage {
     const topUp = parseFloat(revenueStats.topUpRevenue?.toString() || '0');
     const totalEmiPayments = parseFloat(emiStats.totalEmiPayments?.toString() || '0');
     
-    // Calculate net profit including salary expenses and EMI deductions
-    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp - totalEmiPayments);
+    // Calculate net profit including salary expenses (EMI payments tracked separately)
+    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp);
 
     return {
       revenue: totalRevenue + totalSecurity,
