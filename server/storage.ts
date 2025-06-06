@@ -331,13 +331,13 @@ export class DatabaseStorage implements IStorage {
       })
       .from(emiPayments);
 
-    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups - EMI Payments
+    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups
+    // EMI payments are vehicle financing costs and don't affect business profit
     const baseProfit = (journeyStats.totalRevenue || 0) + (journeyStats.completedSecurity || 0) - (journeyStats.totalExpenses || 0);
     const salaryAdjustment = -(salaryStats.totalPayments || 0) + (salaryStats.totalDebts || 0); // Subtract payments, add debts
     const additionalRevenue = (revenueStats.hydInwardRevenue || 0) + (revenueStats.topUpRevenue || 0);
-    const emiDeduction = -(emiStats.totalEmiPayments || 0); // Subtract EMI payments
     
-    const netProfit = baseProfit + salaryAdjustment + additionalRevenue + emiDeduction;
+    const netProfit = baseProfit + salaryAdjustment + additionalRevenue;
 
     // Get total security deposits for revenue display
     const [allSecurityStats] = await db
