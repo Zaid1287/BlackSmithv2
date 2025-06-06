@@ -51,6 +51,7 @@ export interface IStorage {
   // Reset methods
   resetAllFinancialData(): Promise<void>;
   resetSalaryData(): Promise<void>;
+  resetEmiData(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -454,6 +455,11 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEmiPayment(id: number): Promise<void> {
     await db.delete(emiPayments).where(eq(emiPayments.id, id));
+  }
+
+  async resetEmiData(): Promise<void> {
+    // Delete all EMI payment records
+    await db.delete(emiPayments);
   }
 }
 
