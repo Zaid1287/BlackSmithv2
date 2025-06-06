@@ -422,7 +422,7 @@ export class DatabaseStorage implements IStorage {
     const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp - totalEmiPayments - totalEmiResetAmount);
 
     return {
-      revenue: totalRevenue + totalSecurity,
+      revenue: totalRevenue + totalSecurity + hydInward + topUp,
       expenses: totalExpenses,
       netProfit: isNaN(calculatedNetProfit) ? 0 : calculatedNetProfit,
       salaryStats: {
