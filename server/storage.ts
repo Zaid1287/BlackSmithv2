@@ -134,7 +134,7 @@ export class DatabaseStorage implements IStorage {
         id: journeys.id,
         driverId: journeys.driverId,
         vehicleId: journeys.vehicleId,
-        startLocation: journeys.startLocation,
+        licensePlate: journeys.licensePlate,
         destination: journeys.destination,
         startTime: journeys.startTime,
         endTime: journeys.endTime,
@@ -144,11 +144,11 @@ export class DatabaseStorage implements IStorage {
         totalExpenses: journeys.totalExpenses,
         balance: journeys.balance,
         currentLocation: journeys.currentLocation,
-        currentSpeed: journeys.currentSpeed,
-        totalDistance: journeys.totalDistance,
+        speed: journeys.speed,
+        distanceCovered: journeys.distanceCovered,
         photos: journeys.photos,
         driverName: users.name,
-        licensePlate: vehicles.licensePlate,
+        vehicleLicensePlate: vehicles.licensePlate,
       })
       .from(journeys)
       .leftJoin(users, eq(journeys.driverId, users.id))
@@ -165,7 +165,7 @@ export class DatabaseStorage implements IStorage {
         id: journeys.id,
         driverId: journeys.driverId,
         vehicleId: journeys.vehicleId,
-        startLocation: journeys.startLocation,
+        licensePlate: journeys.licensePlate,
         destination: journeys.destination,
         startTime: journeys.startTime,
         endTime: journeys.endTime,
@@ -175,11 +175,11 @@ export class DatabaseStorage implements IStorage {
         totalExpenses: journeys.totalExpenses,
         balance: journeys.balance,
         currentLocation: journeys.currentLocation,
-        currentSpeed: journeys.currentSpeed,
-        totalDistance: journeys.totalDistance,
+        speed: journeys.speed,
+        distanceCovered: journeys.distanceCovered,
         photos: journeys.photos,
         driverName: users.name,
-        licensePlate: vehicles.licensePlate,
+        vehicleLicensePlate: vehicles.licensePlate,
       })
       .from(journeys)
       .leftJoin(users, eq(journeys.driverId, users.id))
