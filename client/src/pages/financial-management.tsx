@@ -482,55 +482,88 @@ export default function FinancialManagement() {
       [""],
       [""],
       ["JOURNEY DETAILS"],
-      [""],
-      ["Journey ID", "Driver Name", "Destination", "Start Date", "End Date", "Status", "Expenses", "Revenue"]
+      [""]
     ];
 
-    // Add journey details
+    // Define common expense categories for consistent columns
+    const expenseCategories = ['fuel', 'food', 'driver_fees', 'loading', 'fines', 'rope', 'tire_grease', 
+                              'tires_air', 'weighment', 'rto', 'nzb_unloading', 'hyd_inward', 'top_up'];
+    
+    // Create header for journey details with expense categories
+    const journeyHeader = [
+      "Journey ID", "Driver Name", "Destination", "Start Date", "End Date", "Status"
+    ];
+    
+    // Add expense category headers
+    expenseCategories.forEach(category => {
+      journeyHeader.push(category.replace('_', ' ').toUpperCase() + " (₹)");
+    });
+    
+    journeyHeader.push("Total Expenses (₹)", "Total Revenue (₹)", "Net Profit (₹)");
+    vehicleData.push(journeyHeader);
+
+    // Add journey details with expenses in single row
     vehicleJourneys.forEach((journey: any) => {
       const journeyExpenses = vehicleExpenses.filter((exp: any) => exp.journeyId === journey.id);
-      const journeyExpenseTotal = journeyExpenses.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
-      const journeyRevenue = journeyExpenses.filter(exp => ['hyd_inward', 'top_up'].includes(exp.category))
-        .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+      
+      // Group expenses by category
+      const expensesByCategory: { [key: string]: number } = {};
+      journeyExpenses.forEach((exp: any) => {
+        expensesByCategory[exp.category] = (expensesByCategory[exp.category] || 0) + parseFloat(exp.amount);
+      });
+      
+      const journeyRevenue = (expensesByCategory['hyd_inward'] || 0) + (expensesByCategory['top_up'] || 0);
+      const journeyExpenseTotal = Object.entries(expensesByCategory)
+        .filter(([category]) => !['hyd_inward', 'top_up'].includes(category))
+        .reduce((sum, [, amount]) => sum + amount, 0);
+      const netProfit = journeyRevenue - journeyExpenseTotal;
 
-      vehicleData.push([
+      const journeyRow = [
         journey.id,
         journey.driverName || "Unknown Driver",
         journey.destination || "",
         journey.startTime ? new Date(journey.startTime).toLocaleDateString() : "",
         journey.endTime ? new Date(journey.endTime).toLocaleDateString() : "Ongoing",
-        journey.status,
-        journeyExpenseTotal,
-        journeyRevenue
-      ]);
-    });
-
-    // Add expense details section
-    vehicleData.push([""], [""], ["DETAILED EXPENSES"], [""]);
-    vehicleData.push(["Date", "Journey ID", "Driver", "Category", "Amount (₹)", "Description"]);
-
-    vehicleExpenses.forEach((expense: any) => {
-      const journey = vehicleJourneys.find((j: any) => j.id === expense.journeyId);
-      vehicleData.push([
-        new Date(expense.timestamp).toLocaleDateString(),
-        expense.journeyId,
-        journey?.driverName || "Unknown Driver",
-        expense.category.replace('_', ' ').toUpperCase(),
-        parseFloat(expense.amount),
-        expense.description || "-"
-      ]);
+        journey.status
+      ];
+      
+      // Add expense amounts for each category
+      expenseCategories.forEach(category => {
+        journeyRow.push(expensesByCategory[category] || 0);
+      });
+      
+      journeyRow.push(journeyExpenseTotal, journeyRevenue, netProfit);
+      vehicleData.push(journeyRow);
     });
 
     // Create worksheet for this vehicle
     const vehicleWS = XLSX.utils.aoa_to_sheet(vehicleData);
-    vehicleWS['!cols'] = [
-      { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 12 }, { wch: 12 }, 
-      { wch: 12 }, { wch: 12 }, { wch: 12 }
+    
+    // Set column widths for all expense categories plus summary columns
+    const columnWidths = [
+      { wch: 12 }, // Journey ID
+      { wch: 18 }, // Driver Name
+      { wch: 15 }, // Destination
+      { wch: 12 }, // Start Date
+      { wch: 12 }, // End Date
+      { wch: 12 }, // Status
     ];
+    
+    // Add widths for each expense category
+    expenseCategories.forEach(() => {
+      columnWidths.push({ wch: 10 });
+    });
+    
+    // Add widths for summary columns
+    columnWidths.push({ wch: 12 }); // Total Expenses
+    columnWidths.push({ wch: 12 }); // Total Revenue
+    columnWidths.push({ wch: 12 }); // Net Profit
+    
+    vehicleWS['!cols'] = columnWidths;
 
     // Add as a new tab - sanitize license plate for sheet name
     const sanitizedName = licensePlate.replace(/[^a-zA-Z0-9]/g, '').substring(0, 31);
-    XLSX.utils.book_append_sheet(workbook, vehicleWS, sanitizedName || 'Vehicle');
+    XLSX.utils.book_append_sheet(mainWorkbook, vehicleWS, sanitizedName || 'Vehicle');
   };
 
   if (isLoading) {
