@@ -418,7 +418,7 @@ export default function AdminDashboard() {
 
           <TabsContent value="finances" className="p-6">
             {/* Financial Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <Card className="bs-gradient-green text-white">
                 <CardContent className="p-6">
                   <div>
@@ -437,6 +437,15 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
 
+              <Card className="bg-gradient-to-r from-gray-700 to-gray-800 text-white">
+                <CardContent className="p-6">
+                  <div>
+                    <h3 className="text-sm font-medium opacity-90 mb-2">EMI Payments</h3>
+                    <p className="text-3xl font-bold">₹{(financialStats?.breakdown?.emiPayments || 0).toLocaleString()}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white">
                 <CardContent className="p-6">
                   <div>
@@ -446,6 +455,49 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Financial Breakdown */}
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Financial Breakdown</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-md font-medium mb-3 text-green-600">Revenue Sources</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Journey Revenue:</span>
+                        <span className="font-medium">₹{(financialStats?.breakdown?.journeyRevenue || 0).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Security Deposits:</span>
+                        <span className="font-medium">₹{(financialStats?.breakdown?.securityDeposits || 0).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">HYD Inward:</span>
+                        <span className="font-medium">₹{(financialStats?.breakdown?.hydInwardRevenue || 0).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-md font-medium mb-3 text-red-600">Expense Categories</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Journey Expenses:</span>
+                        <span className="font-medium">₹{(financialStats?.breakdown?.journeyExpenses || 0).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Salary Payments:</span>
+                        <span className="font-medium">₹{(financialStats?.breakdown?.salaryPayments || 0).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">EMI Payments:</span>
+                        <span className="font-medium">₹{(financialStats?.breakdown?.emiPayments || 0).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Recent Expenses */}
             <Card>

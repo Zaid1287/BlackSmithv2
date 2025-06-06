@@ -174,6 +174,7 @@ export default function FinancialManagement() {
         ["Net Profit", netProfit],
         ["Security Deposits", securityDeposits],
         ["Salary Payments", salaryPayments],
+        ["EMI Payments", emiPaymentTotal],
         ["HYD Inward Revenue", hydInwardRevenue],
         ["Top-up Revenue", topUpRevenue],
         [""],
@@ -399,10 +400,11 @@ export default function FinancialManagement() {
     color: expenseColors[category as keyof typeof expenseColors] || '#6b7280'
   })).filter(item => item.value > 0);
 
-  // Add salary payments as a separate category
+  // Add salary payments and EMI payments as separate categories
   const expenseChartData = [
     ...expenseBreakdownData,
-    ...(salaryPayments > 0 ? [{ name: 'Salary Payments', value: salaryPayments, color: '#374151' }] : [])
+    ...(salaryPayments > 0 ? [{ name: 'Salary Payments', value: salaryPayments, color: '#374151' }] : []),
+    ...(emiPaymentTotal > 0 ? [{ name: 'EMI Payments', value: emiPaymentTotal, color: '#1f2937' }] : [])
   ];
 
   const recentExpenses = [
