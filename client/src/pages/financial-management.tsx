@@ -312,16 +312,16 @@ export default function FinancialManagement() {
 
   const filteredTotalExpenses = filteredExpenses.filter((exp: any) => exp.category !== 'hyd_inward' && exp.category !== 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
 
-  // Calculate filtered EMI payments for the selected vehicle
+  // Calculate filtered EMI payments for the selected vehicle (exclude offset records)
   const filteredEmiPayments = selectedLicensePlateFilter === "all" ? 0 : (() => {
     const selectedVehicle = vehicles.find((v: any) => v.licensePlate === selectedLicensePlateFilter);
     if (!selectedVehicle) return 0;
     return emiPayments
-      .filter((payment: any) => payment.vehicleId === selectedVehicle.id)
+      .filter((payment: any) => payment.vehicleId === selectedVehicle.id && payment.status !== 'reset_offset')
       .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
   })();
 
-  // EMI payments reduce business finances (including negative offset records from resets)
+  // EMI payments reduce business finances when made
   const filteredNetProfit = filteredRevenue - filteredTotalExpenses - filteredEmiPayments;
 
   // Use filtered or total stats based on filter selection

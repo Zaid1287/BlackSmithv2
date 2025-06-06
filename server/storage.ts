@@ -324,12 +324,13 @@ export class DatabaseStorage implements IStorage {
       })
       .from(salaryPayments);
 
-    // Calculate total EMI payments
+    // Calculate total EMI payments (exclude offset records from financial calculations)
     const [emiStats] = await db
       .select({
         totalEmiPayments: sql<number>`COALESCE(SUM(${emiPayments.amount}), 0)`,
       })
-      .from(emiPayments);
+      .from(emiPayments)
+      .where(sql`${emiPayments.status} != 'reset_offset'`);
 
     // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups - EMI Payments
     // EMI payments reduce business finances when made, offset records prevent money from being added back during resets
