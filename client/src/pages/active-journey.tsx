@@ -241,19 +241,21 @@ export default function ActiveJourney() {
                     </div>
                   ))}
                   
-                  {/* Totals */}
-                  <div className="border-t border-gray-200 pt-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold">Total Expenses</span>
-                      <span className="font-bold text-xl">₹{totalExpenses.toLocaleString()}</span>
-                    </div>
-                    {totalTopUp > 0 && (
+                  {/* Totals - Hidden for drivers */}
+                  {user?.role === 'admin' && (
+                    <div className="border-t border-gray-200 pt-3 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-green-700">Total Top Up</span>
-                        <span className="font-bold text-xl text-green-600">+₹{totalTopUp.toLocaleString()}</span>
+                        <span className="font-semibold">Total Expenses</span>
+                        <span className="font-bold text-xl">₹{totalExpenses.toLocaleString()}</span>
                       </div>
-                    )}
-                  </div>
+                      {totalTopUp > 0 && (
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-green-700">Total Top Up</span>
+                          <span className="font-bold text-xl text-green-600">+₹{totalTopUp.toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
