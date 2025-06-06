@@ -1,4 +1,4 @@
-import { users, vehicles, journeys, expenses, salaryPayments, type User, type InsertUser, type Vehicle, type InsertVehicle, type Journey, type InsertJourney, type Expense, type InsertExpense, type SalaryPayment, type InsertSalaryPayment } from "@shared/schema";
+import { users, vehicles, journeys, expenses, salaryPayments, emiPayments, type User, type InsertUser, type Vehicle, type InsertVehicle, type Journey, type InsertJourney, type Expense, type InsertExpense, type SalaryPayment, type InsertSalaryPayment, type EmiPayment, type InsertEmiPayment } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, not } from "drizzle-orm";
 import bcrypt from "bcrypt";

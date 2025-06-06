@@ -61,6 +61,19 @@ export const salaryPayments = pgTable("salary_payments", {
   year: integer("year").notNull(),
 });
 
+export const emiPayments = pgTable("emi_payments", {
+  id: serial("id").primaryKey(),
+  vehicleId: integer("vehicle_id").references(() => vehicles.id),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  paidDate: timestamp("paid_date"),
+  status: text("status").notNull().default("pending"), // "pending", "paid", "overdue"
+  month: text("month").notNull(),
+  year: integer("year").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   journeys: many(journeys),
@@ -69,6 +82,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const vehiclesRelations = relations(vehicles, ({ many }) => ({
   journeys: many(journeys),
+  emiPayments: many(emiPayments),
 }));
 
 export const journeysRelations = relations(journeys, ({ one, many }) => ({
@@ -94,6 +108,13 @@ export const salaryPaymentsRelations = relations(salaryPayments, ({ one }) => ({
   user: one(users, {
     fields: [salaryPayments.userId],
     references: [users.id],
+  }),
+}));
+
+export const emiPaymentsRelations = relations(emiPayments, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [emiPayments.vehicleId],
+    references: [vehicles.id],
   }),
 }));
 
@@ -128,6 +149,13 @@ export const insertSalaryPaymentSchema = createInsertSchema(salaryPayments).omit
   amount: z.string().regex(/^-?\d+(\.\d{1,2})?$/, "Please enter a valid amount"),
 });
 
+export const insertEmiPaymentSchema = createInsertSchema(emiPayments).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  amount: z.string().regex(/^\d+(\.\d{1,2})?$/, "Please enter a valid amount"),
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -139,3 +167,5 @@ export type Expense = typeof expenses.$inferSelect;
 export type InsertExpense = z.infer<typeof insertExpenseSchema>;
 export type SalaryPayment = typeof salaryPayments.$inferSelect;
 export type InsertSalaryPayment = z.infer<typeof insertSalaryPaymentSchema>;
+export type EmiPayment = typeof emiPayments.$inferSelect;
+export type InsertEmiPayment = z.infer<typeof insertEmiPaymentSchema>;

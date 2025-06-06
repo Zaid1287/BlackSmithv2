@@ -8,6 +8,7 @@ import {
   Truck, 
   BarChart3, 
   DollarSign, 
+  CreditCard,
   LogOut,
   ChevronRight,
   ChevronLeft
@@ -24,6 +25,7 @@ const navigation = [
   { name: "Manage Vehicles", href: "/manage-vehicles", icon: Truck, roles: ["admin"] },
   { name: "Financial Management", href: "/financial-management", icon: BarChart3, roles: ["admin"] },
   { name: "Salaries", href: "/salaries", icon: DollarSign, roles: ["admin"] },
+  { name: "EMI", href: "/emi", icon: CreditCard, roles: ["admin"] },
 ];
 
 export default function Sidebar() {
