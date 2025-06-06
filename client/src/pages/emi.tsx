@@ -20,9 +20,6 @@ interface PaymentEntry {
   id: string;
   amount: string;
   description: string;
-  dueDate: string;
-  month: string;
-  year: number;
 }
 
 interface Vehicle {
@@ -102,9 +99,6 @@ export default function EmiManagement() {
       id: Date.now().toString(),
       amount: '',
       description: '',
-      dueDate: '',
-      month: '',
-      year: new Date().getFullYear()
     };
     setPaymentEntries([...paymentEntries, newEntry]);
   };
@@ -133,10 +127,7 @@ export default function EmiManagement() {
       const response = await apiRequest("POST", "/api/emi", {
         vehicleId: vehicle.id,
         amount: paymentAmount.toFixed(2),
-        description: `EMI payment - ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`,
-        dueDate: new Date().toISOString(),
-        month: currentDate.toLocaleString('default', { month: 'long' }),
-        year: currentDate.getFullYear(),
+        description: `EMI payment - ${currentDate.toLocaleDateString()}`,
       });
       return response.json();
     },
@@ -164,9 +155,6 @@ export default function EmiManagement() {
             vehicleId: data.vehicleId,
             amount: payment.amount,
             description: payment.description || `EMI payment - ${new Date().toLocaleDateString()}`,
-            dueDate: new Date(payment.dueDate).toISOString(),
-            month: payment.month,
-            year: payment.year,
           });
           return response.json();
         })
@@ -197,10 +185,7 @@ export default function EmiManagement() {
           const response = await apiRequest("POST", "/api/emi", {
             vehicleId: vehicle.id,
             amount: paymentAmount.toFixed(2),
-            description: `EMI payment - ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`,
-            dueDate: new Date().toISOString(),
-            month: currentDate.toLocaleString('default', { month: 'long' }),
-            year: currentDate.getFullYear(),
+            description: `EMI payment - ${currentDate.toLocaleDateString()}`,
           });
           return response.json();
         })
