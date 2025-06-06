@@ -406,7 +406,7 @@ export default function FinancialManagement() {
         [""],
         ["VEHICLE BREAKDOWN"],
         [""],
-        ["Vehicle", "Total Journeys", "Total Expenses", "Vehicle Revenue"]
+        ["Vehicle", "Total Journeys", "Total Expenses", "Vehicle Revenue", "Vehicle Profit"]
       ];
 
       // Add vehicle summary to overall tab
@@ -414,20 +414,31 @@ export default function FinancialManagement() {
         const vehicleExpenses = finalExpenses.filter((expense: any) => 
           vehicleJourneys.some((journey: any) => journey.id === expense.journeyId)
         );
-        const totalVehicleExpenses = vehicleExpenses.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
-        const vehicleRevenue = vehicleExpenses.filter((exp: any) => ['hyd_inward', 'top_up'].includes(exp.category))
+        
+        // Calculate accurate revenue including pouch, security, and revenue expenses
+        const revenueFromExpenses = vehicleExpenses.filter((exp: any) => ['hyd_inward', 'top_up'].includes(exp.category))
           .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+        const pouchRevenue = vehicleJourneys.reduce((sum: number, journey: any) => sum + parseFloat(journey.pouch || 0), 0);
+        const securityRevenue = vehicleJourneys.reduce((sum: number, journey: any) => sum + parseFloat(journey.security || 0), 0);
+        const totalVehicleRevenue = pouchRevenue + securityRevenue + revenueFromExpenses;
+        
+        // Calculate actual expenses (excluding revenue categories)
+        const totalVehicleExpenses = vehicleExpenses.filter((exp: any) => !['hyd_inward', 'top_up'].includes(exp.category))
+          .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+        
+        const vehicleProfit = totalVehicleRevenue - totalVehicleExpenses;
 
         overallSummaryData.push([
           licensePlate,
           vehicleJourneys.length,
           totalVehicleExpenses,
-          vehicleRevenue
+          totalVehicleRevenue,
+          vehicleProfit
         ]);
       });
 
       const overallSummaryWS = XLSX.utils.aoa_to_sheet(overallSummaryData);
-      overallSummaryWS['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
+      overallSummaryWS['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
       XLSX.utils.book_append_sheet(mainWorkbook, overallSummaryWS, "Overall Summary");
 
       // Create individual tabs for each vehicle
