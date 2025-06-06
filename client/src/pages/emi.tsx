@@ -43,7 +43,7 @@ export default function EmiManagement() {
   // Fetch vehicles
   const { data: vehicles = [], isLoading: vehiclesLoading } = useQuery({
     queryKey: ["/api/vehicles"],
-  });
+  }) as { data: any[], isLoading: boolean };
 
   // Fetch EMI payments
   const { data: emiPayments = [], isLoading: paymentsLoading } = useQuery({
@@ -52,12 +52,13 @@ export default function EmiManagement() {
 
   // Calculate summary statistics
   const summaryStats = {
-    totalVehicles: vehicles.length,
-    totalPendingAmount: emiPayments
-      .filter((p: any) => p.status === 'pending')
-      .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0),
+    totalVehicles: (vehicles as any[]).length,
+    totalScheduledAmount: emiPayments.reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0),
     totalPaidAmount: emiPayments
       .filter((p: any) => p.status === 'paid')
+      .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0),
+    totalPendingAmount: emiPayments
+      .filter((p: any) => p.status === 'pending')
       .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0),
     overdueCount: emiPayments.filter((p: any) => {
       if (p.status !== 'pending') return false;
@@ -65,15 +66,19 @@ export default function EmiManagement() {
     }).length,
   };
 
+  const totalRemainingBalance = summaryStats.totalScheduledAmount - summaryStats.totalPaidAmount;
+
   // Calculate individual vehicle data
   const getVehicleData = (vehicle: any) => {
     const vehiclePayments = emiPayments.filter((p: any) => p.vehicleId === vehicle.id);
+    const totalScheduled = vehiclePayments.reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
     const totalPaid = vehiclePayments
       .filter((p: any) => p.status === 'paid')
       .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
     const totalPending = vehiclePayments
       .filter((p: any) => p.status === 'pending')
       .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
+    const balance = totalScheduled - totalPaid;
     const overdueCount = vehiclePayments.filter((p: any) => {
       if (p.status !== 'pending') return false;
       return new Date(p.dueDate) < new Date();
@@ -84,12 +89,15 @@ export default function EmiManagement() {
     if (overdueCount > 0) {
       status = 'overdue';
       statusColor = 'bg-red-100 text-red-800';
+    } else if (balance <= 0) {
+      status = balance < 0 ? 'overpaid' : 'paid';
+      statusColor = balance < 0 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
     } else if (totalPending > 0) {
       status = 'pending';
       statusColor = 'bg-amber-100 text-amber-800';
     }
 
-    return { totalPaid, totalPending, overdueCount, status, statusColor };
+    return { totalScheduled, totalPaid, totalPending, balance, overdueCount, status, statusColor };
   };
 
   // Open vehicle management dialog
@@ -189,7 +197,7 @@ export default function EmiManagement() {
   // Export data to Excel
   const exportToExcel = () => {
     const exportData = emiPayments.map((payment: any) => {
-      const vehicle = vehicles.find((v: any) => v.id === payment.vehicleId);
+      const vehicle = (vehicles as any[]).find((v: any) => v.id === payment.vehicleId);
       return {
         'Vehicle': vehicle?.licensePlate || 'Unknown',
         'Model': vehicle?.model || 'Unknown',
@@ -259,7 +267,7 @@ export default function EmiManagement() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Vehicles</CardTitle>
@@ -272,11 +280,11 @@ export default function EmiManagement() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Amount</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Scheduled</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{summaryStats.totalPendingAmount.toLocaleString()}</div>
+            <div className="text-2xl font-bold">₹{summaryStats.totalScheduledAmount.toLocaleString()}</div>
           </CardContent>
         </Card>
 
@@ -287,6 +295,21 @@ export default function EmiManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">₹{summaryStats.totalPaidAmount.toLocaleString()}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Remaining Balance</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${
+              totalRemainingBalance < 0 ? 'text-red-600' : 
+              totalRemainingBalance === 0 ? 'text-green-600' : 'text-amber-600'
+            }`}>
+              ₹{totalRemainingBalance.toLocaleString()}
+            </div>
           </CardContent>
         </Card>
 
@@ -315,6 +338,8 @@ export default function EmiManagement() {
                 <SelectItem value="current">Current</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="overdue">Overdue</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="overpaid">Overpaid</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -347,8 +372,14 @@ export default function EmiManagement() {
 
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
-                      <p className="text-sm text-gray-500">Pending: ₹{vehicleData.totalPending.toLocaleString()}</p>
+                      <p className="text-sm text-gray-500">Scheduled: ₹{vehicleData.totalScheduled.toLocaleString()}</p>
                       <p className="text-sm text-gray-500">Paid: ₹{vehicleData.totalPaid.toLocaleString()}</p>
+                      <p className={`text-sm font-medium ${
+                        vehicleData.balance < 0 ? 'text-red-600' : 
+                        vehicleData.balance === 0 ? 'text-green-600' : 'text-amber-600'
+                      }`}>
+                        Balance: ₹{vehicleData.balance.toLocaleString()}
+                      </p>
                     </div>
                     <Badge className={vehicleData.statusColor}>
                       {vehicleData.status}
