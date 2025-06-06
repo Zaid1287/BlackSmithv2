@@ -256,7 +256,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
               className="bg-green-600 hover:bg-green-700 h-10 px-4"
             >
               <Plus className="w-4 h-4 mr-1" />
-              Add
+              {t('add')}
             </Button>
           </div>
         </div>
