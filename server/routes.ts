@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { insertUserSchema, insertVehicleSchema, insertJourneySchema, insertExpenseSchema, insertSalaryPaymentSchema } from "@shared/schema";
+import { insertUserSchema, insertVehicleSchema, insertJourneySchema, insertExpenseSchema, insertSalaryPaymentSchema, insertEmiPaymentSchema } from "@shared/schema";
 import { z } from "zod";
 import path from "path";
 
@@ -439,6 +439,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: error.message });
       }
       res.status(500).json({ message: "Failed to reset financial data" });
+    }
+  });
+
+  // EMI management routes (Admin only)
+  app.get("/api/emi", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const emiPayments = await storage.getAllEmiPayments();
+      res.json(emiPayments);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch EMI payments" });
+    }
+  });
+
+  app.post("/api/emi", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const emiData = insertEmiPaymentSchema.parse(req.body);
+      const emiPayment = await storage.createEmiPayment(emiData);
+      res.json(emiPayment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid EMI data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create EMI payment" });
+    }
+  });
+
+  app.patch("/api/emi/:id/status", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      const paidDate = status === 'paid' ? new Date() : undefined;
+      
+      await storage.updateEmiPaymentStatus(id, status, paidDate);
+      res.json({ message: "EMI payment status updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update EMI payment status" });
+    }
+  });
+
+  app.delete("/api/emi/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteEmiPayment(id);
+      res.json({ message: "EMI payment deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete EMI payment" });
     }
   });
 

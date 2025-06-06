@@ -37,6 +37,12 @@ export interface IStorage {
   createSalaryPayment(payment: InsertSalaryPayment): Promise<SalaryPayment>;
   getSalaryPayments(): Promise<SalaryPayment[]>;
   
+  // EMI methods
+  createEmiPayment(payment: InsertEmiPayment): Promise<EmiPayment>;
+  getAllEmiPayments(): Promise<EmiPayment[]>;
+  updateEmiPaymentStatus(id: number, status: string, paidDate?: Date): Promise<void>;
+  deleteEmiPayment(id: number): Promise<void>;
+  
   // Dashboard stats
   getDashboardStats(): Promise<any>;
   getFinancialStats(): Promise<any>;
@@ -405,6 +411,31 @@ export class DatabaseStorage implements IStorage {
     await db.update(salaryPayments)
       .set({ transactionType: 'reset_archived' })
       .where(not(eq(salaryPayments.transactionType, 'reset_archived')));
+  }
+
+  async createEmiPayment(payment: InsertEmiPayment): Promise<EmiPayment> {
+    const [newPayment] = await db
+      .insert(emiPayments)
+      .values(payment)
+      .returning();
+    return newPayment;
+  }
+
+  async getAllEmiPayments(): Promise<EmiPayment[]> {
+    return await db.select().from(emiPayments).orderBy(desc(emiPayments.dueDate));
+  }
+
+  async updateEmiPaymentStatus(id: number, status: string, paidDate?: Date): Promise<void> {
+    await db.update(emiPayments)
+      .set({ 
+        status,
+        paidDate: paidDate ? paidDate : null
+      })
+      .where(eq(emiPayments.id, id));
+  }
+
+  async deleteEmiPayment(id: number): Promise<void> {
+    await db.delete(emiPayments).where(eq(emiPayments.id, id));
   }
 }
 
