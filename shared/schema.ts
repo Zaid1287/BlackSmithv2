@@ -66,11 +66,8 @@ export const emiPayments = pgTable("emi_payments", {
   id: serial("id").primaryKey(),
   vehicleId: integer("vehicle_id").references(() => vehicles.id),
   amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
-  dueDate: timestamp("due_date").notNull(),
   paidDate: timestamp("paid_date"),
   status: text("status").notNull().default("pending"), // "pending", "paid", "overdue"
-  month: text("month").notNull(),
-  year: integer("year").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -156,10 +153,7 @@ export const insertEmiPaymentSchema = createInsertSchema(emiPayments).omit({
   paidDate: true,
 }).extend({
   amount: z.string().regex(/^\d+(\.\d{1,2})?$/, "Please enter a valid amount"),
-  dueDate: z.string().transform((val) => new Date(val)),
   vehicleId: z.number(),
-  month: z.string(),
-  year: z.number(),
   description: z.string().optional(),
 });
 
