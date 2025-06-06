@@ -72,6 +72,12 @@ export const emiPayments = pgTable("emi_payments", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const emiResetHistory = pgTable("emi_reset_history", {
+  id: serial("id").primaryKey(),
+  totalAmountReset: decimal("total_amount_reset", { precision: 15, scale: 2 }).notNull(),
+  resetDate: timestamp("reset_date").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   journeys: many(journeys),

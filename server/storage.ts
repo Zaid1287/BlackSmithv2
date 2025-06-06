@@ -1,4 +1,4 @@
-import { users, vehicles, journeys, expenses, salaryPayments, emiPayments, type User, type InsertUser, type Vehicle, type InsertVehicle, type Journey, type InsertJourney, type Expense, type InsertExpense, type SalaryPayment, type InsertSalaryPayment, type EmiPayment, type InsertEmiPayment } from "@shared/schema";
+import { users, vehicles, journeys, expenses, salaryPayments, emiPayments, emiResetHistory, type User, type InsertUser, type Vehicle, type InsertVehicle, type Journey, type InsertJourney, type Expense, type InsertExpense, type SalaryPayment, type InsertSalaryPayment, type EmiPayment, type InsertEmiPayment } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, not } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -331,13 +331,21 @@ export class DatabaseStorage implements IStorage {
       })
       .from(emiPayments);
 
-    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups
-    // EMI payments are tracked separately and don't affect business profit calculations
+    // Calculate total EMI reset amounts to prevent adding money back during resets
+    const [emiResetStats] = await db
+      .select({
+        totalResetAmount: sql<number>`COALESCE(SUM(${emiResetHistory.totalAmountReset}), 0)`,
+      })
+      .from(emiResetHistory);
+
+    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups - EMI Payments + Reset Amounts
+    // EMI payments reduce profit when made, but reset amounts prevent adding money back
     const baseProfit = (journeyStats.totalRevenue || 0) + (journeyStats.completedSecurity || 0) - (journeyStats.totalExpenses || 0);
     const salaryAdjustment = -(salaryStats.totalPayments || 0) + (salaryStats.totalDebts || 0); // Subtract payments, add debts
     const additionalRevenue = (revenueStats.hydInwardRevenue || 0) + (revenueStats.topUpRevenue || 0);
+    const emiAdjustment = -(emiStats.totalEmiPayments || 0) + (emiResetStats.totalResetAmount || 0); // Subtract payments, add back reset amounts
     
-    const netProfit = baseProfit + salaryAdjustment + additionalRevenue;
+    const netProfit = baseProfit + salaryAdjustment + additionalRevenue + emiAdjustment;
 
     // Get total security deposits for revenue display
     const [allSecurityStats] = await db
@@ -356,8 +364,9 @@ export class DatabaseStorage implements IStorage {
     const topUp = parseFloat(revenueStats.topUpRevenue?.toString() || '0');
     const totalEmiPayments = parseFloat(emiStats.totalEmiPayments?.toString() || '0');
     
-    // Calculate net profit including salary expenses (EMI payments tracked separately)
-    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp);
+    // Calculate net profit including salary expenses and EMI adjustments
+    const totalEmiResetAmount = parseFloat(emiResetStats.totalResetAmount?.toString() || '0');
+    const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp - totalEmiPayments + totalEmiResetAmount);
 
     return {
       revenue: totalRevenue + totalSecurity,
@@ -458,7 +467,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async resetEmiData(): Promise<void> {
-    // Simple reset - delete all EMI payment records (like salary reset)
+    // Calculate total EMI payments before reset
+    const [totalPaid] = await db
+      .select({
+        total: sql<number>`COALESCE(SUM(${emiPayments.amount}), 0)`
+      })
+      .from(emiPayments);
+    
+    // Record the reset amount to prevent adding money back to profit
+    if (totalPaid.total > 0) {
+      await db.insert(emiResetHistory).values({
+        totalAmountReset: totalPaid.total.toString(),
+      });
+    }
+    
+    // Delete all EMI payment records
     await db.delete(emiPayments);
   }
 }
