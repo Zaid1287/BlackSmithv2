@@ -34,7 +34,6 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
     { value: "fuel", label: t('fuel') },
     { value: "food", label: t('food') },
     { value: "maintenance", label: t('maintenance') },
-    { value: "rto", label: t('rto') },
     { value: "hyd_unloading", label: t('hydUnloading') },
     { value: "nzb_unloading", label: t('nzbUnloading') },
     { value: "miscellaneous", label: t('miscellaneous') },
@@ -48,6 +47,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
     { value: "driver_fees", label: t('driverFees') },
     { value: "tire_grease", label: t('tireGrease') },
     { value: "toll", label: t('toll'), adminOnly: true },
+    { value: "rto", label: t('rto'), adminOnly: true },
     { value: "top_up", label: t('topUp'), isRevenue: true },
   ];
 

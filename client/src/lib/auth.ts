@@ -43,13 +43,16 @@ export const authService = {
       });
 
       if (!response.ok) {
+        console.error(`Auth check failed: ${response.status} ${response.statusText}`);
         localStorage.removeItem("auth_token");
         return null;
       }
 
       const data = await response.json();
+      console.log('Auth check successful:', data.user?.role);
       return data.user;
     } catch (error) {
+      console.error("Get current user error:", error);
       localStorage.removeItem("auth_token");
       return null;
     }
