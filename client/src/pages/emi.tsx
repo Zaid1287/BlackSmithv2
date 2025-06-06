@@ -205,6 +205,14 @@ export default function EmiManagement() {
   // Reset EMI data mutation
   const resetEmiDataMutation = useMutation({
     mutationFn: async () => {
+      // Calculate total EMI payments before reset to track in localStorage
+      const totalEmiPayments = emiPayments.reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
+      
+      // Store cumulative resets in localStorage to prevent adding money back to profit
+      const currentResets = localStorage.getItem('cumulativeEmiResets');
+      const cumulativeResets = (currentResets ? parseFloat(currentResets) : 0) + totalEmiPayments;
+      localStorage.setItem('cumulativeEmiResets', cumulativeResets.toString());
+      
       return await apiRequest("POST", "/api/reset-emi-data");
     },
     onSuccess: () => {
