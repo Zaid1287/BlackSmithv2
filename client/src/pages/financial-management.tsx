@@ -463,9 +463,13 @@ export default function FinancialManagement() {
     );
 
     // Calculate vehicle totals
-    const totalVehicleExpenses = vehicleExpenses.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
-    const totalVehicleRevenue = vehicleExpenses.filter(exp => ['hyd_inward', 'top_up'].includes(exp.category))
+    const totalVehicleExpenses = vehicleExpenses.filter((exp: any) => !['hyd_inward', 'top_up'].includes(exp.category))
       .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+    const revenueFromExpenses = vehicleExpenses.filter((exp: any) => ['hyd_inward', 'top_up'].includes(exp.category))
+      .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+    const pouchRevenue = vehicleJourneys.reduce((sum: number, journey: any) => sum + parseFloat(journey.pouch || 0), 0);
+    const securityRevenue = vehicleJourneys.reduce((sum: number, journey: any) => sum + parseFloat(journey.security || 0), 0);
+    const totalVehicleRevenue = pouchRevenue + securityRevenue + revenueFromExpenses;
 
     // Vehicle Summary Data
     const vehicleData = [
@@ -513,7 +517,10 @@ export default function FinancialManagement() {
         expensesByCategory[exp.category] = (expensesByCategory[exp.category] || 0) + parseFloat(exp.amount);
       });
       
-      const journeyRevenue = (expensesByCategory['hyd_inward'] || 0) + (expensesByCategory['top_up'] || 0);
+      const revenueFromExpenseCategories = (expensesByCategory['hyd_inward'] || 0) + (expensesByCategory['top_up'] || 0);
+      const journeyPouchRevenue = parseFloat(journey.pouch || 0);
+      const journeySecurityRevenue = parseFloat(journey.security || 0);
+      const journeyRevenue = journeyPouchRevenue + journeySecurityRevenue + revenueFromExpenseCategories;
       const journeyExpenseTotal = Object.entries(expensesByCategory)
         .filter(([category]) => !['hyd_inward', 'top_up'].includes(category))
         .reduce((sum, [, amount]) => sum + amount, 0);
