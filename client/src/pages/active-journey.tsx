@@ -87,15 +87,15 @@ export default function ActiveJourney() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to complete journey",
+        title: t('error'),
+        description: error.message || t('failedToCompleteJourney'),
         variant: "destructive",
       });
     },
   });
 
   const handleCompleteJourney = () => {
-    if (userActiveJourney && confirm("Are you sure you want to complete this journey?")) {
+    if (userActiveJourney && confirm(t('confirmCompleteJourney'))) {
       completeJourneyMutation.mutate(userActiveJourney.id);
     }
   };
@@ -103,7 +103,7 @@ export default function ActiveJourney() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading active journey...</div>
+        <div className="text-lg">{t('loadingActiveJourney')}</div>
       </div>
     );
   }
@@ -113,14 +113,14 @@ export default function ActiveJourney() {
       <div className="p-6">
         <div className="text-center py-12">
           <Route className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Active Journey</h2>
-          <p className="text-gray-500 mb-6">You don't have any active journeys at the moment.</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('noActiveJourney')}</h2>
+          <p className="text-gray-500 mb-6">{t('noActiveJourneyMessage')}</p>
           <Button 
             onClick={() => setShowJourneyModal(true)}
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Start New Journey
+            {t('startNewJourney')}
           </Button>
         </div>
 

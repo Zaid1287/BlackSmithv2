@@ -145,6 +145,22 @@ export const translations = {
   selectOption: { en: 'Select an option', hi: 'एक विकल्प चुनें', te: 'ఒక ఎంపిక ఎంచుకోండి' },
   required: { en: 'Required', hi: 'आवश्यक', te: 'అవసరం' },
   optional: { en: 'Optional', hi: 'वैकल्पिक', te: 'ఐచ్ఛిక' },
+  
+  // Complete UI translations
+  noActiveJourneyMessage: { en: "You don't have any active journeys at the moment.", hi: 'आपकी कोई सक्रिय यात्रा फिलहाल नहीं है।', te: 'మీకు ప్రస్తుతం కోई క్రియాశీల యాత్రలు లేవు।' },
+  failedToCompleteJourney: { en: 'Failed to complete journey', hi: 'यात्रा पूरी करने में असफल', te: 'యాత్ర పూర్తి చేయడంలో విఫలమైంది' },
+  confirmCompleteJourney: { en: 'Are you sure you want to complete this journey?', hi: 'क्या आप वाकई इस यात्रा को पूरा करना चाहते हैं?', te: 'మీరు ఈ యాత్రను పూర్తి చేయాలని ఖచ్చితంగా అనుకుంటున్नారా?' },
+  loadingActiveJourney: { en: 'Loading active journey...', hi: 'सक्रिय यात्रा लोड हो रही है...', te: 'క్రియాశీల యాత్ర లోడవుతోంది...' },
+  completeJourney: { en: 'Complete Journey', hi: 'यात्रा पूरी करें', te: 'యాత్ర పూర్తి చేయండి' },
+  currentLocation: { en: 'Current Location', hi: 'वर्तमान स्थान', te: 'ప్రస్తుత స్థానం' },
+  currentSpeed: { en: 'Current Speed', hi: 'वर्तमान गति', te: 'ప్రస్తుత వేగం' },
+  totalDistance: { en: 'Total Distance', hi: 'कुल दूरी', te: 'మొత్తం దూరం' },
+  km: { en: 'km', hi: 'किमी', te: 'కి.మీ' },
+  kmh: { en: 'km/h', hi: 'किमी/घंटा', te: 'కి.మీ/గం' },
+  quickExpenses: { en: 'Quick Expenses', hi: 'त्वरित खर्च', te: 'త్వరిత ఖర్చులు' },
+  addQuickExpense: { en: 'Add Quick Expense', hi: 'त्वरित खर्च जोड़ें', te: 'త్వరిత ఖర్చు జోడించండి' },
+  journeyExpenses: { en: 'Journey Expenses', hi: 'यात्रा खर्च', te: 'యాత్ర ఖర్చులు' },
+  noExpensesAdded: { en: 'No expenses added yet', hi: 'अभी तक कोई खर्च नहीं जोड़ा गया', te: 'ఇంకా ఎలాంటి ఖర్చులు జోడించలేదు' },
 } as const;
 
 export type TranslationKeys = keyof typeof translations;
