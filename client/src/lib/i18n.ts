@@ -117,6 +117,34 @@ export const translations = {
   error: { en: 'Error', hi: 'त्रुटि', te: 'లోపం' },
   warning: { en: 'Warning', hi: 'चेतावनी', te: 'హెచ్చరిక' },
   info: { en: 'Information', hi: 'जानकारी', te: 'సమాచారం' },
+
+  // Additional UI elements for comprehensive translation
+  all: { en: 'All', hi: 'सभी', te: 'అన్నీ' },
+  view: { en: 'View', hi: 'देखें', te: 'చూడండి' },
+  update: { en: 'Update', hi: 'अपडेट', te: 'అప్‌డేట్' },
+  details: { en: 'Details', hi: 'विवरण', te: 'వివరాలు' },
+  total: { en: 'Total', hi: 'कुल', te: 'మొత్తం' },
+  date: { en: 'Date', hi: 'तारीख', te: 'తేదీ' },
+  type: { en: 'Type', hi: 'प्रकार', te: 'రకం' },
+  actions: { en: 'Actions', hi: 'कार्य', te: 'చర్యలు' },
+  complete: { en: 'Complete', hi: 'पूर्ण', te: 'పూర్తి' },
+  pending: { en: 'Pending', hi: 'लंबित', te: 'పెండింగ్' },
+  paid: { en: 'Paid', hi: 'भुगतान किया गया', te: 'చెల్లించారు' },
+  unpaid: { en: 'Unpaid', hi: 'अवैतनिक', te: 'చెల్లించలేదు' },
+  
+  // Vehicle status
+  inService: { en: 'In Service', hi: 'सेवा में', te: 'సేవలో' },
+  outOfService: { en: 'Out of Service', hi: 'सेवा से बाहर', te: 'సేవ వెలుపల' },
+  
+  // Journey status  
+  active: { en: 'Active', hi: 'सक्रिय', te: 'క్రియాశీల' },
+  completed: { en: 'Completed', hi: 'पूर्ण', te: 'పూర్తయింది' },
+  cancelled: { en: 'Cancelled', hi: 'रद्द', te: 'రద్దు చేయబడింది' },
+  
+  // Form labels
+  selectOption: { en: 'Select an option', hi: 'एक विकल्प चुनें', te: 'ఒక ఎంపిక ఎంచుకోండి' },
+  required: { en: 'Required', hi: 'आवश्यक', te: 'అవసరం' },
+  optional: { en: 'Optional', hi: 'वैकल्पिक', te: 'ఐచ్ఛిక' },
 } as const;
 
 export type TranslationKeys = keyof typeof translations;

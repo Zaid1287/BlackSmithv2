@@ -18,6 +18,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/use-auth";
 import StartJourneyModal from "@/components/start-journey-modal";
 import AddExpenseModal from "@/components/add-expense-modal";
@@ -27,6 +28,7 @@ import { apiRequest } from "@/lib/queryClient";
 
 export default function ActiveJourney() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showJourneyModal, setShowJourneyModal] = useState(false);
