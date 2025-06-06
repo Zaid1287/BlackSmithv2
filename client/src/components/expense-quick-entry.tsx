@@ -102,7 +102,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
     },
   });
 
-  const categoriesRequiringDescription = ['miscellaneous', 'maintenance', 'mechanical', 'electrical', 'body_works'];
+  const categoriesRequiringDescription = ['miscellaneous', 'maintenance', 'mechanical', 'electrical', 'body_works', 'fines'];
 
   const handleAddExpense = (category: string) => {
     const amount = parseFloat(amounts[category] || "0");

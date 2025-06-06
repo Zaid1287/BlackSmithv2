@@ -30,7 +30,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 
-const categoriesRequiringDescription = ['miscellaneous', 'maintenance', 'mechanical', 'electrical', 'body_works'];
+const categoriesRequiringDescription = ['miscellaneous', 'maintenance', 'mechanical', 'electrical', 'body_works', 'fines'];
 
 const expenseSchema = z.object({
   journeyId: z.number(),
