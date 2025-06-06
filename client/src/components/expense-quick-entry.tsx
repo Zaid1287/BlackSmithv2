@@ -180,11 +180,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
           requiresDescription ? 'relative' : ''
         }`}
       >
-        {requiresDescription && (
-          <div className="absolute top-1 right-1">
-            <span className="bg-orange-500 text-white text-xs px-1 py-0.5 rounded">Description</span>
-          </div>
-        )}
+
         
         {/* Mobile Layout: Stack vertically */}
         <div className="flex flex-col space-y-3 sm:hidden">
