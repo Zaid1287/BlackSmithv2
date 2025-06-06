@@ -62,7 +62,7 @@ export const translations = {
   toll: { en: 'Toll', hi: 'टोल', te: 'టోల్' },
   food: { en: 'Food', hi: 'भोजन', te: 'ఆహారం' },
   maintenance: { en: 'Maintenance', hi: 'रखरखाव', te: 'నిర్వహణ' },
-  other: { en: 'Other', hi: 'अन्य', te: 'ఇతర' },
+  tireGrease: { en: 'Tire Grease', hi: 'टायर ग्रीस', te: 'టైర్ గ్రీస్' },
 
   // User management
   addUser: { en: 'Add User', hi: 'उपयोगकर्ता जोड़ें', te: 'వినియోగదారుని జోడించండి' },

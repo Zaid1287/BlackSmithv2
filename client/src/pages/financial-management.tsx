@@ -13,11 +13,13 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function FinancialManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [confirmationText, setConfirmationText] = useState("");
   const [expandedJourneys, setExpandedJourneys] = useState<Set<number>>(new Set());
@@ -25,6 +27,35 @@ export default function FinancialManagement() {
   const [exportStartDate, setExportStartDate] = useState("");
   const [exportEndDate, setExportEndDate] = useState("");
   const [selectedLicensePlateFilter, setSelectedLicensePlateFilter] = useState<string>("all");
+
+  // Function to get translated expense category name
+  const getTranslatedCategory = (category: string) => {
+    const categoryMap: { [key: string]: string } = {
+      'fuel': t('fuel'),
+      'food': t('food'),
+      'maintenance': t('maintenance'),
+      'loading': t('loading'),
+      'rope': t('rope'),
+      'rto': t('rto'),
+      'hyd_unloading': t('hydUnloading'),
+      'nzb_unloading': t('nzbUnloading'),
+      'miscellaneous': t('miscellaneous'),
+      'mechanical': t('mechanical'),
+      'electrical': t('electrical'),
+      'body_works': t('bodyWorks'),
+      'tires_air': t('tiresAir'),
+      'weighment': t('weighment'),
+      'adblue': t('adblue'),
+      'fines': t('fines'),
+      'driver_fees': t('driverFees'),
+      'tire_grease': t('tireGrease'),
+      'toll': t('toll'),
+      'top_up': t('topUp'),
+      'hyd_inward': 'HYD Inward'
+    };
+    
+    return categoryMap[category] || category.split('_').join(' ');
+  };
   
   const { data: financialStats, isLoading } = useQuery({
     queryKey: ["/api/dashboard/financial"],
@@ -647,11 +678,13 @@ export default function FinancialManagement() {
                         
                         {journeyExpenses.length > 0 && isExpanded && (
                           <div className="space-y-2 max-h-48 overflow-y-auto">
-                            {journeyExpenses.map((expense: any) => (
+                            {journeyExpenses
+                              .filter((expense: any) => expense.category !== 'other')
+                              .map((expense: any) => (
                               <div key={expense.id} className="flex items-center justify-between text-sm bg-white p-2 rounded">
                                 <div>
-                                  <span className="font-medium capitalize">
-                                    {expense.category.split('_').join(' ')}
+                                  <span className="font-medium">
+                                    {getTranslatedCategory(expense.category)}
                                   </span>
                                   {expense.description && (
                                     <p className="text-xs text-gray-500 mt-1">{expense.description}</p>

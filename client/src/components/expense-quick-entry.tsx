@@ -46,7 +46,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
     { value: "adblue", label: t('adblue') },
     { value: "fines", label: t('fines') },
     { value: "driver_fees", label: t('driverFees') },
-    { value: "other", label: t('other') },
+    { value: "tire_grease", label: t('tireGrease') },
     { value: "toll", label: t('toll'), adminOnly: true },
     { value: "top_up", label: t('topUp'), isRevenue: true },
   ];
@@ -299,7 +299,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-600 mb-2">
-                Adding <strong>₹{pendingExpense?.amount}</strong> for <strong>{pendingExpense && allExpenseCategories.find(cat => cat.value === pendingExpense.category)?.label}</strong>
+                Adding <strong>₹{pendingExpense?.amount}</strong> for <strong>{pendingExpense && getExpenseCategories().find(cat => cat.value === pendingExpense.category)?.label}</strong>
               </p>
               <p className="text-sm text-orange-600">
                 This category requires a description. Please provide details about this expense.
