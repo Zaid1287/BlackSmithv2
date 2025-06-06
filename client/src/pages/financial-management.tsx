@@ -312,12 +312,12 @@ export default function FinancialManagement() {
 
   const filteredTotalExpenses = filteredExpenses.filter((exp: any) => exp.category !== 'hyd_inward' && exp.category !== 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
 
-  // Calculate filtered EMI payments for the selected vehicle (exclude offset records)
+  // Calculate filtered EMI payments for the selected vehicle
   const filteredEmiPayments = selectedLicensePlateFilter === "all" ? 0 : (() => {
     const selectedVehicle = vehicles.find((v: any) => v.licensePlate === selectedLicensePlateFilter);
     if (!selectedVehicle) return 0;
     return emiPayments
-      .filter((payment: any) => payment.vehicleId === selectedVehicle.id && payment.status !== 'reset_offset')
+      .filter((payment: any) => payment.vehicleId === selectedVehicle.id)
       .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
   })();
 

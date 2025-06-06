@@ -51,17 +51,14 @@ export default function EmiManagement() {
     queryKey: ["/api/emi"],
   }) as { data: any[], isLoading: boolean };
 
-  // Filter out offset records from display
-  const visibleEmiPayments = emiPayments.filter((p: any) => p.status !== 'reset_offset');
-
   // Calculate summary statistics
   const summaryStats = {
     totalVehicles: vehicles.length,
     totalEmiAmount: vehicles.reduce((sum: number, vehicle: any) => sum + parseFloat(vehicle.monthlyEmi || 0), 0),
-    totalPaidAmount: visibleEmiPayments
+    totalPaidAmount: emiPayments
       .filter((p: any) => parseFloat(p.amount) > 0)
       .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0),
-    totalAdvances: visibleEmiPayments
+    totalAdvances: emiPayments
       .filter((p: any) => parseFloat(p.amount) < 0)
       .reduce((sum: number, p: any) => sum + Math.abs(parseFloat(p.amount)), 0),
   };
@@ -70,7 +67,7 @@ export default function EmiManagement() {
 
   // Calculate individual vehicle data
   const getVehicleData = (vehicle: any) => {
-    const vehiclePayments = visibleEmiPayments.filter((p: any) => p.vehicleId === vehicle.id);
+    const vehiclePayments = emiPayments.filter((p: any) => p.vehicleId === vehicle.id);
     const totalPaid = vehiclePayments
       .filter((p: any) => parseFloat(p.amount) > 0)
       .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
@@ -229,7 +226,7 @@ export default function EmiManagement() {
 
   // Export data to Excel
   const exportToExcel = () => {
-    const exportData = visibleEmiPayments.map((payment: any) => {
+    const exportData = emiPayments.map((payment: any) => {
       const vehicle = vehicles.find((v: any) => v.id === payment.vehicleId);
       return {
         'Vehicle': vehicle?.licensePlate || 'Unknown',
@@ -263,7 +260,7 @@ export default function EmiManagement() {
 
   // Get filtered EMI payments for history dialog
   const filteredEmiPayments = selectedVehicle 
-    ? visibleEmiPayments.filter((p: any) => p.vehicleId === selectedVehicle.id)
+    ? emiPayments.filter((p: any) => p.vehicleId === selectedVehicle.id)
     : [];
 
   if (vehiclesLoading || paymentsLoading) {

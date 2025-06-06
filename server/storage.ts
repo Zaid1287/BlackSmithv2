@@ -324,13 +324,12 @@ export class DatabaseStorage implements IStorage {
       })
       .from(salaryPayments);
 
-    // Calculate total EMI payments (exclude offset records from financial calculations)
+    // Calculate total EMI payments
     const [emiStats] = await db
       .select({
         totalEmiPayments: sql<number>`COALESCE(SUM(${emiPayments.amount}), 0)`,
       })
-      .from(emiPayments)
-      .where(sql`${emiPayments.status} != 'reset_offset'`);
+      .from(emiPayments);
 
     // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups - EMI Payments
     // EMI payments reduce business finances when made, offset records prevent money from being added back during resets
@@ -460,27 +459,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async resetEmiData(): Promise<void> {
-    // Calculate total EMI payments before reset
-    const [totalPaid] = await db
-      .select({
-        total: sql<number>`COALESCE(SUM(${emiPayments.amount}), 0)`
-      })
-      .from(emiPayments);
-    
-    // Store the reset amount in a special EMI payment record with negative amount
-    // This prevents the money from being added back to business finances
-    if (totalPaid.total > 0) {
-      await db.insert(emiPayments).values({
-        vehicleId: 1, // Use first vehicle as placeholder
-        amount: `${-totalPaid.total}`, // Negative amount to offset reset
-        status: 'reset_offset',
-        description: `Reset offset - ${new Date().toISOString()}`,
-        paidDate: new Date(),
-      });
-    }
-    
-    // Delete all regular EMI payment records (but keep the offset record)
-    await db.delete(emiPayments).where(sql`${emiPayments.status} != 'reset_offset'`);
+    // Simple reset - delete all EMI payment records (like salary reset)
+    await db.delete(emiPayments);
   }
 }
 
