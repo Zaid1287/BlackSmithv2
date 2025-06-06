@@ -468,8 +468,8 @@ export default function EmiManagement() {
           </DialogHeader>
           
           <div className="space-y-6">
-            {/* Vehicle Monthly EMI */}
-            <div className="bg-gray-50 rounded-lg p-4">
+            {/* Monthly Payment Update */}
+            <div className="p-4 border rounded-lg bg-gray-50">
               <h3 className="text-lg font-semibold mb-3">Monthly Payment</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -483,57 +483,108 @@ export default function EmiManagement() {
                     placeholder="Enter monthly payment amount"
                     value={newMonthlyEmi}
                     onChange={(e) => setNewMonthlyEmi(e.target.value)}
-                    className="mt-1"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Payment Entries */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Add Payments</h3>
-                <Button onClick={addPaymentEntry} size="sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Payment
+            {/* Add Payment Entries */}
+            <div className="border rounded-lg p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Add Payment Entries</h3>
+                <Button onClick={addPaymentEntry} size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Entry
                 </Button>
               </div>
 
-              {paymentEntries.map((entry) => (
-                <div key={entry.id} className="border rounded-lg p-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">Payment Entry</h4>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removePaymentEntry(entry.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  
-                  <div>
-                    <Label className="text-sm font-medium">Amount (₹)</Label>
-                    <Input
-                      type="number"
-                      placeholder="Payment amount"
-                      value={entry.amount}
-                      onChange={(e) => updatePaymentEntry(entry.id, 'amount', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label className="text-sm font-medium">Description (Optional)</Label>
-                    <Textarea
-                      placeholder="Add payment notes or details..."
-                      value={entry.description}
-                      onChange={(e) => updatePaymentEntry(entry.id, 'description', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
+              {paymentEntries.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                  <CreditCard className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-sm">No payment entries added yet.</p>
+                  <p className="text-xs text-gray-400">Click "Add Entry" to schedule EMI payments</p>
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-4 max-h-80 overflow-y-auto">
+                  {paymentEntries.map((entry, index) => (
+                    <Card key={entry.id} className="p-4 bg-blue-50 border-blue-200">
+                      <div className="flex justify-between items-start mb-3">
+                        <h4 className="font-medium text-blue-900">Payment Entry #{index + 1}</h4>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 hover:text-red-700 border-red-300"
+                          onClick={() => removePaymentEntry(entry.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <Label className="text-sm font-medium">Amount (₹)</Label>
+                          <Input
+                            type="number"
+                            placeholder="Enter amount"
+                            value={entry.amount}
+                            onChange={(e) => updatePaymentEntry(entry.id, 'amount', e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium">Due Date</Label>
+                          <Input
+                            type="date"
+                            value={entry.dueDate}
+                            onChange={(e) => updatePaymentEntry(entry.id, 'dueDate', e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <Label className="text-sm font-medium">Month</Label>
+                          <Select value={entry.month} onValueChange={(value) => updatePaymentEntry(entry.id, 'month', value)}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select month" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[
+                                "January", "February", "March", "April", "May", "June",
+                                "July", "August", "September", "October", "November", "December"
+                              ].map((month) => (
+                                <SelectItem key={month} value={month}>{month}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium">Year</Label>
+                          <Input
+                            type="number"
+                            placeholder="2025"
+                            value={entry.year}
+                            onChange={(e) => updatePaymentEntry(entry.id, 'year', parseInt(e.target.value))}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label className="text-sm font-medium">Description (Optional)</Label>
+                        <Textarea
+                          placeholder="Add payment notes or details..."
+                          value={entry.description}
+                          onChange={(e) => updatePaymentEntry(entry.id, 'description', e.target.value)}
+                          rows={2}
+                          className="mt-1"
+                        />
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end space-x-3 pt-4 border-t">
@@ -592,12 +643,18 @@ export default function EmiManagement() {
                             {isAdvance ? 'Advance: ' : 'Payment: '}
                             ₹{Math.abs(amount).toLocaleString()}
                           </h4>
-                          <p className="text-sm text-gray-600">{payment.description}</p>
+                          <p className="text-sm text-gray-600">{payment.month} {payment.year}</p>
                           <p className="text-xs text-gray-500">
-                            Created: {new Date(payment.createdAt).toLocaleDateString()}
+                            {payment.paidDate ? `Paid: ${new Date(payment.paidDate).toLocaleDateString()}` : 
+                             `Due: ${new Date(payment.dueDate).toLocaleDateString()}`}
                           </p>
+                          {payment.description && (
+                            <p className="text-xs text-gray-600 mt-1">{payment.description}</p>
+                          )}
                         </div>
-                        <Badge variant={payment.status === 'paid' ? 'default' : 'secondary'}>
+                        <Badge className={
+                          payment.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                        }>
                           {payment.status}
                         </Badge>
                       </div>
