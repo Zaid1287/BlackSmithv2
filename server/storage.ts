@@ -129,11 +129,64 @@ export class DatabaseStorage implements IStorage {
 
   async getAllJourneys(): Promise<Journey[]> {
     // Limit to recent 90 journeys for better performance
-    return await db.select().from(journeys).orderBy(desc(journeys.startTime)).limit(90);
+    const result = await db
+      .select({
+        id: journeys.id,
+        driverId: journeys.driverId,
+        vehicleId: journeys.vehicleId,
+        startLocation: journeys.startLocation,
+        destination: journeys.destination,
+        startTime: journeys.startTime,
+        endTime: journeys.endTime,
+        status: journeys.status,
+        pouch: journeys.pouch,
+        security: journeys.security,
+        totalExpenses: journeys.totalExpenses,
+        balance: journeys.balance,
+        currentLocation: journeys.currentLocation,
+        currentSpeed: journeys.currentSpeed,
+        totalDistance: journeys.totalDistance,
+        photos: journeys.photos,
+        driverName: users.name,
+        licensePlate: vehicles.licensePlate,
+      })
+      .from(journeys)
+      .leftJoin(users, eq(journeys.driverId, users.id))
+      .leftJoin(vehicles, eq(journeys.vehicleId, vehicles.id))
+      .orderBy(desc(journeys.startTime))
+      .limit(90);
+    
+    return result as any[];
   }
 
   async getActiveJourneys(): Promise<Journey[]> {
-    return await db.select().from(journeys).where(eq(journeys.status, 'active'));
+    const result = await db
+      .select({
+        id: journeys.id,
+        driverId: journeys.driverId,
+        vehicleId: journeys.vehicleId,
+        startLocation: journeys.startLocation,
+        destination: journeys.destination,
+        startTime: journeys.startTime,
+        endTime: journeys.endTime,
+        status: journeys.status,
+        pouch: journeys.pouch,
+        security: journeys.security,
+        totalExpenses: journeys.totalExpenses,
+        balance: journeys.balance,
+        currentLocation: journeys.currentLocation,
+        currentSpeed: journeys.currentSpeed,
+        totalDistance: journeys.totalDistance,
+        photos: journeys.photos,
+        driverName: users.name,
+        licensePlate: vehicles.licensePlate,
+      })
+      .from(journeys)
+      .leftJoin(users, eq(journeys.driverId, users.id))
+      .leftJoin(vehicles, eq(journeys.vehicleId, vehicles.id))
+      .where(eq(journeys.status, 'active'));
+    
+    return result as any[];
   }
 
   async getJourneysByDriver(driverId: number): Promise<Journey[]> {
