@@ -18,6 +18,7 @@ export default function AdminDashboard() {
   const [selectedJourney, setSelectedJourney] = useState<any>(null);
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
 
   const { data: dashboardStats } = useQuery({
     queryKey: ["/api/dashboard/stats"],
