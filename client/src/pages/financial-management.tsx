@@ -406,7 +406,7 @@ export default function FinancialManagement() {
         [""],
         ["VEHICLE BREAKDOWN"],
         [""],
-        ["Vehicle", "Total Journeys", "Total Expenses", "Vehicle Revenue", "Vehicle Profit"]
+        ["Vehicle", "Total Journeys", "Total Expenses", "Vehicle Revenue", "EMI Payments", "Vehicle Profit"]
       ];
 
       // Add vehicle summary to overall tab
@@ -426,19 +426,26 @@ export default function FinancialManagement() {
         const totalVehicleExpenses = vehicleExpenses.filter((exp: any) => !['hyd_inward', 'top_up'].includes(exp.category))
           .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
         
-        const vehicleProfit = totalVehicleRevenue - totalVehicleExpenses;
+        // Calculate vehicle-specific EMI payments
+        const vehicle = vehicles.find((v: any) => v.licensePlate === licensePlate);
+        const vehicleEmiPayments = vehicle ? emiPayments
+          .filter((payment: any) => payment.vehicleId === vehicle.id)
+          .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0) : 0;
+        
+        const vehicleProfit = totalVehicleRevenue - totalVehicleExpenses - vehicleEmiPayments;
 
         overallSummaryData.push([
           licensePlate,
           vehicleJourneys.length,
           totalVehicleExpenses,
           totalVehicleRevenue,
+          vehicleEmiPayments,
           vehicleProfit
         ]);
       });
 
       const overallSummaryWS = XLSX.utils.aoa_to_sheet(overallSummaryData);
-      overallSummaryWS['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
+      overallSummaryWS['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
       XLSX.utils.book_append_sheet(mainWorkbook, overallSummaryWS, "Overall Summary");
 
       // Create individual tabs for each vehicle
