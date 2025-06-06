@@ -29,7 +29,7 @@ export const translations = {
   search: { en: 'Search', hi: 'खोजें', te: 'వెతకండి' },
   filter: { en: 'Filter', hi: 'फ़िल्टर', te: 'ఫిల్టర్' },
   reset: { en: 'Reset', hi: 'रीसेट', te: 'రీసెట్' },
-  loading: { en: 'Loading...', hi: 'लोड हो रहा है...', te: 'లోడవుతోంది...' },
+  loadingText: { en: 'Loading...', hi: 'लोड हो रहा है...', te: 'లోడవుతోంది...' },
 
   // Dashboard
   totalVehicles: { en: 'Total Vehicles', hi: 'कुल वाहन', te: 'మొత్తం వాహనాలు' },
@@ -161,6 +161,23 @@ export const translations = {
   addQuickExpense: { en: 'Add Quick Expense', hi: 'त्वरित खर्च जोड़ें', te: 'త్వరిత ఖర్చు జోడించండి' },
   journeyExpenses: { en: 'Journey Expenses', hi: 'यात्रा खर्च', te: 'యాత్ర ఖర్చులు' },
   noExpensesAdded: { en: 'No expenses added yet', hi: 'अभी तक कोई खर्च नहीं जोड़ा गया', te: 'ఇంకా ఎలాంటి ఖర్చులు జోడించలేదు' },
+  
+  // Expense categories - complete translations
+  loading: { en: 'Loading', hi: 'लोडिंग', te: 'లోడింగ్' },
+  rope: { en: 'Rope', hi: 'रस्सी', te: 'తాడు' },
+  rto: { en: 'RTO', hi: 'आरटीओ', te: 'ఆర్‌టీవో' },
+  hydUnloading: { en: 'HYD Unloading', hi: 'हैदराबाद अनलोडिंग', te: 'హైదరాబాద్ అన్‌లోడింగ్' },
+  nzbUnloading: { en: 'NZB Unloading', hi: 'निज़ामाबाद अनलोडिंग', te: 'నిజామాబాద్ అన్‌లోడింగ్' },
+  miscellaneous: { en: 'Miscellaneous', hi: 'विविध', te: 'ఇతరములు' },
+  mechanical: { en: 'Mechanical', hi: 'यांत्रिक', te: 'యాంత్రిక' },
+  electrical: { en: 'Electrical', hi: 'बिजली', te: 'విద్యుత్' },
+  bodyWorks: { en: 'Body Works', hi: 'बॉडी वर्क', te: 'బాడీ వర్క్' },
+  tiresAir: { en: 'Tires Air', hi: 'टायर हवा', te: 'టైర్ గాలి' },
+  weighment: { en: 'Weighment', hi: 'तौल', te: 'బరువు' },
+  adblue: { en: 'AdBlue', hi: 'एडब्लू', te: 'ఆడ్‌బ్లూ' },
+  fines: { en: 'Fines', hi: 'जुर्माना', te: 'జరిమానా' },
+  driverFees: { en: 'Driver Fees', hi: 'ड्राइवर फीस', te: 'డ్రైవర్ ఫీస్' },
+  topUp: { en: 'Top Up', hi: 'टॉप अप', te: 'టాప్ అప్' },
 } as const;
 
 export type TranslationKeys = keyof typeof translations;
