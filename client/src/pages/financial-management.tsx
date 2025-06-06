@@ -267,27 +267,117 @@ export default function FinancialManagement() {
         sheetData.push([category, amount]);
       });
 
-      // Create single worksheet
-      const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-      
-      // Set column widths for better formatting
-      const colWidths = [
-        { wch: 12 }, // Journey ID
-        { wch: 15 }, // License Plate
-        { wch: 20 }, // Destination/Category
-        { wch: 15 }, // Driver/Amount
-        { wch: 12 }, // Status/Description
-        { wch: 12 }, // Start Date
-        { wch: 12 }, // End Date
-        { wch: 15 }, // Pouch Amount
-        { wch: 15 }, // Security Deposit
-        { wch: 15 }, // Total Expenses
-        { wch: 15 }  // Current Balance
+      // Create main financial summary worksheet
+      const summaryWS = XLSX.utils.aoa_to_sheet(sheetData);
+      summaryWS['!cols'] = [
+        { wch: 20 }, { wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 25 },
+        { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }
       ];
-      worksheet['!cols'] = colWidths;
 
-      // Add the single sheet to workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Financial Report");
+      // Create journey-wise breakdown sheet
+      const journeyBreakdownData = [
+        ["BLACKSMITH TRADERS - JOURNEY EXPENSE BREAKDOWN"],
+        [`Report Generated: ${new Date().toLocaleDateString()}`],
+        [""],
+        ["Journey ID", "License Plate", "Driver", "Route", "Start Date", "End Date", "Status", 
+         "Fuel Expenses", "Food Expenses", "Loading Expenses", "Maintenance Expenses", "Other Expenses", "Total Expenses"]
+      ];
+
+      finalJourneys.forEach((journey: any) => {
+        const journeyExpenses = finalExpenses.filter((exp: any) => exp.journeyId === journey.id);
+        const expensesByCategory = journeyExpenses.reduce((acc: any, exp: any) => {
+          acc[exp.category] = (acc[exp.category] || 0) + parseFloat(exp.amount);
+          return acc;
+        }, {});
+
+        const totalJourneyExpenses = Object.values(expensesByCategory).reduce((sum: any, amount: any) => sum + amount, 0);
+
+        journeyBreakdownData.push([
+          journey.id,
+          journey.licensePlate,
+          journey.driverName || "N/A",
+          `${journey.startLocation || ''} → ${journey.destination || ''}`,
+          journey.startTime ? new Date(journey.startTime).toLocaleDateString() : "",
+          journey.endTime ? new Date(journey.endTime).toLocaleDateString() : "Ongoing",
+          journey.status,
+          expensesByCategory.fuel || 0,
+          expensesByCategory.food || 0,
+          expensesByCategory.loading || 0,
+          expensesByCategory.maintenance || 0,
+          (expensesByCategory.tire_grease || 0) + (expensesByCategory.miscellaneous || 0) + (expensesByCategory.other || 0),
+          totalJourneyExpenses
+        ]);
+      });
+
+      const journeyBreakdownWS = XLSX.utils.aoa_to_sheet(journeyBreakdownData);
+      journeyBreakdownWS['!cols'] = [
+        { wch: 12 }, { wch: 15 }, { wch: 15 }, { wch: 25 }, { wch: 12 }, { wch: 12 }, { wch: 10 },
+        { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 12 }, { wch: 15 }
+      ];
+
+      // Create detailed expense records sheet
+      const expenseRecordsData = [
+        ["BLACKSMITH TRADERS - DETAILED EXPENSE RECORDS"],
+        [`Report Generated: ${new Date().toLocaleDateString()}`],
+        [""],
+        ["Date", "Journey ID", "License Plate", "Driver", "Category", "Amount (₹)", "Description", "Added By"]
+      ];
+
+      finalExpenses.forEach((expense: any) => {
+        const journey = finalJourneys.find((j: any) => j.id === expense.journeyId);
+        expenseRecordsData.push([
+          new Date(expense.timestamp).toLocaleDateString(),
+          expense.journeyId,
+          journey?.licensePlate || "N/A",
+          journey?.driverName || "N/A",
+          expense.category.replace('_', ' ').toUpperCase(),
+          parseFloat(expense.amount),
+          expense.description || "-",
+          expense.addedBy || "System"
+        ]);
+      });
+
+      const expenseRecordsWS = XLSX.utils.aoa_to_sheet(expenseRecordsData);
+      expenseRecordsWS['!cols'] = [
+        { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 15 }, { wch: 20 }, { wch: 12 }, { wch: 30 }, { wch: 15 }
+      ];
+
+      // Create category analysis sheet
+      const categoryAnalysisData = [
+        ["BLACKSMITH TRADERS - EXPENSE CATEGORY ANALYSIS"],
+        [`Report Generated: ${new Date().toLocaleDateString()}`],
+        [""],
+        ["Category", "Total Amount (₹)", "Number of Transactions", "Average per Transaction", "% of Total Expenses"]
+      ];
+
+      const totalExpenseAmount = finalExpenses.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+      
+      Object.entries(categoryTotals).forEach(([category, amount]) => {
+        const categoryExpenses = finalExpenses.filter((exp: any) => 
+          exp.category.replace('_', ' ').toUpperCase() === category
+        );
+        const avgAmount = categoryExpenses.length > 0 ? amount / categoryExpenses.length : 0;
+        const percentage = totalExpenseAmount > 0 ? ((amount / totalExpenseAmount) * 100).toFixed(1) : 0;
+
+        categoryAnalysisData.push([
+          category,
+          amount,
+          categoryExpenses.length,
+          avgAmount.toFixed(2),
+          `${percentage}%`
+        ]);
+      });
+
+      const categoryAnalysisWS = XLSX.utils.aoa_to_sheet(categoryAnalysisData);
+      categoryAnalysisWS['!cols'] = [
+        { wch: 25 }, { wch: 18 }, { wch: 20 }, { wch: 20 }, { wch: 18 }
+      ];
+
+      // Add all sheets to workbook
+      XLSX.utils.book_append_sheet(workbook, summaryWS, "Financial Summary");
+      XLSX.utils.book_append_sheet(workbook, journeyBreakdownWS, "Journey Breakdown");
+      XLSX.utils.book_append_sheet(workbook, expenseRecordsWS, "Expense Records");
+      XLSX.utils.book_append_sheet(workbook, categoryAnalysisWS, "Category Analysis");
 
       // Generate and download file
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
