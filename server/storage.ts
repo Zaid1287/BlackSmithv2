@@ -331,13 +331,14 @@ export class DatabaseStorage implements IStorage {
       })
       .from(emiPayments);
 
-    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups
-    // EMI payments are vehicle financing costs and don't affect business profit calculations
+    // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups - EMI Payments
+    // EMI payments reduce business finances when made, offset records prevent money from being added back during resets
     const baseProfit = (journeyStats.totalRevenue || 0) + (journeyStats.completedSecurity || 0) - (journeyStats.totalExpenses || 0);
     const salaryAdjustment = -(salaryStats.totalPayments || 0) + (salaryStats.totalDebts || 0); // Subtract payments, add debts
     const additionalRevenue = (revenueStats.hydInwardRevenue || 0) + (revenueStats.topUpRevenue || 0);
+    const emiAdjustment = -(emiStats.totalEmiPayments || 0); // Subtract all EMI payments (including negative offset records)
     
-    const netProfit = baseProfit + salaryAdjustment + additionalRevenue;
+    const netProfit = baseProfit + salaryAdjustment + additionalRevenue + emiAdjustment;
 
     // Get total security deposits for revenue display
     const [allSecurityStats] = await db
@@ -458,8 +459,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async resetEmiData(): Promise<void> {
-    // Delete all EMI payment records
-    await db.delete(emiPayments);
+    // Calculate total EMI payments before reset
+    const [totalPaid] = await db
+      .select({
+        total: sql<number>`COALESCE(SUM(${emiPayments.amount}), 0)`
+      })
+      .from(emiPayments);
+    
+    // Store the reset amount in a special EMI payment record with negative amount
+    // This prevents the money from being added back to business finances
+    if (totalPaid.total > 0) {
+      await db.insert(emiPayments).values({
+        vehicleId: 1, // Use first vehicle as placeholder
+        amount: `${-totalPaid.total}`, // Negative amount to offset reset
+        status: 'reset_offset',
+        description: `Reset offset - ${new Date().toISOString()}`,
+        paidDate: new Date(),
+      });
+    }
+    
+    // Delete all regular EMI payment records (but keep the offset record)
+    await db.delete(emiPayments).where(sql`${emiPayments.status} != 'reset_offset'`);
   }
 }
 
