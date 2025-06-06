@@ -312,12 +312,6 @@ export default function FinancialManagement() {
 
   const filteredTotalExpenses = filteredExpenses.filter((exp: any) => exp.category !== 'hyd_inward' && exp.category !== 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
 
-  // Get cumulative EMI resets from localStorage to prevent adding money back
-  const getCumulativeEmiResets = () => {
-    const stored = localStorage.getItem('cumulativeEmiResets');
-    return stored ? parseFloat(stored) : 0;
-  };
-
   // Calculate filtered EMI payments for the selected vehicle
   const filteredEmiPayments = selectedLicensePlateFilter === "all" ? 0 : (() => {
     const selectedVehicle = vehicles.find((v: any) => v.licensePlate === selectedLicensePlateFilter);
@@ -327,9 +321,8 @@ export default function FinancialManagement() {
       .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
   })();
 
-  // EMI payments reduce business finances when paid, but resets don't add money back
-  const cumulativeEmiResets = getCumulativeEmiResets();
-  const filteredNetProfit = filteredRevenue - filteredTotalExpenses - filteredEmiPayments - cumulativeEmiResets;
+  // EMI payments reduce business finances when paid
+  const filteredNetProfit = filteredRevenue - filteredTotalExpenses - filteredEmiPayments;
 
   // Use filtered or total stats based on filter selection
   const totalRevenue = selectedLicensePlateFilter === "all" ? parseFloat(financialStats?.revenue?.toString() || "0") || 0 : filteredRevenue;
