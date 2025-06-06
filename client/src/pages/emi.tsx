@@ -263,7 +263,7 @@ export default function EmiManagement() {
 
   // Get filtered EMI payments for history dialog
   const filteredEmiPayments = selectedVehicle 
-    ? emiPayments.filter((p: any) => p.vehicleId === selectedVehicle.id)
+    ? visibleEmiPayments.filter((p: any) => p.vehicleId === selectedVehicle.id)
     : [];
 
   if (vehiclesLoading || paymentsLoading) {
