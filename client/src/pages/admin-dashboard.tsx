@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Truck, Route, UserCheck, TrafficCone, Search, X, Plus } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import AddExpenseModal from "@/components/add-expense-modal";
 import QuickAddExpense from "@/components/quick-add-expense";
 

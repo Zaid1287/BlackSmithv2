@@ -16,22 +16,27 @@ import {
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSelector from "./language-selector";
 
-const navigation = [
-  { name: "Dashboard", href: "/active-journeys", icon: LayoutDashboard, roles: ["driver"] },
-  { name: "Dashboard", href: "/admin-dashboard", icon: LayoutDashboard, roles: ["admin"] },
-  { name: "Journey History", href: "/journey-history", icon: History, roles: ["driver", "admin"] },
-  { name: "Manage Users", href: "/manage-users", icon: Users, roles: ["admin"] },
-  { name: "Manage Vehicles", href: "/manage-vehicles", icon: Truck, roles: ["admin"] },
-  { name: "Financial Management", href: "/financial-management", icon: BarChart3, roles: ["admin"] },
-  { name: "Salaries", href: "/salaries", icon: DollarSign, roles: ["admin"] },
-  { name: "EMI", href: "/emi", icon: CreditCard, roles: ["admin"] },
+const getNavigation = (t: (key: any) => string) => [
+  { name: t('dashboard'), href: "/active-journeys", icon: LayoutDashboard, roles: ["driver"] },
+  { name: t('adminDashboard'), href: "/admin-dashboard", icon: LayoutDashboard, roles: ["admin"] },
+  { name: t('journeyHistory'), href: "/journey-history", icon: History, roles: ["driver", "admin"] },
+  { name: t('manageUsers'), href: "/manage-users", icon: Users, roles: ["admin"] },
+  { name: t('manageVehicles'), href: "/manage-vehicles", icon: Truck, roles: ["admin"] },
+  { name: t('financialManagement'), href: "/financial-management", icon: BarChart3, roles: ["admin"] },
+  { name: t('salaries'), href: "/salaries", icon: DollarSign, roles: ["admin"] },
+  { name: t('emi'), href: "/emi", icon: CreditCard, roles: ["admin"] },
 ];
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
   const [location] = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { t } = useLanguage();
+  
+  const navigation = getNavigation(t);
 
   if (!user) return null;
 
@@ -129,16 +134,7 @@ export default function Sidebar() {
           </div>
           
           <div className="mb-4">
-            <Select defaultValue="english">
-              <SelectTrigger className="w-full bg-gray-800 border-gray-600">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="english">English</SelectItem>
-                <SelectItem value="hindi">Hindi</SelectItem>
-                <SelectItem value="tamil">Tamil</SelectItem>
-              </SelectContent>
-            </Select>
+            <LanguageSelector />
           </div>
           
           <Button 
@@ -147,7 +143,7 @@ export default function Sidebar() {
             className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800"
           >
             <LogOut className="w-4 h-4 mr-2" />
-            Log out
+            {t('logout')}
           </Button>
         </div>
       )}
