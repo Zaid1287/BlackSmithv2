@@ -39,10 +39,10 @@ export default function Sidebar() {
 
   return (
     <div className={`${isCollapsed ? 'w-12' : 'w-48 md:w-64'} sidebar-dark text-white flex flex-col transition-all duration-300`}>
-      {/* Logo */}
+      {/* Logo and Toggle */}
       <div className={`${isCollapsed ? 'p-2' : 'p-6'} border-b border-gray-700`}>
         {isCollapsed ? (
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center space-y-3">
             <Link href="/admin-dashboard">
               <div className="flex items-center justify-center cursor-pointer hover:bg-slate-700/50 p-1 rounded-lg transition-colors">
                 <span className="text-sm font-serif font-bold text-white">B</span>
@@ -50,6 +50,15 @@ export default function Sidebar() {
                 <span className="text-sm font-serif font-bold text-white">S</span>
               </div>
             </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="text-white hover:text-white hover:bg-slate-600/70 p-2 rounded-lg bg-slate-700/30 border border-slate-600/50"
+              aria-label="expand"
+            >
+              <ChevronRight size={16} className="font-bold" />
+            </Button>
           </div>
         ) : (
           <div className="flex items-center justify-between">
@@ -141,20 +150,7 @@ export default function Sidebar() {
         </div>
       )}
 
-      {/* Expand Button - Bottom positioned when collapsed */}
-      {isCollapsed && (
-        <div className="mt-auto p-2 border-t border-gray-700">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="w-full text-white hover:text-white hover:bg-slate-600/70 p-3 rounded-lg bg-slate-700/30 border border-slate-600/50"
-            aria-label="expand"
-          >
-            <ChevronRight size={16} className="font-bold" />
-          </Button>
-        </div>
-      )}
+
     </div>
   );
 }
