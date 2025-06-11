@@ -185,6 +185,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/users/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { username, name, role, password } = req.body;
+      
+      if (!username || !name || !role) {
+        return res.status(400).json({ message: "Username, name, and role are required" });
+      }
+
+      await storage.updateUser(id, { username, name, role, password });
+      res.json({ message: "User updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  app.put("/api/users/:id/salary", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { salary } = req.body;
+      
+      if (!salary || isNaN(parseFloat(salary))) {
+        return res.status(400).json({ message: "Valid salary amount is required" });
+      }
+
+      await storage.updateUserSalary(id, salary);
+      res.json({ message: "User salary updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update user salary" });
+    }
+  });
+
   // Vehicle management routes
   app.get("/api/vehicles", authenticateToken, async (req, res) => {
     try {
@@ -219,6 +251,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put("/api/vehicles/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { licensePlate, model, status } = req.body;
+      
+      if (!licensePlate || !model || !status) {
+        return res.status(400).json({ message: "License plate, model, and status are required" });
+      }
+
+      await storage.updateVehicle(id, { licensePlate, model, status });
+      res.json({ message: "Vehicle updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update vehicle" });
+    }
+  });
+
+  app.put("/api/vehicles/:id/emi", authenticateToken, requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { monthlyEmi } = req.body;

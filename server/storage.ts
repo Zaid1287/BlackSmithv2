@@ -10,12 +10,14 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   deleteUser(id: number): Promise<void>;
   getAllUsers(): Promise<User[]>;
+  updateUser(id: number, data: { username?: string; name?: string; role?: string; password?: string }): Promise<void>;
   updateUserSalary(id: number, salary: string): Promise<void>;
   
   // Vehicle methods
   createVehicle(vehicle: InsertVehicle): Promise<Vehicle>;
   getAllVehicles(): Promise<Vehicle[]>;
   deleteVehicle(id: number): Promise<void>;
+  updateVehicle(id: number, data: { licensePlate?: string; model?: string; status?: string }): Promise<void>;
   updateVehicleStatus(id: number, status: string): Promise<void>;
   updateVehicleMonthlyEmi(id: number, monthlyEmi: string): Promise<void>;
   
@@ -82,6 +84,19 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
+  async updateUser(id: number, data: { username?: string; name?: string; role?: string; password?: string }): Promise<void> {
+    const updateData: any = {};
+    
+    if (data.username) updateData.username = data.username;
+    if (data.name) updateData.name = data.name;
+    if (data.role) updateData.role = data.role;
+    if (data.password) {
+      updateData.password = await bcrypt.hash(data.password, 10);
+    }
+
+    await db.update(users).set(updateData).where(eq(users.id, id));
+  }
+
   async updateUserSalary(id: number, salary: string): Promise<void> {
     await db.update(users).set({ salary }).where(eq(users.id, id));
   }
@@ -104,6 +119,16 @@ export class DatabaseStorage implements IStorage {
 
   async updateVehicleStatus(id: number, status: string): Promise<void> {
     await db.update(vehicles).set({ status }).where(eq(vehicles.id, id));
+  }
+
+  async updateVehicle(id: number, data: { licensePlate?: string; model?: string; status?: string }): Promise<void> {
+    const updateData: any = {};
+    
+    if (data.licensePlate) updateData.licensePlate = data.licensePlate;
+    if (data.model) updateData.model = data.model;
+    if (data.status) updateData.status = data.status;
+
+    await db.update(vehicles).set(updateData).where(eq(vehicles.id, id));
   }
 
   async updateVehicleMonthlyEmi(id: number, monthlyEmi: string): Promise<void> {
