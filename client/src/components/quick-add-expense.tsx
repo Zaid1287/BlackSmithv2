@@ -37,13 +37,14 @@ const regularExpenseTypes = [
 
 export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseProps) {
   const [amounts, setAmounts] = useState<{[key: string]: string}>({});
+  const [descriptions, setDescriptions] = useState<{[key: string]: string}>({});
   const [showModal, setShowModal] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const addExpenseMutation = useMutation({
-    mutationFn: async (data: { type: string; amount: number }) => {
+    mutationFn: async (data: { type: string; amount: number; description?: string }) => {
       const response = await fetch(`/api/expenses`, {
         method: "POST",
         headers: {
@@ -55,7 +56,7 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
           journeyId: journeyId,
           category: data.type,
           amount: data.amount,
-          description: `${regularExpenseTypes.find(t => t.value === data.type)?.label || data.type} expense`,
+          description: data.description || `${regularExpenseTypes.find(t => t.value === data.type)?.label || data.type} expense`,
         }),
       });
       
@@ -80,8 +81,12 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       
-      // Clear the amount for this specific expense type
+      // Clear the amount and description for this specific expense type
       setAmounts(prev => ({
+        ...prev,
+        [variables.type]: ""
+      }));
+      setDescriptions(prev => ({
         ...prev,
         [variables.type]: ""
       }));
@@ -97,6 +102,7 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
 
   const handleAddExpense = (type: string) => {
     const amount = amounts[type];
+    const description = descriptions[type];
     if (!amount || parseFloat(amount) <= 0) {
       toast({
         title: "Error",
@@ -109,6 +115,7 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
     addExpenseMutation.mutate({
       type: type,
       amount: parseFloat(amount),
+      description: description,
     });
   };
 
@@ -120,6 +127,13 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
         [type]: value
       }));
     }
+  };
+
+  const handleDescriptionChange = (type: string, value: string) => {
+    setDescriptions(prev => ({
+      ...prev,
+      [type]: value
+    }));
   };
 
   return (
@@ -206,28 +220,37 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
             </div>
 
             {/* Regular Expenses Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {regularExpenseTypes.map((expenseType) => (
                 <div key={expenseType.value} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 mb-3">{expenseType.label}</h4>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 space-y-3">
+                      <h4 className="font-medium text-gray-900">{expenseType.label}</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                          <Input
+                            type="text"
+                            placeholder="Amount"
+                            value={amounts[expenseType.value] || ''}
+                            onChange={(e) => handleAmountChange(expenseType.value, e.target.value)}
+                            className="pl-8 bg-white"
+                          />
+                        </div>
                         <Input
                           type="text"
-                          placeholder="Amount"
-                          value={amounts[expenseType.value] || ''}
-                          onChange={(e) => handleAmountChange(expenseType.value, e.target.value)}
-                          className="pl-8 bg-white"
+                          placeholder="Description (optional)"
+                          value={descriptions[expenseType.value] || ''}
+                          onChange={(e) => handleDescriptionChange(expenseType.value, e.target.value)}
+                          className="bg-white"
                         />
                       </div>
                     </div>
                     <Button
                       onClick={() => handleAddExpense(expenseType.value)}
-                      disabled={addExpenseMutation.isPending}
+                      disabled={addExpenseMutation.isPending || !amounts[expenseType.value]}
                       variant="outline"
-                      className="ml-3 px-4"
+                      className="px-4 shrink-0"
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Add
