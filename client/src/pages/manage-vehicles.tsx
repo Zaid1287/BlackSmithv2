@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Truck, CheckCircle, Route, TrendingUp } from "lucide-react";
+import { Plus, Trash2, Truck, CheckCircle, Route, TrendingUp, Edit } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { getAuthHeaders } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
+import EditVehicleModal from "@/components/edit-vehicle-modal";
 
 const vehicleSchema = z.object({
   licensePlate: z.string().min(1, "License plate is required"),
@@ -33,6 +34,8 @@ export default function ManageVehicles() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditVehicleModal, setShowEditVehicleModal] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
 
   const {
     register,
@@ -342,15 +345,28 @@ export default function ManageVehicles() {
                       {new Date(vehicle.addedOn).toLocaleDateString()} {new Date(vehicle.addedOn).toLocaleTimeString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteVehicle(vehicle.id, vehicle.licensePlate)}
-                        className="text-red-600 hover:text-red-900"
-                        disabled={deleteVehicleMutation.isPending || vehicle.status === 'in_use'}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedVehicle(vehicle);
+                            setShowEditVehicleModal(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteVehicle(vehicle.id, vehicle.licensePlate)}
+                          className="text-red-600 hover:text-red-900"
+                          disabled={deleteVehicleMutation.isPending || vehicle.status === 'in_use'}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

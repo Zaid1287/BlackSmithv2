@@ -3,16 +3,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Edit } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { getAuthHeaders } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import AddUserModal from "@/components/add-user-modal";
+import EditUserModal from "@/components/edit-user-modal";
 
 export default function ManageUsers() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["/api/users"],
@@ -111,19 +114,32 @@ export default function ManageUsers() {
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {user.role !== 'admin' || users.filter((u: any) => u.role === 'admin').length > 1 ? (
+                      <div className="flex items-center space-x-2">
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeleteUser(user.id, user.name)}
-                          className="text-red-600 hover:text-red-900"
-                          disabled={deleteUserMutation.isPending}
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowEditUserModal(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-900"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Edit className="w-4 h-4" />
                         </Button>
-                      ) : (
-                        <span className="text-gray-400 text-sm">-</span>
-                      )}
+                        {user.role !== 'admin' || users.filter((u: any) => u.role === 'admin').length > 1 ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteUser(user.id, user.name)}
+                            className="text-red-600 hover:text-red-900"
+                            disabled={deleteUserMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        ) : (
+                          <span className="text-gray-400 text-sm">-</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -142,6 +158,12 @@ export default function ManageUsers() {
       <AddUserModal 
         open={showAddUserModal} 
         onOpenChange={setShowAddUserModal} 
+      />
+
+      <EditUserModal 
+        open={showEditUserModal} 
+        onOpenChange={setShowEditUserModal}
+        user={selectedUser}
       />
     </div>
   );
