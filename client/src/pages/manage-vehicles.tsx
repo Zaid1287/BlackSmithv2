@@ -386,6 +386,12 @@ export default function ManageVehicles() {
           </div>
         </CardContent>
       </Card>
+
+      <EditVehicleModal 
+        open={showEditVehicleModal} 
+        onOpenChange={setShowEditVehicleModal}
+        vehicle={selectedVehicle}
+      />
     </div>
   );
 }
