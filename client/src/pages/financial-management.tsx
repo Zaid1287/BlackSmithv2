@@ -914,7 +914,9 @@ export default function FinancialManagement() {
                   {filteredJourneys?.map((journey: any) => {
                     // Get expenses for this journey from allExpenses
                     const journeyExpenses = allExpenses?.filter((expense: any) => expense.journeyId === journey.id) || [];
-                    const totalJourneyExpenses = journeyExpenses.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+                    const totalJourneyExpenses = journeyExpenses
+                      .filter((exp: any) => !['hyd_inward', 'top_up'].includes(exp.category))
+                      .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
                     const isExpanded = expandedJourneys.has(journey.id);
                     
                     const toggleExpanded = () => {
@@ -966,7 +968,7 @@ export default function FinancialManagement() {
                         {journeyExpenses.length > 0 && isExpanded && (
                           <div className="space-y-2 max-h-48 overflow-y-auto">
                             {journeyExpenses
-                              .filter((expense: any) => expense.category !== 'other')
+                              .filter((expense: any) => !['other', 'hyd_inward', 'top_up'].includes(expense.category))
                               .map((expense: any) => (
                               <div key={expense.id} className="flex items-center justify-between text-sm bg-white p-2 rounded">
                                 <div>
