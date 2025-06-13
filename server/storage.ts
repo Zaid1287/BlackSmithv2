@@ -445,9 +445,8 @@ export class DatabaseStorage implements IStorage {
     // Calculate net profit including salary expenses and EMI payments
     const totalEmiResetAmount = parseFloat(emiResetStats.totalResetAmount?.toString() || '0');
     
-    // Add additional business expenses (2000) to reach target total expenses of 17047
-    const additionalBusinessExpenses = 2000;
-    const businessTotalExpenses = totalExpenses + additionalBusinessExpenses;
+    // Use actual journey expenses without additional business expenses
+    const businessTotalExpenses = totalExpenses;
     
     const calculatedNetProfit = (totalRevenue + totalSecurity - businessTotalExpenses - totalPayments + totalDebts + hydInward + topUp - totalEmiPayments - totalEmiResetAmount);
 
