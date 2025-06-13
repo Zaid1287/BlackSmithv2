@@ -446,18 +446,7 @@ export class DatabaseStorage implements IStorage {
     const totalEmiResetAmount = parseFloat(emiResetStats.totalResetAmount?.toString() || '0');
     const calculatedNetProfit = (totalRevenue + totalSecurity - totalExpenses - totalPayments + totalDebts + hydInward + topUp - totalEmiPayments - totalEmiResetAmount);
 
-    console.log('Financial Stats Debug:', {
-      totalRevenue,
-      totalSecurity,
-      totalExpenses,
-      totalPayments,
-      totalDebts,
-      hydInward,
-      topUp,
-      totalEmiPayments,
-      totalEmiResetAmount,
-      calculatedNetProfit
-    });
+
 
     return {
       revenue: totalRevenue + totalSecurity + hydInward + topUp,
