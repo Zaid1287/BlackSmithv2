@@ -471,12 +471,15 @@ export class DatabaseStorage implements IStorage {
     
     const actualTotalExpenses = parseFloat(actualExpenseStats.totalActualExpenses?.toString() || '0');
     
-    // Calculate net profit using visible expenses (35280) as specified
-    const calculatedNetProfit = (totalRevenue + totalSecurity + hydInward + topUp - totalExpenses - totalPayments + totalDebts - totalEmiPayments - totalEmiResetAmount);
+    // Simplified net profit calculation: Total Revenue - Total Expenses
+    // Total expenses include: business expenses + salary payments + EMI payments
+    const totalBusinessExpenses = totalExpenses + totalPayments + totalEmiPayments + totalEmiResetAmount - totalDebts;
+    const totalRevenueAmount = totalRevenue + totalSecurity + hydInward + topUp;
+    const calculatedNetProfit = totalRevenueAmount - totalBusinessExpenses;
 
-    // Display visible expenses (excluding toll) as specified: 35280
-    const displayExpenses = totalExpenses;
-    const displayNetProfit = totalExpenses === 0 ? 0 : calculatedNetProfit;
+    // Display total expenses including salary and EMI
+    const displayExpenses = totalBusinessExpenses;
+    const displayNetProfit = calculatedNetProfit;
 
     return {
       revenue: totalRevenue + totalSecurity + hydInward + topUp,
