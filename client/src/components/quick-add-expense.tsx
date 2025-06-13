@@ -57,7 +57,6 @@ export default function QuickAddExpense({ journeyId, onClose }: QuickAddExpenseP
           category: data.type,
           amount: data.amount,
           description: data.description || `${regularExpenseTypes.find(t => t.value === data.type)?.label || data.type} expense`,
-          isCompanySecret: data.type === 'toll',
         }),
       });
       

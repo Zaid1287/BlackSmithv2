@@ -132,9 +132,9 @@ export default function ActiveJourney() {
     );
   }
 
-  // Calculate actual expenses (excluding company secrets and revenue items)
+  // Calculate actual expenses (excluding HYD Inward and Top Up)
   const actualExpenses = expenses.filter((expense: any) => 
-    !expense.isCompanySecret && expense.category !== 'top_up'
+    expense.category !== 'hyd_inward' && expense.category !== 'top_up'
   );
   const totalExpenses = actualExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
   
