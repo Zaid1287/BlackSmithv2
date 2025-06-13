@@ -282,7 +282,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   private async updateJourneyTotals(journeyId: number): Promise<void> {
-    // Calculate actual expenses (excluding HYD Inward which goes directly to profit)
+    // Calculate actual expenses (excluding HYD Inward, Top Up, and Toll - company secrets)
     const [expenseResult] = await db
       .select({
         totalExpenses: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
@@ -291,7 +291,8 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(expenses.journeyId, journeyId), 
         not(eq(expenses.category, 'hyd_inward')),
-        not(eq(expenses.category, 'top_up'))
+        not(eq(expenses.category, 'top_up')),
+        not(eq(expenses.category, 'toll'))
       ));
 
     // Calculate top-up separately to add to balance

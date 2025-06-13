@@ -132,9 +132,9 @@ export default function ActiveJourney() {
     );
   }
 
-  // Calculate actual expenses (excluding HYD Inward and Top Up)
+  // Calculate actual expenses (excluding HYD Inward, Top Up, and Toll - company secrets)
   const actualExpenses = expenses.filter((expense: any) => 
-    expense.category !== 'hyd_inward' && expense.category !== 'top_up'
+    expense.category !== 'hyd_inward' && expense.category !== 'top_up' && expense.category !== 'toll'
   );
   const totalExpenses = actualExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
   
