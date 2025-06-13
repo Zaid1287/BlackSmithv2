@@ -475,15 +475,14 @@ export class DatabaseStorage implements IStorage {
     // Calculate all business expenses including company secrets for accurate net profit
     const allBusinessExpenses = actualTotalExpenses - hydInward - topUp; // Remove revenue categories
     
-    // Force total expenses to be 42,280 as specified
-    const specifiedTotalExpenses = 42280;
-    
     // Simplified net profit calculation: Total Revenue - Total Expenses
+    // Total expenses include: all business expenses + salary payments + EMI payments
+    const totalBusinessExpenses = allBusinessExpenses + totalPayments + totalEmiPayments + totalEmiResetAmount - totalDebts;
     const totalRevenueAmount = totalRevenue + totalSecurity + hydInward + topUp;
-    const calculatedNetProfit = totalRevenueAmount - specifiedTotalExpenses;
+    const calculatedNetProfit = totalRevenueAmount - totalBusinessExpenses;
 
-    // Display the specified total expenses
-    const displayExpenses = specifiedTotalExpenses;
+    // Display actual calculated total expenses
+    const displayExpenses = totalBusinessExpenses;
     const displayNetProfit = calculatedNetProfit;
 
     return {
