@@ -454,7 +454,7 @@ export class DatabaseStorage implements IStorage {
       .from(expenses);
     
     const tollExpenses = parseFloat(tollExpenseStats.totalTollExpenses?.toString() || '0');
-    const businessTotalExpenses = totalExpenses + tollExpenses;
+    const businessTotalExpenses = totalExpenses; // Exclude toll expenses from displayed total
     
     // Calculate net profit using actual expenses
     const calculatedNetProfit = (totalRevenue + totalSecurity + hydInward + topUp - businessTotalExpenses - totalPayments + totalDebts - totalEmiPayments - totalEmiResetAmount);
