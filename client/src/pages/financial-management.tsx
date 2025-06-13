@@ -949,7 +949,13 @@ export default function FinancialManagement() {
                     // Get expenses for this journey from allExpenses
                     const journeyExpenses = allExpenses?.filter((expense: any) => expense.journeyId === journey.id) || [];
                     const totalJourneyExpenses = journeyExpenses
-                      .filter((exp: any) => !['hyd_inward', 'top_up'].includes(exp.category))
+                      .filter((exp: any) => {
+                        const excludedCategories = ['hyd_inward', 'top_up'];
+                        if (user?.role !== 'admin') {
+                          excludedCategories.push('toll');
+                        }
+                        return !excludedCategories.includes(exp.category);
+                      })
                       .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
                     const isExpanded = expandedJourneys.has(journey.id);
                     
@@ -1002,7 +1008,13 @@ export default function FinancialManagement() {
                         {journeyExpenses.length > 0 && isExpanded && (
                           <div className="space-y-2 max-h-48 overflow-y-auto">
                             {journeyExpenses
-                              .filter((expense: any) => !['other', 'hyd_inward', 'top_up'].includes(expense.category))
+                              .filter((expense: any) => {
+                                const excludedCategories = ['other', 'hyd_inward', 'top_up'];
+                                if (user?.role !== 'admin') {
+                                  excludedCategories.push('toll');
+                                }
+                                return !excludedCategories.includes(expense.category);
+                              })
                               .map((expense: any) => (
                               <div key={expense.id} className="flex items-center justify-between text-sm bg-white p-2 rounded">
                                 <div>
