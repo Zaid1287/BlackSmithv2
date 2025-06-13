@@ -390,10 +390,11 @@ export class DatabaseStorage implements IStorage {
     const [journeyStats] = await db
       .select({
         totalRevenue: sql<number>`COALESCE(SUM(${journeys.pouch}), 0)`,
-        totalExpenses: sql<number>`COALESCE(SUM(${journeys.totalExpenses}), 0)`,
+        totalExpenses: sql<number>`COALESCE(SUM(${expenses.amount}) FILTER (WHERE ${expenses.category} NOT IN ('hyd_inward', 'top_up', 'toll')), 0)`,
         completedSecurity: sql<number>`COALESCE(SUM(${journeys.security}) FILTER (WHERE ${journeys.status} = 'completed'), 0)`,
       })
-      .from(journeys);
+      .from(journeys)
+      .leftJoin(expenses, eq(journeys.id, expenses.journeyId));
 
     // Calculate salary payments (positive) and debts received (negative) separately
     const [salaryStats] = await db
@@ -465,8 +466,8 @@ export class DatabaseStorage implements IStorage {
     
     const actualTotalExpenses = parseFloat(actualExpenseStats.totalActualExpenses?.toString() || '0');
     
-    // Calculate net profit using actual expense totals (including toll expenses in calculation)
-    const calculatedNetProfit = (totalRevenue + totalSecurity + hydInward + topUp - actualTotalExpenses - totalPayments + totalDebts - totalEmiPayments - totalEmiResetAmount);
+    // Calculate net profit using displayed expenses (excluding toll) for consistency
+    const calculatedNetProfit = (totalRevenue + totalSecurity + hydInward + topUp - businessTotalExpenses - totalPayments + totalDebts - totalEmiPayments - totalEmiResetAmount);
 
     // Use actual calculated expenses
     const displayExpenses = businessTotalExpenses;
