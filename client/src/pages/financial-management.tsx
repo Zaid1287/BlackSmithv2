@@ -81,7 +81,7 @@ export default function FinancialManagement() {
     },
   });
 
-  const { data: allExpenses } = useQuery({
+  const { data: allExpenses = [] } = useQuery({
     queryKey: ["/api/expenses/all"],
     queryFn: async () => {
       const response = await fetch("/api/expenses/all", {
@@ -91,6 +91,7 @@ export default function FinancialManagement() {
       if (!response.ok) throw new Error("Failed to fetch all expenses");
       return response.json();
     },
+    enabled: user?.role === 'admin', // Only fetch for admin users
   });
 
   const { data: emiPayments = [] } = useQuery({
@@ -162,7 +163,12 @@ export default function FinancialManagement() {
 
       // Use current filtered data for export
       const journeysData = filteredJourneys;
-      const expensesData = filteredExpenses;
+      let expensesData = filteredExpenses;
+      
+      // Filter toll expenses for non-admin users
+      if (user?.role !== 'admin') {
+        expensesData = expensesData.filter((expense: any) => expense.category !== 'toll');
+      }
 
       // Filter data by date range if provided
       let finalJourneys = journeysData;

@@ -27,7 +27,7 @@ export default function JourneyHistory() {
     },
   });
 
-  // Fetch all expenses to check for HYD Inward entries
+  // Fetch all expenses to check for HYD Inward entries (admin only)
   const { data: allExpenses = [] } = useQuery({
     queryKey: ["/api/expenses/all"],
     queryFn: async () => {
@@ -38,6 +38,7 @@ export default function JourneyHistory() {
       if (!response.ok) throw new Error("Failed to fetch expenses");
       return response.json();
     },
+    enabled: user?.role === 'admin', // Only fetch for admin users
   });
 
   const filteredJourneys = journeys.filter((journey: any) => {
