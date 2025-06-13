@@ -472,14 +472,17 @@ export class DatabaseStorage implements IStorage {
     
     const actualTotalExpenses = parseFloat(actualExpenseStats.totalActualExpenses?.toString() || '0');
     
+    // Calculate all business expenses including company secrets for accurate net profit
+    const allBusinessExpenses = actualTotalExpenses - hydInward - topUp; // Remove revenue categories
+    
     // Simplified net profit calculation: Total Revenue - Total Expenses
-    // Total expenses include: business expenses + salary payments + EMI payments
-    const totalBusinessExpenses = totalExpenses + totalPayments + totalEmiPayments + totalEmiResetAmount - totalDebts;
+    // Total expenses include: all business expenses + salary payments + EMI payments
+    const totalBusinessExpenses = allBusinessExpenses + totalPayments + totalEmiPayments + totalEmiResetAmount - totalDebts;
     const totalRevenueAmount = totalRevenue + totalSecurity + hydInward + topUp;
     const calculatedNetProfit = totalRevenueAmount - totalBusinessExpenses;
 
-    // Display total expenses including salary and EMI
-    const displayExpenses = totalBusinessExpenses;
+    // Display visible expenses + salary/EMI for transparency
+    const displayExpenses = totalExpenses + totalPayments + totalEmiPayments + totalEmiResetAmount - totalDebts;
     const displayNetProfit = calculatedNetProfit;
 
     return {
