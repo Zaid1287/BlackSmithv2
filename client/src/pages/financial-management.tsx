@@ -663,6 +663,7 @@ export default function FinancialManagement() {
   const salaryPayments = parseFloat(breakdown.salaryPayments?.toString() || "0") || 0; // Salaries are not vehicle-specific
   const salaryDebts = parseFloat(breakdown.salaryDebts?.toString() || "0") || 0; // Salary debts are not vehicle-specific
   const emiPaymentTotal = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.emiPayments?.toString() || "0") || 0 : filteredEmiPayments;
+  const tollExpenses = parseFloat(breakdown.tollExpenses?.toString() || "0") || 0; // Toll expenses are not vehicle-specific
 
   // Prepare chart data
   const revenueChartData = [
@@ -912,8 +913,14 @@ export default function FinancialManagement() {
                   </div>
                   <div className="flex justify-between">
                     <span>Total Costs:</span>
-                    <span>₹{(totalExpenses + salaryPayments + emiPaymentTotal - salaryDebts).toLocaleString()}</span>
+                    <span>₹{(totalExpenses + salaryPayments + emiPaymentTotal + tollExpenses - salaryDebts).toLocaleString()}</span>
                   </div>
+                  {tollExpenses > 0 && (
+                    <div className="flex justify-between">
+                      <span>Toll Expenses:</span>
+                      <span>₹{tollExpenses.toLocaleString()}</span>
+                    </div>
+                  )}
                   {salaryDebts > 0 && (
                     <div className="flex justify-between text-green-200">
                       <span>Salary Debts:</span>

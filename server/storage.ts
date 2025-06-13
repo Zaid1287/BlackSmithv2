@@ -445,10 +445,17 @@ export class DatabaseStorage implements IStorage {
     // Calculate net profit including salary expenses and EMI payments
     const totalEmiResetAmount = parseFloat(emiResetStats.totalResetAmount?.toString() || '0');
     
-    // Use actual journey expenses without additional business expenses
+    // Calculate toll expenses separately to subtract from net profit
+    const [tollExpenseStats] = await db
+      .select({
+        totalTollExpenses: sql<number>`COALESCE(SUM(${expenses.amount}) FILTER (WHERE ${expenses.category} = 'toll'), 0)`,
+      })
+      .from(expenses);
+    
+    const tollExpenses = parseFloat(tollExpenseStats.totalTollExpenses?.toString() || '0');
     const businessTotalExpenses = totalExpenses;
     
-    const calculatedNetProfit = (totalRevenue + totalSecurity - businessTotalExpenses - totalPayments + totalDebts + hydInward + topUp - totalEmiPayments - totalEmiResetAmount);
+    const calculatedNetProfit = (totalRevenue + totalSecurity - businessTotalExpenses - totalPayments + totalDebts + hydInward + topUp - totalEmiPayments - totalEmiResetAmount - tollExpenses);
 
     return {
       revenue: totalRevenue + totalSecurity + hydInward + topUp,
@@ -468,6 +475,7 @@ export class DatabaseStorage implements IStorage {
         salaryPayments: totalPayments,
         salaryDebts: totalDebts,
         emiPayments: totalEmiPayments,
+        tollExpenses: tollExpenses,
       },
       emiStats: {
         totalEmiPayments: totalEmiPayments,
