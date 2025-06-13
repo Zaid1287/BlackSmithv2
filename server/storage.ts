@@ -471,12 +471,12 @@ export class DatabaseStorage implements IStorage {
     
     const actualTotalExpenses = parseFloat(actualExpenseStats.totalActualExpenses?.toString() || '0');
     
-    // Calculate net profit using displayed expenses (excluding toll) for consistency
-    const calculatedNetProfit = (totalRevenue + totalSecurity + hydInward + topUp - businessTotalExpenses - totalPayments + totalDebts - totalEmiPayments - totalEmiResetAmount);
+    // Calculate net profit using actual total expenses (including toll) for accurate profit calculation
+    const calculatedNetProfit = (totalRevenue + totalSecurity + hydInward + topUp - actualTotalExpenses - totalPayments + totalDebts - totalEmiPayments - totalEmiResetAmount);
 
-    // Use actual calculated expenses
-    const displayExpenses = businessTotalExpenses;
-    const displayNetProfit = businessTotalExpenses === 0 ? 0 : calculatedNetProfit;
+    // Display actual total expenses including toll for proper net profit calculation
+    const displayExpenses = actualTotalExpenses;
+    const displayNetProfit = actualTotalExpenses === 0 ? 0 : calculatedNetProfit;
 
     return {
       revenue: totalRevenue + totalSecurity + hydInward + topUp,
