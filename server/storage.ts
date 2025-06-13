@@ -459,7 +459,7 @@ export class DatabaseStorage implements IStorage {
 
     // Use dynamic expenses when no data exists, otherwise use 23000
     const displayExpenses = businessTotalExpenses === 0 ? 0 : 23000;
-    const displayNetProfit = businessTotalExpenses === 0 ? 0 : -5000;
+    const displayNetProfit = businessTotalExpenses === 0 ? 0 : calculatedNetProfit;
 
     return {
       revenue: totalRevenue + totalSecurity + hydInward + topUp,
