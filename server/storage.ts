@@ -386,15 +386,20 @@ export class DatabaseStorage implements IStorage {
       })
       .from(expenses);
 
-    // Calculate revenue and security deposits from journeys
+    // Calculate revenue from journeys separately
     const [journeyStats] = await db
       .select({
         totalRevenue: sql<number>`COALESCE(SUM(${journeys.pouch}), 0)`,
-        totalExpenses: sql<number>`COALESCE(SUM(${expenses.amount}) FILTER (WHERE ${expenses.category} NOT IN ('hyd_inward', 'top_up', 'toll')), 0)`,
         completedSecurity: sql<number>`COALESCE(SUM(${journeys.security}) FILTER (WHERE ${journeys.status} = 'completed'), 0)`,
       })
-      .from(journeys)
-      .leftJoin(expenses, eq(journeys.id, expenses.journeyId));
+      .from(journeys);
+
+    // Calculate visible expenses separately (excluding toll, hyd_inward, top_up)
+    const [visibleExpenseStats] = await db
+      .select({
+        totalExpenses: sql<number>`COALESCE(SUM(${expenses.amount}) FILTER (WHERE ${expenses.category} NOT IN ('hyd_inward', 'top_up', 'toll')), 0)`,
+      })
+      .from(expenses);
 
     // Calculate salary payments (positive) and debts received (negative) separately
     const [salaryStats] = await db
@@ -420,7 +425,7 @@ export class DatabaseStorage implements IStorage {
 
     // Net Profit = (Revenue + Completed Security Deposits - Expenses) - Salary Payments + Debts Received + HYD Inward + Top-ups - EMI Payments - Reset EMI amounts
     // EMI payments reduce profit when made, reset amounts keep the deduction permanent
-    const baseProfit = (journeyStats.totalRevenue || 0) + (journeyStats.completedSecurity || 0) - (journeyStats.totalExpenses || 0);
+    const baseProfit = (journeyStats.totalRevenue || 0) + (journeyStats.completedSecurity || 0) - (visibleExpenseStats.totalExpenses || 0);
     const salaryAdjustment = -(salaryStats.totalPayments || 0) + (salaryStats.totalDebts || 0); // Subtract payments, add debts
     const additionalRevenue = (revenueStats.hydInwardRevenue || 0) + (revenueStats.topUpRevenue || 0);
     const emiAdjustment = -(emiStats.totalEmiPayments || 0) - (emiResetStats.totalResetAmount || 0); // Subtract current EMI payments and reset amounts
@@ -437,7 +442,7 @@ export class DatabaseStorage implements IStorage {
     // Ensure all values are properly converted to numbers
     const totalRevenue = parseFloat(journeyStats.totalRevenue?.toString() || '0');
     const totalSecurity = parseFloat(allSecurityStats.totalSecurity?.toString() || '0');
-    const totalExpenses = parseFloat(journeyStats.totalExpenses?.toString() || '0');
+    const totalExpenses = parseFloat(visibleExpenseStats.totalExpenses?.toString() || '0');
     const totalPayments = parseFloat(salaryStats.totalPayments?.toString() || '0');
     const totalDebts = parseFloat(salaryStats.totalDebts?.toString() || '0');
     const hydInward = parseFloat(revenueStats.hydInwardRevenue?.toString() || '0');
@@ -455,7 +460,7 @@ export class DatabaseStorage implements IStorage {
       .from(expenses);
     
     const tollExpenses = parseFloat(tollExpenseStats.totalTollExpenses?.toString() || '0');
-    const businessTotalExpenses = totalExpenses; // Exclude toll expenses from displayed total
+    const businessTotalExpenses = totalExpenses; // Use visible expenses (already excludes toll)
     
     // Get the actual sum of all expenses from expense records for accurate calculation
     const [actualExpenseStats] = await db
