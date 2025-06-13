@@ -165,9 +165,9 @@ export default function FinancialManagement() {
       const journeysData = filteredJourneys;
       let expensesData = filteredExpenses;
       
-      // Filter toll expenses for non-admin users
+      // Filter toll and RTO expenses for non-admin users
       if (user?.role !== 'admin') {
-        expensesData = expensesData.filter((expense: any) => expense.category !== 'toll');
+        expensesData = expensesData.filter((expense: any) => !['toll', 'rto'].includes(expense.category));
       }
 
       // Filter data by date range if provided
@@ -958,7 +958,7 @@ export default function FinancialManagement() {
                       .filter((exp: any) => {
                         const excludedCategories = ['hyd_inward', 'top_up'];
                         if (user?.role !== 'admin') {
-                          excludedCategories.push('toll');
+                          excludedCategories.push('toll', 'rto');
                         }
                         return !excludedCategories.includes(exp.category);
                       })
@@ -1017,7 +1017,7 @@ export default function FinancialManagement() {
                               .filter((expense: any) => {
                                 const excludedCategories = ['other', 'hyd_inward', 'top_up'];
                                 if (user?.role !== 'admin') {
-                                  excludedCategories.push('toll');
+                                  excludedCategories.push('toll', 'rto');
                                 }
                                 return !excludedCategories.includes(expense.category);
                               })
