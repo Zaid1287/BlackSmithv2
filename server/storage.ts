@@ -394,10 +394,10 @@ export class DatabaseStorage implements IStorage {
       })
       .from(journeys);
 
-    // Calculate visible expenses separately (excluding toll, hyd_inward, top_up)
+    // Calculate total expenses (excluding only hyd_inward and top_up revenue categories)
     const [visibleExpenseStats] = await db
       .select({
-        totalExpenses: sql<number>`COALESCE(SUM(${expenses.amount}) FILTER (WHERE ${expenses.category} NOT IN ('hyd_inward', 'top_up', 'toll')), 0)`,
+        totalExpenses: sql<number>`COALESCE(SUM(${expenses.amount}) FILTER (WHERE ${expenses.category} NOT IN ('hyd_inward', 'top_up')), 0)`,
       })
       .from(expenses);
 
