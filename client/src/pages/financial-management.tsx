@@ -836,18 +836,28 @@ export default function FinancialManagement() {
       {/* Financial Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Total Revenue Card */}
-        <Card className="bg-green-500 text-white">
+        <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg border-0">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center space-x-2 mb-2">
-                  <DollarSign className="w-5 h-5" />
-                  <span className="text-lg font-medium">Total Revenue</span>
+              <div className="w-full">
+                <div className="flex items-center space-x-2 mb-3">
+                  <DollarSign className="w-6 h-6" />
+                  <span className="text-lg font-semibold">Total Revenue</span>
                 </div>
-                <div className="text-3xl font-bold">₹{totalRevenue.toLocaleString()}</div>
-                <div className="text-sm opacity-90 mt-2">
-                  <div>Journey: ₹{journeyRevenue.toLocaleString()}</div>
-                  <div>HYD Inward: ₹{hydInwardRevenue.toLocaleString()}</div>
+                <div className="text-3xl font-bold mb-3">₹{totalRevenue.toLocaleString()}</div>
+                <div className="text-sm opacity-90 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Journey:</span>
+                    <span>₹{journeyRevenue.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>HYD Inward:</span>
+                    <span>₹{hydInwardRevenue.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Security:</span>
+                    <span>₹{securityDeposits.toLocaleString()}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -855,18 +865,28 @@ export default function FinancialManagement() {
         </Card>
 
         {/* Total Expenses Card */}
-        <Card className="bg-red-500 text-white">
+        <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg border-0">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center space-x-2 mb-2">
-                  <TrendingDown className="w-5 h-5" />
-                  <span className="text-lg font-medium">Total Expenses</span>
+              <div className="w-full">
+                <div className="flex items-center space-x-2 mb-3">
+                  <TrendingDown className="w-6 h-6" />
+                  <span className="text-lg font-semibold">Total Expenses</span>
                 </div>
-                <div className="text-3xl font-bold">₹{totalExpenses.toLocaleString()}</div>
-                <div className="text-sm opacity-90 mt-2">
-                  <div>Active: ₹{financialStats?.activeExpenses || "0"}</div>
-                  <div>Completed: ₹{financialStats?.completedExpenses || totalExpenses}</div>
+                <div className="text-3xl font-bold mb-3">₹{totalExpenses.toLocaleString()}</div>
+                <div className="text-sm opacity-90 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Journey Expenses:</span>
+                    <span>₹{totalExpenses.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Salary Payments:</span>
+                    <span>₹{salaryPayments.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>EMI Payments:</span>
+                    <span>₹{emiPaymentTotal.toLocaleString()}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -874,20 +894,32 @@ export default function FinancialManagement() {
         </Card>
 
         {/* Net Profit Card */}
-        <Card className="bg-green-600 text-white">
+        <Card className={`${netProfit >= 0 ? 'bg-gradient-to-br from-green-600 to-green-700' : 'bg-gradient-to-br from-red-600 to-red-700'} text-white shadow-lg border-0`}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center space-x-2 mb-2">
-                  <TrendingUp className="w-5 h-5" />
-                  <span className="text-lg font-medium">Net Profit</span>
+              <div className="w-full">
+                <div className="flex items-center space-x-2 mb-3">
+                  {netProfit >= 0 ? <TrendingUp className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
+                  <span className="text-lg font-semibold">Net Profit</span>
                 </div>
-                <div className="text-3xl font-bold">₹{netProfit.toLocaleString()}</div>
-                <div className="text-sm opacity-90 mt-2">
-                  <div>Security Deposits: ₹{securityDeposits.toLocaleString()}</div>
-                  <div>Salary Payments: ₹{salaryPayments.toLocaleString()}</div>
-                  <div>Salary Debts: +₹{salaryDebts.toLocaleString()}</div>
-                  <div>EMI Payments: ₹{emiPaymentTotal.toLocaleString()}</div>
+                <div className="text-3xl font-bold mb-3">
+                  {netProfit >= 0 ? '₹' : '-₹'}{Math.abs(netProfit).toLocaleString()}
+                </div>
+                <div className="text-sm opacity-90 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Revenue:</span>
+                    <span>₹{totalRevenue.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Costs:</span>
+                    <span>₹{(totalExpenses + salaryPayments + emiPaymentTotal - salaryDebts).toLocaleString()}</span>
+                  </div>
+                  {salaryDebts > 0 && (
+                    <div className="flex justify-between text-green-200">
+                      <span>Salary Debts:</span>
+                      <span>+₹{salaryDebts.toLocaleString()}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
