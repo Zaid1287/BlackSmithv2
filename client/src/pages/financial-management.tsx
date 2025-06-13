@@ -915,12 +915,7 @@ export default function FinancialManagement() {
                     <span>Total Costs:</span>
                     <span>₹{(totalExpenses + salaryPayments + emiPaymentTotal + tollExpenses - salaryDebts).toLocaleString()}</span>
                   </div>
-                  {tollExpenses > 0 && (
-                    <div className="flex justify-between">
-                      <span>Toll Expenses:</span>
-                      <span>₹{tollExpenses.toLocaleString()}</span>
-                    </div>
-                  )}
+                  
                   {salaryDebts > 0 && (
                     <div className="flex justify-between text-green-200">
                       <span>Salary Debts:</span>
