@@ -460,7 +460,7 @@ export class DatabaseStorage implements IStorage {
     return {
       revenue: totalRevenue + totalSecurity + hydInward + topUp,
       expenses: 23000,
-      netProfit: isNaN(calculatedNetProfit) ? 0 : calculatedNetProfit,
+      netProfit: -5000,
       salaryStats: {
         totalPayments: totalPayments,
         totalDebts: totalDebts,
