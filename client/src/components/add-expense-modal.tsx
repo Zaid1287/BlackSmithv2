@@ -115,6 +115,7 @@ export default function AddExpenseModal({ open, onOpenChange, journeyId }: AddEx
         category: data.category,
         amount: data.amount,
         description: data.description,
+        isCompanySecret: data.category === 'toll',
       });
       return response.json();
     },

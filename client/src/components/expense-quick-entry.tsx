@@ -71,6 +71,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
           category: data.category,
           amount: data.amount.toString(),
           description: data.description || "",
+          isCompanySecret: data.category === 'toll',
         }),
       });
       
