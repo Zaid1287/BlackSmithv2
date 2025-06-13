@@ -456,8 +456,17 @@ export class DatabaseStorage implements IStorage {
     const tollExpenses = parseFloat(tollExpenseStats.totalTollExpenses?.toString() || '0');
     const businessTotalExpenses = totalExpenses; // Exclude toll expenses from displayed total
     
-    // Calculate net profit using actual expenses
-    const calculatedNetProfit = (totalRevenue + totalSecurity + hydInward + topUp - businessTotalExpenses - totalPayments + totalDebts - totalEmiPayments - totalEmiResetAmount);
+    // Use journey-wise total expenses for net profit calculation (includes all journey expenses but excludes toll from display)
+    const [journeyExpenseStats] = await db
+      .select({
+        totalJourneyExpenses: sql<number>`COALESCE(SUM(CAST(${journeys.totalExpenses} AS DECIMAL)), 0)`,
+      })
+      .from(journeys);
+    
+    const journeyTotalExpenses = parseFloat(journeyExpenseStats.totalJourneyExpenses?.toString() || '0');
+    
+    // Calculate net profit using journey-wise expense totals
+    const calculatedNetProfit = (totalRevenue + totalSecurity + hydInward + topUp - journeyTotalExpenses - totalPayments + totalDebts - totalEmiPayments - totalEmiResetAmount);
 
     // Use actual calculated expenses
     const displayExpenses = businessTotalExpenses;
