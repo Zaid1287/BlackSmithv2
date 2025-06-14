@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,16 @@ export default function AdminEditModal({ open, onOpenChange, journeyData, expens
     pouch: journeyData?.pouch || '',
     security: journeyData?.security || ''
   });
+
+  // Update form when journeyData changes
+  useEffect(() => {
+    if (journeyData) {
+      setJourneyFinancials({
+        pouch: journeyData.pouch || '',
+        security: journeyData.security || ''
+      });
+    }
+  }, [journeyData]);
   const [expenseData, setExpenseData] = useState({
     amount: '',
     description: '',
@@ -80,9 +90,13 @@ export default function AdminEditModal({ open, onOpenChange, journeyData, expens
         title: "Success",
         description: "Journey financials updated successfully",
       });
+      // Invalidate all relevant queries to refresh revenue/expense calculations
       queryClient.invalidateQueries({ queryKey: ['/api/journeys'] });
       queryClient.invalidateQueries({ queryKey: ['/api/journeys/active'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/financial'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/journeys/${journeyData.id}/expenses`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/expenses/all'] });
     },
     onError: () => {
       toast({
@@ -104,9 +118,13 @@ export default function AdminEditModal({ open, onOpenChange, journeyData, expens
       });
       setEditingExpense(null);
       setExpenseData({ amount: '', description: '', category: '' });
+      // Invalidate all relevant queries to refresh revenue/expense calculations
       queryClient.invalidateQueries({ queryKey: ['/api/journeys'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/journeys/active'] });
       queryClient.invalidateQueries({ queryKey: [`/api/journeys/${journeyData.id}/expenses`] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/financial'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/expenses/all'] });
     },
     onError: () => {
       toast({
@@ -126,9 +144,13 @@ export default function AdminEditModal({ open, onOpenChange, journeyData, expens
         title: "Success",
         description: "Expense deleted successfully",
       });
+      // Invalidate all relevant queries to refresh revenue/expense calculations
       queryClient.invalidateQueries({ queryKey: ['/api/journeys'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/journeys/active'] });
       queryClient.invalidateQueries({ queryKey: [`/api/journeys/${journeyData.id}/expenses`] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/financial'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/expenses/all'] });
     },
     onError: () => {
       toast({
