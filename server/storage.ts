@@ -29,12 +29,15 @@ export interface IStorage {
   updateJourneyStatus(id: number, status: string): Promise<void>;
   updateJourneyLocation(id: number, location: any, speed: number, distance: number): Promise<void>;
   completeJourney(id: number): Promise<void>;
+  updateJourneyFinancials(id: number, data: { pouch?: string; security?: string }): Promise<void>;
   
   // Expense methods
   createExpense(expense: InsertExpense): Promise<Expense>;
   getExpensesByJourney(journeyId: number): Promise<Expense[]>;
   getExpensesByJourneyForUser(journeyId: number, userRole: string): Promise<Expense[]>;
   getAllExpenses(): Promise<Expense[]>;
+  updateExpense(id: number, data: { amount?: string; description?: string; category?: string }): Promise<void>;
+  deleteExpense(id: number): Promise<void>;
   
   // Salary methods
   createSalaryPayment(payment: InsertSalaryPayment): Promise<SalaryPayment>;
@@ -603,6 +606,50 @@ export class DatabaseStorage implements IStorage {
     
     // Delete all EMI payment records
     await db.delete(emiPayments);
+  }
+
+  async updateJourneyFinancials(id: number, data: { pouch?: string; security?: string }): Promise<void> {
+    const updateData: any = {};
+    if (data.pouch !== undefined) updateData.pouch = data.pouch;
+    if (data.security !== undefined) updateData.security = data.security;
+    
+    await db.update(journeys)
+      .set(updateData)
+      .where(eq(journeys.id, id));
+    
+    // Recalculate journey balance after updating financials
+    await this.updateJourneyTotals(id);
+  }
+
+  async updateExpense(id: number, data: { amount?: string; description?: string; category?: string }): Promise<void> {
+    const updateData: any = {};
+    if (data.amount !== undefined) updateData.amount = data.amount;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.category !== undefined) updateData.category = data.category;
+    
+    // Get the expense to find its journey ID for balance recalculation
+    const [expense] = await db.select().from(expenses).where(eq(expenses.id, id));
+    
+    await db.update(expenses)
+      .set(updateData)
+      .where(eq(expenses.id, id));
+    
+    // Recalculate journey balance after updating expense
+    if (expense && expense.journeyId !== null) {
+      await this.updateJourneyTotals(expense.journeyId);
+    }
+  }
+
+  async deleteExpense(id: number): Promise<void> {
+    // Get the expense to find its journey ID for balance recalculation
+    const [expense] = await db.select().from(expenses).where(eq(expenses.id, id));
+    
+    await db.delete(expenses).where(eq(expenses.id, id));
+    
+    // Recalculate journey balance after deleting expense
+    if (expense && expense.journeyId !== null) {
+      await this.updateJourneyTotals(expense.journeyId);
+    }
   }
 }
 

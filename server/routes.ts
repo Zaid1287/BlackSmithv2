@@ -473,6 +473,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin editing routes
+  app.put("/api/admin/journeys/:id/financials", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const journeyId = parseInt(req.params.id);
+      const { pouch, security } = req.body;
+      
+      await storage.updateJourneyFinancials(journeyId, { pouch, security });
+      res.json({ message: "Journey financials updated successfully" });
+    } catch (error) {
+      console.error("Failed to update journey financials:", error);
+      res.status(500).json({ message: "Failed to update journey financials" });
+    }
+  });
+
+  app.put("/api/admin/expenses/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const expenseId = parseInt(req.params.id);
+      const { amount, description, category } = req.body;
+      
+      await storage.updateExpense(expenseId, { amount, description, category });
+      res.json({ message: "Expense updated successfully" });
+    } catch (error) {
+      console.error("Failed to update expense:", error);
+      res.status(500).json({ message: "Failed to update expense" });
+    }
+  });
+
+  app.delete("/api/admin/expenses/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const expenseId = parseInt(req.params.id);
+      
+      await storage.deleteExpense(expenseId);
+      res.json({ message: "Expense deleted successfully" });
+    } catch (error) {
+      console.error("Failed to delete expense:", error);
+      res.status(500).json({ message: "Failed to delete expense" });
+    }
+  });
+
   // Dashboard stats routes
   app.get("/api/dashboard/stats", authenticateToken, async (req, res) => {
     try {
