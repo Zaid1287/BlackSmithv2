@@ -244,8 +244,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createExpense(expense: InsertExpense): Promise<Expense> {
-    // Mark as company secret if category is toll, hyd_inward, or rto
-    const isSecret = expense.category === 'toll' || expense.category === 'hyd_inward' || expense.category === 'rto';
+    // Mark as company secret if category is toll or hyd_inward
+    const isSecret = expense.category === 'toll' || expense.category === 'hyd_inward';
     
     const [newExpense] = await db
       .insert(expenses)
@@ -282,7 +282,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   private async updateJourneyTotals(journeyId: number): Promise<void> {
-    // Calculate actual expenses (excluding HYD Inward, Top Up, Toll, and RTO - company secrets)
+    // Calculate actual expenses (excluding HYD Inward, Top Up, and Toll - company secrets)
     const [expenseResult] = await db
       .select({
         totalExpenses: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
@@ -292,8 +292,7 @@ export class DatabaseStorage implements IStorage {
         eq(expenses.journeyId, journeyId), 
         not(eq(expenses.category, 'hyd_inward')),
         not(eq(expenses.category, 'top_up')),
-        not(eq(expenses.category, 'toll')),
-        not(eq(expenses.category, 'rto'))
+        not(eq(expenses.category, 'toll'))
       ));
 
     // Calculate top-up separately to add to balance
@@ -395,10 +394,10 @@ export class DatabaseStorage implements IStorage {
       })
       .from(journeys);
 
-    // Calculate total expenses (excluding hyd_inward, top_up, toll, and rto - company secrets)
+    // Calculate total expenses (excluding hyd_inward, top_up, and toll - company secrets)
     const [visibleExpenseStats] = await db
       .select({
-        totalExpenses: sql<number>`COALESCE(SUM(${expenses.amount}) FILTER (WHERE ${expenses.category} NOT IN ('hyd_inward', 'top_up', 'toll', 'rto')), 0)`,
+        totalExpenses: sql<number>`COALESCE(SUM(${expenses.amount}) FILTER (WHERE ${expenses.category} NOT IN ('hyd_inward', 'top_up', 'toll')), 0)`,
       })
       .from(expenses);
 
