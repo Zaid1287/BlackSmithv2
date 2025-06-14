@@ -119,9 +119,7 @@ export default function AdminEditModal({ open, onOpenChange, journeyData, expens
 
   const deleteExpenseMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/admin/expenses/${id}`, {
-        method: 'DELETE'
-      });
+      return apiRequest(`/api/admin/expenses/${id}`, 'DELETE');
     },
     onSuccess: () => {
       toast({
