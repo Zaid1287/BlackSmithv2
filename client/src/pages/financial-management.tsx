@@ -94,6 +94,37 @@ export default function FinancialManagement() {
     enabled: user?.role === 'admin', // Only fetch for admin users
   });
 
+  // For non-admin users, get expenses from individual journeys
+  const { data: userRoleExpenses = [] } = useQuery({
+    queryKey: ["/api/journeys/expenses/all"],
+    queryFn: async () => {
+      if (user?.role === 'admin') return [];
+      
+      // Get all journeys first
+      const journeysResponse = await fetch("/api/journeys", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!journeysResponse.ok) throw new Error("Failed to fetch journeys");
+      const journeys = await journeysResponse.json();
+
+      // Get expenses for each journey with user role filtering
+      const allJourneyExpenses = [];
+      for (const journey of journeys) {
+        const expensesResponse = await fetch(`/api/journeys/${journey.id}/expenses`, {
+          headers: getAuthHeaders(),
+          credentials: "include",
+        });
+        if (expensesResponse.ok) {
+          const expenses = await expensesResponse.json();
+          allJourneyExpenses.push(...expenses);
+        }
+      }
+      return allJourneyExpenses;
+    },
+    enabled: user?.role !== 'admin',
+  });
+
   const { data: emiPayments = [] } = useQuery({
     queryKey: ["/api/emi"],
     queryFn: async () => {
@@ -533,11 +564,11 @@ export default function FinancialManagement() {
 
     // Add journey details with expenses in single row
     vehicleJourneys.forEach((journey: any) => {
-      const journeyExpenses = vehicleExpenses.filter((exp: any) => exp.journeyId === journey.id);
+      const journeyRelatedExpenses = vehicleExpenses.filter((exp: any) => exp.journeyId === journey.id);
       
       // Group expenses by category
       const expensesByCategory: { [key: string]: number } = {};
-      journeyExpenses.forEach((exp: any) => {
+      journeyRelatedExpenses.forEach((exp: any) => {
         expensesByCategory[exp.category] = (expensesByCategory[exp.category] || 0) + parseFloat(exp.amount);
       });
       
@@ -665,7 +696,7 @@ export default function FinancialManagement() {
   const securityDeposits = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.securityDeposits?.toString() || "0") || 0 : filteredSecurityDeposits;
   const hydInwardRevenue = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.hydInwardRevenue?.toString() || "0") || 0 : filteredHydInwardRevenue;
   const topUpRevenue = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.topUpRevenue?.toString() || "0") || 0 : filteredTopUpRevenue;
-  const journeyExpenses = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.journeyExpenses?.toString() || "0") || 0 : filteredTotalExpenses;
+  const totalJourneyExpenses = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.journeyExpenses?.toString() || "0") || 0 : filteredTotalExpenses;
   const salaryPayments = parseFloat(breakdown.salaryPayments?.toString() || "0") || 0; // Salaries are not vehicle-specific
   const salaryDebts = parseFloat(breakdown.salaryDebts?.toString() || "0") || 0; // Salary debts are not vehicle-specific
   const emiPaymentTotal = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.emiPayments?.toString() || "0") || 0 : filteredEmiPayments;
