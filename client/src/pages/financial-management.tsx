@@ -557,18 +557,34 @@ export default function FinancialManagement() {
       [""]
     ];
 
-    // Define common expense categories for consistent columns
-    const expenseCategories = ['fuel', 'food', 'driver_fees', 'loading', 'fines', 'rope', 'tire_grease', 
-                              'tires_air', 'weighment', 'rto', 'nzb_unloading', 'hyd_inward', 'top_up'];
+    // Define all expense categories with role-based filtering
+    const allExpenseCategories = [
+      'fuel', 'food', 'maintenance', 'loading', 'rope', 'rto', 'hyd_unloading', 'nzb_unloading', 
+      'miscellaneous', 'mechanical', 'electrical', 'body_works', 'tires_air', 'weighment', 
+      'adblue', 'fines', 'driver_fees', 'tire_grease', 'tire_change', 'tire_greasing',
+      'toll', 'hyd_inward', 'top_up'
+    ];
+
+    // Admin-only categories that should be filtered out for drivers
+    const adminOnlyCategories = ['toll', 'rto', 'hyd_inward'];
+    
+    // Filter categories based on user role
+    const expenseCategories = user?.role === 'admin' 
+      ? allExpenseCategories 
+      : allExpenseCategories.filter(cat => !adminOnlyCategories.includes(cat));
     
     // Create header for journey details with expense categories
     const journeyHeader = [
       "Journey ID", "Driver Name", "Destination", "Start Date", "End Date", "Status", "Pouch (₹)", "Security (₹)"
     ];
     
-    // Add expense category headers
+    // Add expense category headers with proper formatting
     expenseCategories.forEach(category => {
-      journeyHeader.push(category.replace('_', ' ').toUpperCase() + " (₹)");
+      const formattedName = category
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      journeyHeader.push(formattedName + " (₹)");
     });
     
     journeyHeader.push("Total Expenses (₹)", "Total Revenue (₹)", "Net Profit (₹)");
@@ -742,20 +758,23 @@ export default function FinancialManagement() {
     fuel: '#ef4444',
     toll: '#dc2626', 
     loading: '#f97316',
-    unloading: '#ea580c',
+    hyd_unloading: '#ea580c',
+    nzb_unloading: '#9333ea',
     food: '#d97706',
     maintenance: '#ca8a04',
     mechanical: '#eab308',
+    electrical: '#2563eb',
     rto: '#84cc16',
     rope: '#65a30d',
     weighment: '#16a34a',
     body_works: '#059669',
     tires_air: '#0891b2',
     adblue: '#0284c7',
-    electrical: '#2563eb',
     tire_change: '#4f46e5',
+    tire_grease: '#7c3aed',
     tire_greasing: '#7c3aed',
-    nzb_unloading: '#9333ea',
+    fines: '#dc2626',
+    driver_fees: '#f59e0b',
     miscellaneous: '#c2410c',
     other: '#991b1b'
   };
