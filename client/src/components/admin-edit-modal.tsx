@@ -73,11 +73,7 @@ export default function AdminEditModal({ open, onOpenChange, journeyData, expens
 
   const updateFinancialsMutation = useMutation({
     mutationFn: async (data: { pouch: string; security: string }) => {
-      return apiRequest(`/api/admin/journeys/${journeyData.id}/financials`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return apiRequest(`/api/admin/journeys/${journeyData.id}/financials`, 'PUT', data);
     },
     onSuccess: () => {
       toast({
@@ -99,11 +95,7 @@ export default function AdminEditModal({ open, onOpenChange, journeyData, expens
 
   const updateExpenseMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return apiRequest(`/api/admin/expenses/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return apiRequest(`/api/admin/expenses/${id}`, 'PUT', data);
     },
     onSuccess: () => {
       toast({

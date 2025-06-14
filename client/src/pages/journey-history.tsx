@@ -4,17 +4,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Plus } from "lucide-react";
+import { Eye, Plus, Settings } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
 import AddExpenseModal from "@/components/add-expense-modal";
 import JourneyExpenseBreakdown from "@/components/journey-expense-breakdown";
+import AdminEditModal from "@/components/admin-edit-modal";
 
 export default function JourneyHistory() {
   const { user } = useAuth();
   const [statusFilter, setStatusFilter] = useState("all");
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [selectedJourneyId, setSelectedJourneyId] = useState<number | null>(null);
+  const [showAdminEditModal, setShowAdminEditModal] = useState(false);
+  const [selectedJourneyForEdit, setSelectedJourneyForEdit] = useState<any>(null);
 
   const { data: journeys = [], isLoading } = useQuery({
     queryKey: ["/api/journeys"],
@@ -40,6 +43,20 @@ export default function JourneyHistory() {
       return response.json();
     },
     enabled: user?.role === 'admin', // Only fetch for admin users
+  });
+
+  // Fetch expenses for the selected journey (for admin edit modal)
+  const { data: journeyExpenses = [] } = useQuery({
+    queryKey: [`/api/journeys/${selectedJourneyForEdit?.id}/expenses`],
+    queryFn: async () => {
+      const response = await fetch(`/api/journeys/${selectedJourneyForEdit.id}/expenses`, {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch journey expenses");
+      return response.json();
+    },
+    enabled: !!selectedJourneyForEdit && user?.role === 'admin',
   });
 
   const filteredJourneys = journeys.filter((journey: any) => {
@@ -149,21 +166,38 @@ export default function JourneyHistory() {
                           journeyId={journey.id} 
                           journeyData={journey} 
                         />
-                        {user?.role === 'admin' && journey.status === 'completed' && !allExpenses.some((expense: any) => 
-                          expense.journeyId === journey.id && expense.category === 'hyd_inward'
-                        ) && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedJourneyId(journey.id);
-                              setShowAddExpenseModal(true);
-                            }}
-                            className="text-xs"
-                          >
-                            <Plus className="w-3 h-3 mr-1" />
-                            HYD Inward
-                          </Button>
+                        {user?.role === 'admin' && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedJourneyForEdit(journey);
+                                setShowAdminEditModal(true);
+                              }}
+                              className="text-xs"
+                              title="Edit Journey Financials & Expenses"
+                            >
+                              <Settings className="w-3 h-3 mr-1" />
+                              Edit
+                            </Button>
+                            {journey.status === 'completed' && !allExpenses.some((expense: any) => 
+                              expense.journeyId === journey.id && expense.category === 'hyd_inward'
+                            ) && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedJourneyId(journey.id);
+                                  setShowAddExpenseModal(true);
+                                }}
+                                className="text-xs"
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                HYD Inward
+                              </Button>
+                            )}
+                          </>
                         )}
                       </div>
                     </td>
@@ -192,6 +226,16 @@ export default function JourneyHistory() {
           open={showAddExpenseModal}
           onOpenChange={setShowAddExpenseModal}
           journeyId={selectedJourneyId}
+        />
+      )}
+
+      {/* Admin Edit Modal */}
+      {selectedJourneyForEdit && (
+        <AdminEditModal
+          open={showAdminEditModal}
+          onOpenChange={setShowAdminEditModal}
+          journeyData={selectedJourneyForEdit}
+          expenses={journeyExpenses}
         />
       )}
     </div>
