@@ -167,37 +167,19 @@ export default function JourneyHistory() {
                           journeyData={journey} 
                         />
                         {user?.role === 'admin' && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedJourneyForEdit(journey);
-                                setShowAdminEditModal(true);
-                              }}
-                              className="text-xs"
-                              title="Edit Journey Financials & Expenses"
-                            >
-                              <Settings className="w-3 h-3 mr-1" />
-                              Edit
-                            </Button>
-                            {journey.status === 'completed' && !allExpenses.some((expense: any) => 
-                              expense.journeyId === journey.id && expense.category === 'hyd_inward'
-                            ) && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedJourneyId(journey.id);
-                                  setShowAddExpenseModal(true);
-                                }}
-                                className="text-xs"
-                              >
-                                <Plus className="w-3 h-3 mr-1" />
-                                HYD Inward
-                              </Button>
-                            )}
-                          </>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedJourneyForEdit(journey);
+                              setShowAdminEditModal(true);
+                            }}
+                            className="text-xs"
+                            title="Edit Journey Financials & Expenses"
+                          >
+                            <Settings className="w-3 h-3 mr-1" />
+                            Edit
+                          </Button>
                         )}
                       </div>
                     </td>
