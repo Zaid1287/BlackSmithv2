@@ -47,7 +47,7 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
     { value: "driver_fees", label: t('driverFees') },
     { value: "tire_grease", label: t('tireGrease') },
     { value: "toll", label: t('toll'), adminOnly: true },
-    { value: "rto", label: t('rto'), adminOnly: true },
+    { value: "rto", label: t('rto') },
     { value: "top_up", label: t('topUp'), isRevenue: true },
   ];
 
