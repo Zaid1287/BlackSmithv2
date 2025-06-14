@@ -84,6 +84,9 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [`/api/journeys/${journeyId}/expenses`] });
       queryClient.invalidateQueries({ queryKey: ["/api/journeys/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
       
       // Clear the amount for this category
       setAmounts(prev => ({
