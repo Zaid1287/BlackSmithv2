@@ -23,6 +23,7 @@ import { useAuth } from "@/hooks/use-auth";
 import StartJourneyModal from "@/components/start-journey-modal";
 import AddExpenseModal from "@/components/add-expense-modal";
 import ExpenseQuickEntry from "@/components/expense-quick-entry";
+import JourneyExpenseBreakdown from "@/components/journey-expense-breakdown";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -171,7 +172,13 @@ export default function ActiveJourney() {
                     {t('licensePlate')}: {userActiveJourney.licensePlate} • {t('startJourney')}: {new Date(userActiveJourney.startTime).toLocaleTimeString()}
                   </p>
                 </div>
-                <Badge className="bg-green-100 text-green-700">{t('active')}</Badge>
+                <div className="flex items-center gap-3">
+                  <JourneyExpenseBreakdown 
+                    journeyId={userActiveJourney.id} 
+                    journeyData={userActiveJourney} 
+                  />
+                  <Badge className="bg-green-100 text-green-700">{t('active')}</Badge>
+                </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">

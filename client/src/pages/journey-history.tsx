@@ -8,6 +8,7 @@ import { Eye, Plus } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
 import AddExpenseModal from "@/components/add-expense-modal";
+import JourneyExpenseBreakdown from "@/components/journey-expense-breakdown";
 
 export default function JourneyHistory() {
   const { user } = useAuth();
@@ -144,9 +145,10 @@ export default function JourneyHistory() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">
-                        <button className="text-gray-600 hover:text-gray-900">
-                          <Eye className="w-4 h-4" />
-                        </button>
+                        <JourneyExpenseBreakdown 
+                          journeyId={journey.id} 
+                          journeyData={journey} 
+                        />
                         {user?.role === 'admin' && journey.status === 'completed' && !allExpenses.some((expense: any) => 
                           expense.journeyId === journey.id && expense.category === 'hyd_inward'
                         ) && (
