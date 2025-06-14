@@ -149,6 +149,9 @@ export default function FinancialManagement() {
     },
   });
 
+  // Combine all expense sources based on user role
+  const combinedExpenses = user?.role === 'admin' ? allExpenses : userRoleExpenses;
+
   const resetFinancialDataMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("POST", "/api/reset-financial-data");
@@ -192,9 +195,18 @@ export default function FinancialManagement() {
         description: `Preparing separate Excel files for each vehicle${dateRange}...`,
       });
 
+      // Calculate filtering for export
+      const journeysForExport = journeys?.filter((journey: any) => 
+        selectedLicensePlateFilter === "all" || journey.licensePlate === selectedLicensePlateFilter
+      ) || [];
+
+      const expensesForExport = combinedExpenses?.filter((expense: any) => 
+        journeysForExport.some((journey: any) => journey.id === expense.journeyId)
+      ) || [];
+
       // Use current filtered data for export
-      const journeysData = filteredJourneys;
-      let expensesData = filteredExpenses;
+      const journeysData = journeysForExport;
+      let expensesData = expensesForExport;
       
       // Filter toll expenses for non-admin users
       if (user?.role !== 'admin') {
@@ -648,17 +660,15 @@ export default function FinancialManagement() {
     );
   }
 
-  // Filter journeys based on selected license plate
-  const filteredJourneys = journeys ? journeys.filter((journey: any) => 
+  // Calculate filtering based on selected license plate
+  const filteredJourneys = journeys?.filter((journey: any) => 
     selectedLicensePlateFilter === "all" || journey.licensePlate === selectedLicensePlateFilter
-  ) : [];
+  ) || [];
 
-  // Filter expenses based on selected license plate
-  const filteredExpenses = allExpenses ? allExpenses.filter((expense: any) => {
-    if (selectedLicensePlateFilter === "all") return true;
-    const journey = journeys?.find((j: any) => j.id === expense.journeyId);
-    return journey?.licensePlate === selectedLicensePlateFilter;
-  }) : [];
+  // Filter expenses based on filtered journeys
+  const filteredExpenses = combinedExpenses?.filter((expense: any) => 
+    filteredJourneys.some((journey: any) => journey.id === expense.journeyId)
+  ) || [];
 
   // Calculate filtered financial stats
   const filteredRevenue = filteredJourneys.reduce((sum: number, journey: any) => {
