@@ -49,7 +49,7 @@ export default function Sidebar() {
       {/* Logo and Toggle */}
       <div className={`${isCollapsed ? 'p-2' : 'p-6'} border-b border-gray-700`}>
         {isCollapsed ? (
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center space-y-3">
             <div 
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="flex items-center justify-center cursor-pointer hover:bg-slate-700/50 p-2 rounded-lg transition-colors"
@@ -59,12 +59,15 @@ export default function Sidebar() {
               <div className="w-0.5 h-4 bg-white mx-0.5"></div>
               <span className="text-sm font-serif font-bold text-white">S</span>
             </div>
+            <div className="text-gray-400 pointer-events-none">
+              <ChevronRight size={16} />
+            </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-between">
             <div 
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="flex items-center cursor-pointer hover:bg-slate-700/50 p-2 rounded-lg transition-colors"
+              className="flex items-center cursor-pointer hover:bg-slate-700/50 p-2 rounded-lg transition-colors flex-1"
               title="Click to collapse sidebar"
             >
               <div className="flex items-center justify-center mr-3">
@@ -73,6 +76,9 @@ export default function Sidebar() {
                 <span className="text-2xl font-serif font-bold text-white">S</span>
               </div>
               <span className="text-xs font-medium tracking-wider">BLACKSMITH TRADERS</span>
+            </div>
+            <div className="text-gray-400 pointer-events-none flex-shrink-0">
+              <ChevronLeft size={18} />
             </div>
           </div>
         )}
