@@ -174,16 +174,17 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
+      <DialogContent className="max-w-md max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Start Journey</DialogTitle>
         </DialogHeader>
 
-        <p className="text-gray-500 mb-6">Please enter the details to start your journey</p>
+        <div className="flex-1 overflow-y-auto pr-2">
+          <p className="text-gray-500 mb-6">Please enter the details to start your journey</p>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
               control={form.control}
               name="vehicleId"
               render={({ field }) => (
@@ -335,8 +336,9 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
                 {createJourneyMutation.isPending ? "Starting..." : "Start Journey"}
               </Button>
             </div>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );
