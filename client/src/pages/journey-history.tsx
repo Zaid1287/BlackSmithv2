@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Plus, Settings } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Eye, Plus, Settings, Camera } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
 import AddExpenseModal from "@/components/add-expense-modal";
@@ -18,6 +19,8 @@ export default function JourneyHistory() {
   const [selectedJourneyId, setSelectedJourneyId] = useState<number | null>(null);
   const [showAdminEditModal, setShowAdminEditModal] = useState(false);
   const [selectedJourneyForEdit, setSelectedJourneyForEdit] = useState<any>(null);
+  const [showPhotosModal, setShowPhotosModal] = useState(false);
+  const [selectedJourneyPhotos, setSelectedJourneyPhotos] = useState<any>(null);
 
   const { data: journeys = [], isLoading } = useQuery({
     queryKey: ["/api/journeys"],
@@ -167,19 +170,36 @@ export default function JourneyHistory() {
                           journeyData={journey} 
                         />
                         {user?.role === 'admin' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedJourneyForEdit(journey);
-                              setShowAdminEditModal(true);
-                            }}
-                            className="text-xs"
-                            title="Edit Journey Financials & Expenses"
-                          >
-                            <Settings className="w-3 h-3 mr-1" />
-                            Edit
-                          </Button>
+                          <>
+                            {journey.photos && Array.isArray(journey.photos) && journey.photos.length > 0 && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedJourneyPhotos(journey);
+                                  setShowPhotosModal(true);
+                                }}
+                                className="text-xs"
+                                title="View Journey Photos"
+                              >
+                                <Camera className="w-3 h-3 mr-1" />
+                                Photos ({journey.photos.length})
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedJourneyForEdit(journey);
+                                setShowAdminEditModal(true);
+                              }}
+                              className="text-xs"
+                              title="Edit Journey Financials & Expenses"
+                            >
+                              <Settings className="w-3 h-3 mr-1" />
+                              Edit
+                            </Button>
+                          </>
                         )}
                       </div>
                     </td>
@@ -219,6 +239,48 @@ export default function JourneyHistory() {
           journeyData={selectedJourneyForEdit}
           expenses={journeyExpenses}
         />
+      )}
+
+      {/* Photos Modal */}
+      {selectedJourneyPhotos && (
+        <Dialog open={showPhotosModal} onOpenChange={setShowPhotosModal}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Journey Photos - {selectedJourneyPhotos.destination}</DialogTitle>
+            </DialogHeader>
+            
+            <div className="mt-4">
+              <div className="mb-4 text-sm text-gray-600">
+                <p><strong>Driver:</strong> {selectedJourneyPhotos.driverName}</p>
+                <p><strong>Vehicle:</strong> {selectedJourneyPhotos.licensePlate}</p>
+                <p><strong>Date:</strong> {new Date(selectedJourneyPhotos.startTime).toLocaleDateString()}</p>
+              </div>
+              
+              {selectedJourneyPhotos.photos && Array.isArray(selectedJourneyPhotos.photos) && selectedJourneyPhotos.photos.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {selectedJourneyPhotos.photos.map((photo: string, index: number) => (
+                    <div key={index} className="relative aspect-square overflow-hidden rounded-lg border border-gray-200">
+                      <img 
+                        src={photo} 
+                        alt={`Journey document ${index + 1}`}
+                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
+                        onClick={() => window.open(photo, '_blank')}
+                      />
+                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                        {index + 1} / {selectedJourneyPhotos.photos.length}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Camera className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                  <p>No photos available for this journey</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
