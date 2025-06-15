@@ -49,44 +49,31 @@ export default function Sidebar() {
       {/* Logo and Toggle */}
       <div className={`${isCollapsed ? 'p-2' : 'p-6'} border-b border-gray-700`}>
         {isCollapsed ? (
-          <div className="flex flex-col items-center space-y-3">
-            <Link href="/admin-dashboard">
-              <div className="flex items-center justify-center cursor-pointer hover:bg-slate-700/50 p-1 rounded-lg transition-colors">
-                <span className="text-sm font-serif font-bold text-white">B</span>
-                <div className="w-0.5 h-4 bg-white mx-0.5"></div>
-                <span className="text-sm font-serif font-bold text-white">S</span>
-              </div>
-            </Link>
-            <Button
-              variant="ghost"
-              size="sm"
+          <div className="flex justify-center">
+            <div 
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="text-white hover:text-white hover:bg-slate-600/70 p-2 rounded-lg bg-slate-700/30 border border-slate-600/50"
-              aria-label="expand"
+              className="flex items-center justify-center cursor-pointer hover:bg-slate-700/50 p-2 rounded-lg transition-colors"
+              title="Click to expand sidebar"
             >
-              <ChevronRight size={16} className="font-bold" />
-            </Button>
+              <span className="text-sm font-serif font-bold text-white">B</span>
+              <div className="w-0.5 h-4 bg-white mx-0.5"></div>
+              <span className="text-sm font-serif font-bold text-white">S</span>
+            </div>
           </div>
         ) : (
-          <div className="flex items-center justify-between">
-            <Link href="/admin-dashboard">
-              <div className="flex items-center cursor-pointer hover:bg-slate-700/50 p-2 rounded-lg transition-colors">
-                <div className="flex items-center justify-center mr-3">
-                  <span className="text-2xl font-serif font-bold text-white">B</span>
-                  <div className="w-0.5 h-8 bg-white mx-2"></div>
-                  <span className="text-2xl font-serif font-bold text-white">S</span>
-                </div>
-                <span className="text-xs font-medium tracking-wider">BLACKSMITH TRADERS</span>
-              </div>
-            </Link>
-            <Button
-              variant="ghost"
-              size="sm"
+          <div className="flex items-center justify-center">
+            <div 
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="text-gray-300 hover:text-white hover:bg-slate-700/50 p-1 flex-shrink-0 rounded-lg"
+              className="flex items-center cursor-pointer hover:bg-slate-700/50 p-2 rounded-lg transition-colors"
+              title="Click to collapse sidebar"
             >
-              <ChevronLeft size={18} />
-            </Button>
+              <div className="flex items-center justify-center mr-3">
+                <span className="text-2xl font-serif font-bold text-white">B</span>
+                <div className="w-0.5 h-8 bg-white mx-2"></div>
+                <span className="text-2xl font-serif font-bold text-white">S</span>
+              </div>
+              <span className="text-xs font-medium tracking-wider">BLACKSMITH TRADERS</span>
+            </div>
           </div>
         )}
       </div>
