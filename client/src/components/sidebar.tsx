@@ -58,7 +58,7 @@ export default function Sidebar() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={() => setIsCollapsed(false)}
               className="text-white hover:text-white hover:bg-slate-600/70 p-2 rounded-lg bg-slate-700/30 border border-slate-600/50"
               aria-label="expand"
               title="Click to expand sidebar"
@@ -68,7 +68,11 @@ export default function Sidebar() {
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <div className="flex items-center p-2">
+            <div 
+              onClick={() => setIsCollapsed(true)}
+              className="flex items-center cursor-pointer hover:bg-slate-700/50 p-2 rounded-lg transition-colors flex-1"
+              title="Click to collapse sidebar"
+            >
               <div className="flex items-center justify-center mr-3">
                 <span className="text-2xl font-serif font-bold text-white">B</span>
                 <div className="w-0.5 h-8 bg-white mx-2"></div>
@@ -76,15 +80,9 @@ export default function Sidebar() {
               </div>
               <span className="text-xs font-medium tracking-wider">BLACKSMITH TRADERS</span>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="text-gray-300 hover:text-white hover:bg-slate-700/50 p-1 flex-shrink-0 rounded-lg"
-              title="Click to collapse sidebar"
-            >
+            <div className="text-gray-400 pointer-events-none flex-shrink-0">
               <ChevronLeft size={18} />
-            </Button>
+            </div>
           </div>
         )}
       </div>
