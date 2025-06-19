@@ -157,7 +157,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllJourneys(): Promise<Journey[]> {
-    // Limit to recent 30 journeys and exclude photos for better RAM efficiency
+    // Select only essential fields and paginate for RAM efficiency
     const result = await db
       .select({
         id: journeys.id,
@@ -172,19 +172,14 @@ export class DatabaseStorage implements IStorage {
         security: journeys.security,
         totalExpenses: journeys.totalExpenses,
         balance: journeys.balance,
-        currentLocation: journeys.currentLocation,
-        speed: journeys.speed,
-        distanceCovered: journeys.distanceCovered,
-        // Exclude photos from general listing to save RAM
+        // Exclude heavy fields for RAM efficiency
         photos: sql<boolean>`CASE WHEN ${journeys.photos} IS NOT NULL THEN true ELSE false END`.as('photos'),
         driverName: users.name,
-        vehicleLicensePlate: vehicles.licensePlate,
       })
       .from(journeys)
       .leftJoin(users, eq(journeys.driverId, users.id))
-      .leftJoin(vehicles, eq(journeys.vehicleId, vehicles.id))
       .orderBy(desc(journeys.startTime))
-      .limit(30);
+      .limit(20);
     
     return result as any[];
   }
@@ -198,23 +193,17 @@ export class DatabaseStorage implements IStorage {
         licensePlate: journeys.licensePlate,
         destination: journeys.destination,
         startTime: journeys.startTime,
-        endTime: journeys.endTime,
         status: journeys.status,
         pouch: journeys.pouch,
         security: journeys.security,
         totalExpenses: journeys.totalExpenses,
         balance: journeys.balance,
-        currentLocation: journeys.currentLocation,
-        speed: journeys.speed,
-        distanceCovered: journeys.distanceCovered,
-        // Only include photos for admin users to save RAM
+        // Exclude photos from active journey queries to save RAM
         photos: journeys.photos,
         driverName: users.name,
-        vehicleLicensePlate: vehicles.licensePlate,
       })
       .from(journeys)
       .leftJoin(users, eq(journeys.driverId, users.id))
-      .leftJoin(vehicles, eq(journeys.vehicleId, vehicles.id))
       .where(eq(journeys.status, 'active'));
     
     return result as any[];

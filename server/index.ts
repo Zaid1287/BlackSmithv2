@@ -2,9 +2,23 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Memory optimization for 10 concurrent users
+process.env.NODE_OPTIONS = '--max-old-space-size=256';
+
 const app = express();
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+
+// Memory monitoring middleware
+app.use((req, res, next) => {
+  const used = process.memoryUsage();
+  const memMB = Math.round(used.heapUsed / 1024 / 1024);
+  if (memMB > 200) {
+    console.warn(`High memory usage: ${memMB}MB`);
+  }
+  next();
+});
+
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 
 app.use((req, res, next) => {
   const start = Date.now();
