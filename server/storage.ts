@@ -199,7 +199,7 @@ export class DatabaseStorage implements IStorage {
         totalExpenses: journeys.totalExpenses,
         balance: journeys.balance,
         // Exclude photos from active journey queries to save RAM
-        photos: journeys.photos,
+        photos: sql<boolean>`false`.as('photos'),
         driverName: users.name,
       })
       .from(journeys)
