@@ -21,6 +21,7 @@ export default function JourneyHistory() {
   const [selectedJourneyForEdit, setSelectedJourneyForEdit] = useState<any>(null);
   const [showPhotosModal, setShowPhotosModal] = useState(false);
   const [selectedJourneyPhotos, setSelectedJourneyPhotos] = useState<any>(null);
+  const [journeyPhotos, setJourneyPhotos] = useState<string[]>([]);
 
   const { data: journeys = [], isLoading } = useQuery({
     queryKey: ["/api/journeys"],
@@ -171,19 +172,33 @@ export default function JourneyHistory() {
                         />
                         {user?.role === 'admin' && (
                           <>
-                            {journey.photos && Array.isArray(journey.photos) && journey.photos.length > 0 && (
+                            {journey.photos && (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => {
+                                onClick={async () => {
                                   setSelectedJourneyPhotos(journey);
                                   setShowPhotosModal(true);
+                                  // Fetch photos only when modal opens
+                                  try {
+                                    const response = await fetch(`/api/journeys/${journey.id}/photos`, {
+                                      headers: getAuthHeaders(),
+                                      credentials: "include",
+                                    });
+                                    if (response.ok) {
+                                      const data = await response.json();
+                                      setJourneyPhotos(data.photos || []);
+                                    }
+                                  } catch (error) {
+                                    console.error("Failed to fetch photos:", error);
+                                    setJourneyPhotos([]);
+                                  }
                                 }}
                                 className="text-xs"
                                 title="View Journey Photos"
                               >
                                 <Camera className="w-3 h-3 mr-1" />
-                                Photos ({journey.photos.length})
+                                Photos
                               </Button>
                             )}
                             <Button
@@ -256,9 +271,9 @@ export default function JourneyHistory() {
                 <p><strong>Date:</strong> {new Date(selectedJourneyPhotos.startTime).toLocaleDateString()}</p>
               </div>
               
-              {selectedJourneyPhotos.photos && Array.isArray(selectedJourneyPhotos.photos) && selectedJourneyPhotos.photos.length > 0 ? (
+              {journeyPhotos && Array.isArray(journeyPhotos) && journeyPhotos.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {selectedJourneyPhotos.photos.map((photo: string, index: number) => (
+                  {journeyPhotos.map((photo: string, index: number) => (
                     <div key={index} className="relative aspect-square overflow-hidden rounded-lg border border-gray-200">
                       <img 
                         src={photo} 
@@ -267,7 +282,7 @@ export default function JourneyHistory() {
                         onClick={() => window.open(photo, '_blank')}
                       />
                       <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-                        {index + 1} / {selectedJourneyPhotos.photos.length}
+                        {index + 1} / {journeyPhotos.length}
                       </div>
                     </div>
                   ))}

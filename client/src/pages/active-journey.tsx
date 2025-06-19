@@ -45,8 +45,8 @@ export default function ActiveJourney() {
       if (!response.ok) throw new Error("Failed to fetch active journeys");
       return response.json();
     },
-    refetchInterval: 2000, // Refresh every 2 seconds for real-time updates
-    staleTime: 0, // Always fetch fresh data
+    refetchInterval: 10000, // Refresh every 10 seconds instead of 2
+    staleTime: 5000, // Cache data for 5 seconds
   });
 
   const userActiveJourney = activeJourneys.find((journey: any) => journey.driverId === user?.id);

@@ -346,6 +346,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/journeys/:id/photos", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const photos = await storage.getJourneyPhotos(id);
+      res.json({ photos });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch journey photos" });
+    }
+  });
+
   // Expense management routes
   app.get("/api/journeys/:id/expenses", authenticateToken, async (req: any, res) => {
     try {

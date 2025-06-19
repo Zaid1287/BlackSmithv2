@@ -26,6 +26,7 @@ export interface IStorage {
   getAllJourneys(): Promise<Journey[]>;
   getActiveJourneys(): Promise<Journey[]>;
   getJourneysByDriver(driverId: number): Promise<Journey[]>;
+  getJourneyPhotos(id: number): Promise<string[] | null>;
   updateJourneyStatus(id: number, status: string): Promise<void>;
   updateJourneyLocation(id: number, location: any, speed: number, distance: number): Promise<void>;
   completeJourney(id: number): Promise<void>;
@@ -156,7 +157,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllJourneys(): Promise<Journey[]> {
-    // Limit to recent 90 journeys for better performance
+    // Limit to recent 30 journeys and exclude photos for better RAM efficiency
     const result = await db
       .select({
         id: journeys.id,
@@ -174,7 +175,8 @@ export class DatabaseStorage implements IStorage {
         currentLocation: journeys.currentLocation,
         speed: journeys.speed,
         distanceCovered: journeys.distanceCovered,
-        photos: journeys.photos,
+        // Exclude photos from general listing to save RAM
+        photos: sql<boolean>`CASE WHEN ${journeys.photos} IS NOT NULL THEN true ELSE false END`.as('photos'),
         driverName: users.name,
         vehicleLicensePlate: vehicles.licensePlate,
       })
@@ -182,7 +184,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(journeys.driverId, users.id))
       .leftJoin(vehicles, eq(journeys.vehicleId, vehicles.id))
       .orderBy(desc(journeys.startTime))
-      .limit(90);
+      .limit(30);
     
     return result as any[];
   }
@@ -205,6 +207,7 @@ export class DatabaseStorage implements IStorage {
         currentLocation: journeys.currentLocation,
         speed: journeys.speed,
         distanceCovered: journeys.distanceCovered,
+        // Only include photos for admin users to save RAM
         photos: journeys.photos,
         driverName: users.name,
         vehicleLicensePlate: vehicles.licensePlate,
@@ -217,9 +220,44 @@ export class DatabaseStorage implements IStorage {
     return result as any[];
   }
 
+  async getJourneyPhotos(id: number): Promise<string[] | null> {
+    const result = await db
+      .select({ photos: journeys.photos })
+      .from(journeys)
+      .where(eq(journeys.id, id))
+      .limit(1);
+    
+    return result[0]?.photos as string[] || null;
+  }
+
   async getJourneysByDriver(driverId: number): Promise<Journey[]> {
-    // Limit to recent 20 journeys for better performance
-    return await db.select().from(journeys).where(eq(journeys.driverId, driverId)).orderBy(desc(journeys.startTime)).limit(20);
+    // Limit to recent 15 journeys and exclude photos for RAM efficiency
+    const result = await db
+      .select({
+        id: journeys.id,
+        driverId: journeys.driverId,
+        vehicleId: journeys.vehicleId,
+        licensePlate: journeys.licensePlate,
+        destination: journeys.destination,
+        startTime: journeys.startTime,
+        endTime: journeys.endTime,
+        status: journeys.status,
+        pouch: journeys.pouch,
+        security: journeys.security,
+        totalExpenses: journeys.totalExpenses,
+        balance: journeys.balance,
+        currentLocation: journeys.currentLocation,
+        speed: journeys.speed,
+        distanceCovered: journeys.distanceCovered,
+        // No photos for driver queries to save RAM
+        photos: sql<boolean>`false`.as('photos'),
+      })
+      .from(journeys)
+      .where(eq(journeys.driverId, driverId))
+      .orderBy(desc(journeys.startTime))
+      .limit(15);
+    
+    return result as any[];
   }
 
   async updateJourneyStatus(id: number, status: string): Promise<void> {
@@ -265,23 +303,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getExpensesByJourney(journeyId: number): Promise<Expense[]> {
-    return await db.select().from(expenses).where(eq(expenses.journeyId, journeyId)).orderBy(desc(expenses.timestamp));
+    return await db.select().from(expenses).where(eq(expenses.journeyId, journeyId)).orderBy(desc(expenses.timestamp)).limit(50);
   }
 
   async getExpensesByJourneyForUser(journeyId: number, userRole: string): Promise<Expense[]> {
     if (userRole === 'admin') {
-      // Admin sees all expenses
-      return await db.select().from(expenses).where(eq(expenses.journeyId, journeyId)).orderBy(desc(expenses.timestamp));
+      // Admin sees all expenses (limited for RAM efficiency)
+      return await db.select().from(expenses).where(eq(expenses.journeyId, journeyId)).orderBy(desc(expenses.timestamp)).limit(50);
     } else {
       // Drivers don't see company secrets (toll and hyd_inward)
       return await db.select().from(expenses)
         .where(and(eq(expenses.journeyId, journeyId), eq(expenses.isCompanySecret, false)))
-        .orderBy(desc(expenses.timestamp));
+        .orderBy(desc(expenses.timestamp))
+        .limit(30);
     }
   }
 
   async getAllExpenses(): Promise<Expense[]> {
-    return await db.select().from(expenses).orderBy(desc(expenses.timestamp));
+    // Limit to recent 100 expenses for RAM efficiency
+    return await db.select().from(expenses).orderBy(desc(expenses.timestamp)).limit(100);
   }
 
   private async updateJourneyTotals(journeyId: number): Promise<void> {
