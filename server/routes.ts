@@ -109,7 +109,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ message: "Initialization complete" });
     } catch (error) {
-      res.status(500).json({ message: "Initialization failed" });
+      console.error("Initialization error:", error);
+      res.status(500).json({ message: "Initialization failed", error: error.message });
     }
   });
 
@@ -144,7 +145,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error) {
-      res.status(500).json({ message: "Login failed" });
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed", error: error.message });
     }
   });
 
