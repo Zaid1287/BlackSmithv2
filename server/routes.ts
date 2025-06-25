@@ -287,15 +287,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Journey management routes
   app.get("/api/journeys", authenticateToken, async (req: any, res) => {
     try {
+      console.log(`Fetching journeys for user: ${req.user.username} (role: ${req.user.role})`);
       let journeys;
       if (req.user.role === 'admin') {
         journeys = await storage.getAllJourneys();
+        console.log(`Admin query returned ${journeys.length} journeys`);
       } else {
         journeys = await storage.getJourneysByDriver(req.user.id);
+        console.log(`Driver query returned ${journeys.length} journeys for driver ID: ${req.user.id}`);
       }
       res.json(journeys);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch journeys" });
+      console.error('Journey fetch error:', error);
+      res.status(500).json({ message: "Failed to fetch journeys", error: error.message });
     }
   });
 

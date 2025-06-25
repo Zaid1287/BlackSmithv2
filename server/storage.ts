@@ -157,7 +157,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllJourneys(): Promise<Journey[]> {
-    // Select only essential fields and paginate for RAM efficiency
+    // Use the same structure as getJourneysByDriver for consistency
     const result = await db
       .select({
         id: journeys.id,
@@ -172,14 +172,17 @@ export class DatabaseStorage implements IStorage {
         security: journeys.security,
         totalExpenses: journeys.totalExpenses,
         balance: journeys.balance,
-        // Exclude heavy fields for RAM efficiency
+        currentLocation: journeys.currentLocation,
+        speed: journeys.speed,
+        distanceCovered: journeys.distanceCovered,
+        // Include photos indicator for admin
         photos: sql<boolean>`CASE WHEN ${journeys.photos} IS NOT NULL THEN true ELSE false END`.as('photos'),
         driverName: users.name,
       })
       .from(journeys)
       .leftJoin(users, eq(journeys.driverId, users.id))
       .orderBy(desc(journeys.startTime))
-      .limit(20);
+      .limit(50); // Higher limit for admin view
     
     return result as any[];
   }
