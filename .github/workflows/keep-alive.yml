@@ -1,56 +1,22 @@
-name: Keep BlackSmith Traders App Alive
+#!/usr/bin/env python3
+import requests
+import datetime
 
-on:
-  schedule:
-    # Ping every 10 minutes to prevent 15-minute timeout
-    - cron: '*/10 * * * *'
-  workflow_dispatch:
-
-jobs:
-  ping:
-    runs-on: ubuntu-latest
+def ping_backend():
+    url = "https://keep-me-alive.org/ping" #replace this url with your backend url & endpoint
     
-    steps:
-    - name: Ping BlackSmith Traders App
-      run: |
-        echo "$(date): Pinging BlackSmith Traders app to keep it alive..."
+    try:
+        print(f"{datetime.datetime.now()}: Pinging {url}")
+        response = requests.get(url, timeout=30)
+        print(f"Response: {response.status_code}")
         
-        # BlackSmith Traders app URL
-        APP_URL="https://blacksmithv2-1.onrender.com"
-        
-        # Ping the health endpoint with timeout
-        echo "$(date): Pinging $APP_URL/ping"
-        response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$APP_URL/ping")
-        echo "Response: $response"
-        
-        if [ $response -eq 200 ]; then
-          echo "Backend is alive"
-          
-          # Keep additional endpoints warm
-          curl -s --max-time 15 "$APP_URL/api/auth/me" > /dev/null || echo "Auth endpoint checked"
-          curl -s --max-time 15 "$APP_URL/api/journeys/active" > /dev/null || echo "Journeys endpoint checked"
-          
-        else
-          echo "⚠️ Unexpected status code: $response"
-        fi
+        if response.status_code == 200:
+            print("Backend is alive")
+        else:
+            print(f"⚠️ Unexpected status code: {response.status_code}")
+            
+    except Exception as e:
+        print(f"Error: {e}")
 
-  keep-warm:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
-    
-    steps:
-    - name: Extended Keep Warm Session
-      run: |
-        APP_URL="https://blacksmithv2-1.onrender.com"
-        
-        echo "Starting extended keep-warm session..."
-        
-        for i in {1..30}; do
-          echo "Ping $i/30"
-          curl -s "$APP_URL/ping" | jq '.status' || echo "Ping $i completed"
-          
-          # Random delay between 15-45 seconds to simulate real traffic
-          sleep $((15 + RANDOM % 30))
-        done
-        
-        echo "Extended session completed"
+if __name__ == "__main__":
+    ping_backend()  # Just ping once, then exit
