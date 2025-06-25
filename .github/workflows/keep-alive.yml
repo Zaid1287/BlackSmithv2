@@ -13,27 +13,26 @@ jobs:
     steps:
     - name: Ping BlackSmith Traders App
       run: |
-        echo "Pinging BlackSmith Traders app to keep it alive..."
+        echo "$(date): Pinging BlackSmith Traders app to keep it alive..."
         
-        # Get your app URL from secrets or replace with your actual URL
-        APP_URL="${{ secrets.APP_URL || 'https://your-app-name.replit.app' }}"
+        # BlackSmith Traders app URL
+        APP_URL="https://blacksmithv2-1.onrender.com"
         
-        # Ping the health endpoint
-        response=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL/ping")
+        # Ping the health endpoint with timeout
+        echo "$(date): Pinging $APP_URL/ping"
+        response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$APP_URL/ping")
+        echo "Response: $response"
         
         if [ $response -eq 200 ]; then
-          echo "✅ App is alive! Response: $response"
+          echo "Backend is alive"
           
-          # Optional: Ping main endpoints to keep them warm
-          curl -s "$APP_URL/api/auth/me" > /dev/null || echo "Auth endpoint checked"
-          curl -s "$APP_URL/api/journeys/active" > /dev/null || echo "Journeys endpoint checked"
+          # Keep additional endpoints warm
+          curl -s --max-time 15 "$APP_URL/api/auth/me" > /dev/null || echo "Auth endpoint checked"
+          curl -s --max-time 15 "$APP_URL/api/journeys/active" > /dev/null || echo "Journeys endpoint checked"
           
         else
-          echo "❌ App might be down. Response: $response"
-          exit 1
+          echo "⚠️ Unexpected status code: $response"
         fi
-        
-        echo "Ping completed at $(date)"
 
   keep-warm:
     runs-on: ubuntu-latest
@@ -42,7 +41,7 @@ jobs:
     steps:
     - name: Extended Keep Warm Session
       run: |
-        APP_URL="${{ secrets.APP_URL || 'https://your-app-name.replit.app' }}"
+        APP_URL="https://blacksmithv2-1.onrender.com"
         
         echo "Starting extended keep-warm session..."
         

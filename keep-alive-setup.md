@@ -9,14 +9,10 @@ Your BlackSmith Traders app deployment spins down after 15 minutes of inactivity
 ### 1. Repository Setup
 Copy the `.github/workflows/keep-alive.yml` file to your `keep-me-alive` repository or create a new repository with this workflow.
 
-### 2. Configure App URL
-Add your deployment URL as a GitHub secret:
+### 2. App URL Configuration
+The workflow is pre-configured with your app URL: `https://blacksmithv2-1.onrender.com`
 
-1. Go to your repository on GitHub
-2. Navigate to: **Settings** → **Secrets and variables** → **Actions**
-3. Click **New repository secret**
-4. Name: `APP_URL`
-5. Value: Your Replit app URL (e.g., `https://blacksmith-traders.your-username.replit.app`)
+No additional secrets configuration needed.
 
 ### 3. Workflow Features
 
@@ -55,7 +51,12 @@ The workflow will:
 
 Test your ping endpoint:
 ```bash
-curl https://your-app-url.replit.app/ping
+curl https://blacksmithv2-1.onrender.com/ping
+```
+
+Or run the Python script:
+```bash
+python ping_backend.py
 ```
 
 ## Advanced Configuration
