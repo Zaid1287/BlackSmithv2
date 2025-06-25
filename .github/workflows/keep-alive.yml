@@ -1,0 +1,57 @@
+name: Keep BlackSmith Traders App Alive
+
+on:
+  schedule:
+    # Ping every 10 minutes to prevent 15-minute timeout
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Ping BlackSmith Traders App
+      run: |
+        echo "Pinging BlackSmith Traders app to keep it alive..."
+        
+        # Get your app URL from secrets or replace with your actual URL
+        APP_URL="${{ secrets.APP_URL || 'https://your-app-name.replit.app' }}"
+        
+        # Ping the health endpoint
+        response=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL/ping")
+        
+        if [ $response -eq 200 ]; then
+          echo "✅ App is alive! Response: $response"
+          
+          # Optional: Ping main endpoints to keep them warm
+          curl -s "$APP_URL/api/auth/me" > /dev/null || echo "Auth endpoint checked"
+          curl -s "$APP_URL/api/journeys/active" > /dev/null || echo "Journeys endpoint checked"
+          
+        else
+          echo "❌ App might be down. Response: $response"
+          exit 1
+        fi
+        
+        echo "Ping completed at $(date)"
+
+  keep-warm:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Extended Keep Warm Session
+      run: |
+        APP_URL="${{ secrets.APP_URL || 'https://your-app-name.replit.app' }}"
+        
+        echo "Starting extended keep-warm session..."
+        
+        for i in {1..30}; do
+          echo "Ping $i/30"
+          curl -s "$APP_URL/ping" | jq '.status' || echo "Ping $i completed"
+          
+          # Random delay between 15-45 seconds to simulate real traffic
+          sleep $((15 + RANDOM % 30))
+        done
+        
+        echo "Extended session completed"
