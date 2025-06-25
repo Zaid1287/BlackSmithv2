@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Eye, Plus, Settings, Camera } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Eye, Plus, Settings, Camera, Trash2 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
 import AddExpenseModal from "@/components/add-expense-modal";
@@ -14,6 +15,7 @@ import AdminEditModal from "@/components/admin-edit-modal";
 
 export default function JourneyHistory() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState("all");
   const [licensePlateFilter, setLicensePlateFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM format
@@ -63,6 +65,24 @@ export default function JourneyHistory() {
       return response.json();
     },
     enabled: !!selectedJourneyForEdit && user?.role === 'admin',
+  });
+
+  // Delete journey mutation
+  const deleteJourneyMutation = useMutation({
+    mutationFn: async (journeyId: number) => {
+      const response = await fetch(`/api/journeys/${journeyId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to delete journey');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/journeys'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/expenses/all'] });
+    },
   });
 
   // Get unique license plates from journeys
@@ -264,6 +284,41 @@ export default function JourneyHistory() {
                               <Settings className="w-3 h-3 mr-1" />
                               Edit
                             </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  title="Delete Journey"
+                                >
+                                  <Trash2 className="w-3 h-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Journey</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this journey? This will permanently remove:
+                                    <br />• Journey record for {journey.licensePlate} to {journey.destination}
+                                    <br />• All associated expenses
+                                    <br />• Photos and location data
+                                    <br /><br />This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deleteJourneyMutation.mutate(journey.id)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                    disabled={deleteJourneyMutation.isPending}
+                                  >
+                                    {deleteJourneyMutation.isPending ? 'Deleting...' : 'Delete Journey'}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </>
                         )}
                       </div>

@@ -352,6 +352,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/journeys/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      console.log(`Admin ${req.user.username} deleting journey ID: ${id}`);
+      await storage.deleteJourney(id);
+      res.json({ message: "Journey deleted successfully" });
+    } catch (error) {
+      console.error('Journey deletion error:', error);
+      res.status(500).json({ message: "Failed to delete journey", error: error.message });
+    }
+  });
+
   app.get("/api/journeys/:id/photos", authenticateToken, requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);

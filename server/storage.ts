@@ -31,6 +31,7 @@ export interface IStorage {
   updateJourneyLocation(id: number, location: any, speed: number, distance: number): Promise<void>;
   completeJourney(id: number): Promise<void>;
   updateJourneyFinancials(id: number, data: { pouch?: string; security?: string }): Promise<void>;
+  deleteJourney(id: number): Promise<void>;
   
   // Expense methods
   createExpense(expense: InsertExpense): Promise<Expense>;
@@ -681,6 +682,37 @@ export class DatabaseStorage implements IStorage {
     // Recalculate journey balance after deleting expense
     if (expense && expense.journeyId !== null) {
       await this.updateJourneyTotals(expense.journeyId);
+    }
+  }
+
+  async deleteJourney(id: number): Promise<void> {
+    // First, get the journey details before deletion
+    const [journey] = await db.select().from(journeys).where(eq(journeys.id, id));
+    if (!journey) {
+      throw new Error('Journey not found');
+    }
+
+    // Delete all expenses associated with this journey first (foreign key constraint)
+    await db.delete(expenses).where(eq(expenses.journeyId, id));
+    
+    // Delete the journey
+    await db.delete(journeys).where(eq(journeys.id, id));
+    
+    // Update vehicle status back to available if it was in use for this journey
+    if (journey.vehicleId && journey.status === 'active') {
+      // Check if there are any other active journeys using this vehicle
+      const activeJourneysWithVehicle = await db
+        .select()
+        .from(journeys)
+        .where(and(
+          eq(journeys.vehicleId, journey.vehicleId),
+          eq(journeys.status, 'active')
+        ));
+      
+      // If no other active journeys, set vehicle back to available
+      if (activeJourneysWithVehicle.length === 0) {
+        await this.updateVehicleStatus(journey.vehicleId, 'available');
+      }
     }
   }
 }

@@ -132,7 +132,14 @@ BlackSmith Traders is a comprehensive logistics management system designed for f
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- **June 25, 2025**: License plate filter added to journey history with month filter defaulting to current date
+- **June 25, 2025**: Delete journey functionality implemented with complete data synchronization
+- **June 25, 2025**: Fixed admin journey visibility issue - admins now see all journeys properly
+- **June 25, 2025**: Database optimizations for memory efficiency - photos excluded from general queries
+
 ## Changelog
 
-Changelog:
-- June 25, 2025. Initial setup
+- June 25, 2025: Initial setup
+- June 25, 2025: Journey management enhancements and data integrity improvements
