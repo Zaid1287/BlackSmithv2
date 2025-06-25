@@ -15,6 +15,7 @@ import AdminEditModal from "@/components/admin-edit-modal";
 export default function JourneyHistory() {
   const { user } = useAuth();
   const [statusFilter, setStatusFilter] = useState("all");
+  const [licensePlateFilter, setLicensePlateFilter] = useState("all");
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [selectedJourneyId, setSelectedJourneyId] = useState<number | null>(null);
   const [showAdminEditModal, setShowAdminEditModal] = useState(false);
@@ -63,16 +64,31 @@ export default function JourneyHistory() {
     enabled: !!selectedJourneyForEdit && user?.role === 'admin',
   });
 
+  // Get unique license plates from journeys
+  const uniqueLicensePlates = [...new Set(journeys.map((journey: any) => journey.licensePlate))].sort();
+
   const filteredJourneys = journeys.filter((journey: any) => {
-    if (statusFilter === "all") return true;
-    if (statusFilter === "hyd_inward_missing") {
-      // Check if journey has any HYD Inward expenses
-      const hasHydInward = allExpenses.some((expense: any) => 
-        expense.journeyId === journey.id && expense.category === 'hyd_inward'
-      );
-      return !hasHydInward && journey.status === 'completed';
+    // Status filter
+    let passesStatusFilter = true;
+    if (statusFilter !== "all") {
+      if (statusFilter === "hyd_inward_missing") {
+        // Check if journey has any HYD Inward expenses
+        const hasHydInward = allExpenses.some((expense: any) => 
+          expense.journeyId === journey.id && expense.category === 'hyd_inward'
+        );
+        passesStatusFilter = !hasHydInward && journey.status === 'completed';
+      } else {
+        passesStatusFilter = journey.status === statusFilter;
+      }
     }
-    return journey.status === statusFilter;
+
+    // License plate filter
+    let passesLicensePlateFilter = true;
+    if (licensePlateFilter !== "all") {
+      passesLicensePlateFilter = journey.licensePlate === licensePlateFilter;
+    }
+
+    return passesStatusFilter && passesLicensePlateFilter;
   });
 
   if (isLoading) {
@@ -96,21 +112,37 @@ export default function JourneyHistory() {
               <p className="text-gray-500 mt-1">View all journeys and their details</p>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">Filter by status:</span>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Journeys</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="active">In Progress</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                  {user?.role === 'admin' && (
-                    <SelectItem value="hyd_inward_missing">HYD Inward not entered</SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-500">Filter by status:</span>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Journeys</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="active">In Progress</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    {user?.role === 'admin' && (
+                      <SelectItem value="hyd_inward_missing">HYD Inward not entered</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-500">Filter by vehicle:</span>
+                <Select value={licensePlateFilter} onValueChange={setLicensePlateFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Vehicles</SelectItem>
+                    {uniqueLicensePlates.map((plate) => (
+                      <SelectItem key={plate} value={plate}>{plate}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>
