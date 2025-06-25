@@ -22,24 +22,6 @@ A comprehensive logistics and expense management system for BlackSmith Traders, 
    - Health Check: `/ping`
    - API Base: `/api`
 
-## Keep Alive Configuration
-
-This app includes automatic keep-alive functionality to prevent deployment timeouts:
-
-### GitHub Actions Setup
-
-1. Fork this repository to your GitHub account
-2. Add your app URL as a secret:
-   - Go to Repository Settings → Secrets and variables → Actions
-   - Add `APP_URL` with your Replit deployment URL
-3. The workflow will automatically ping every 10 minutes
-
-### Manual Keep Alive
-
-You can manually trigger extended keep-alive sessions:
-- Go to Actions tab in your GitHub repository
-- Select "Keep BlackSmith Traders App Alive"
-- Click "Run workflow"
 
 ## Memory Optimization
 
@@ -59,9 +41,6 @@ The system is optimized for efficiency:
 - **Deployment**: Replit with automatic scaling
 
 ## API Endpoints
-
-### Health & Status
-- `GET /ping` - Health check and uptime status
 
 ### Authentication
 - `POST /api/auth/login` - User authentication

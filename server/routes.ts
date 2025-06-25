@@ -65,18 +65,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.resolve(process.cwd(), 'client/sw.js'));
   });
 
-  // Ping endpoint for health check and traffic simulation
-  app.route('/ping')
-    .get((req, res) => {
-      const start_time = Date.now();
-      return res.json({
-        'status': 'healthy',
-        'timestamp': new Date().toISOString(),
-        'uptime': process.uptime(),
-        'status_code': 200
-      });
-    });
-  
   // Initialize admin user if not exists
   app.post("/api/init", async (req, res) => {
     try {
