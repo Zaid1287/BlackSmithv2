@@ -16,6 +16,7 @@ export default function JourneyHistory() {
   const { user } = useAuth();
   const [statusFilter, setStatusFilter] = useState("all");
   const [licensePlateFilter, setLicensePlateFilter] = useState("all");
+  const [monthFilter, setMonthFilter] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM format
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [selectedJourneyId, setSelectedJourneyId] = useState<number | null>(null);
   const [showAdminEditModal, setShowAdminEditModal] = useState(false);
@@ -88,7 +89,15 @@ export default function JourneyHistory() {
       passesLicensePlateFilter = journey.licensePlate === licensePlateFilter;
     }
 
-    return passesStatusFilter && passesLicensePlateFilter;
+    // Month filter
+    let passesMonthFilter = true;
+    if (monthFilter) {
+      const journeyDate = new Date(journey.startTime);
+      const journeyMonth = journeyDate.toISOString().slice(0, 7); // YYYY-MM format
+      passesMonthFilter = journeyMonth === monthFilter;
+    }
+
+    return passesStatusFilter && passesLicensePlateFilter && passesMonthFilter;
   });
 
   if (isLoading) {
@@ -111,7 +120,7 @@ export default function JourneyHistory() {
               <h2 className="text-xl font-semibold text-gray-900">Journey History</h2>
               <p className="text-gray-500 mt-1">View all journeys and their details</p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 flex-wrap gap-2">
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-500">Filter by status:</span>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -142,6 +151,15 @@ export default function JourneyHistory() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-500">Filter by month:</span>
+                <input
+                  type="month"
+                  value={monthFilter}
+                  onChange={(e) => setMonthFilter(e.target.value)}
+                  className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
             </div>
           </div>
