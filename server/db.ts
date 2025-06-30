@@ -10,10 +10,12 @@ if (!process.env.DATABASE_URL) {
 
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  ssl: { rejectUnauthorized: false }, // Always use SSL for Neon
+  max: 5, // Reduce connection pool size for serverless
+  idleTimeoutMillis: 10000, // 10 seconds
+  connectionTimeoutMillis: 10000, // 10 seconds
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 0,
 });
 
 export const db = drizzle(pool, { schema });

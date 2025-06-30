@@ -27,6 +27,10 @@ export default function FinancialManagement() {
   const [exportStartDate, setExportStartDate] = useState("");
   const [exportEndDate, setExportEndDate] = useState("");
   const [selectedLicensePlateFilter, setSelectedLicensePlateFilter] = useState<string>("all");
+  const [selectedMonthFilter, setSelectedMonthFilter] = useState<string>(() => {
+    const currentDate = new Date();
+    return `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+  });
 
   // Function to get translated expense category name
   const getTranslatedCategory = (category: string) => {
@@ -677,14 +681,43 @@ export default function FinancialManagement() {
   }
 
   // Calculate filtering based on selected license plate
-  const filteredJourneys = journeys?.filter((journey: any) => 
-    selectedLicensePlateFilter === "all" || journey.licensePlate === selectedLicensePlateFilter
-  ) || [];
+  const filteredJourneys = journeys?.filter((journey: any) => {
+    // License plate filter
+    if (selectedLicensePlateFilter !== "all" && journey.licensePlate !== selectedLicensePlateFilter) {
+      return false;
+    }
+    
+    // Month filter
+    if (selectedMonthFilter !== "all") {
+      const journeyDate = new Date(journey.startTime);
+      const journeyMonth = `${journeyDate.getFullYear()}-${String(journeyDate.getMonth() + 1).padStart(2, '0')}`;
+      if (journeyMonth !== selectedMonthFilter) {
+        return false;
+      }
+    }
+    
+    return true;
+  }) || [];
 
-  // Filter expenses based on filtered journeys
-  const filteredExpenses = combinedExpenses?.filter((expense: any) => 
-    filteredJourneys.some((journey: any) => journey.id === expense.journeyId)
-  ) || [];
+  // Filter expenses based on filtered journeys and month filter
+  const filteredExpenses = combinedExpenses?.filter((expense: any) => {
+    // First filter by journey inclusion
+    const isInFilteredJourney = filteredJourneys.some((journey: any) => journey.id === expense.journeyId);
+    if (!isInFilteredJourney) {
+      return false;
+    }
+    
+    // Month filter for expenses
+    if (selectedMonthFilter !== "all") {
+      const expenseDate = new Date(expense.timestamp);
+      const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
+      if (expenseMonth !== selectedMonthFilter) {
+        return false;
+      }
+    }
+    
+    return true;
+  }) || [];
 
   // Calculate filtered financial stats
   const filteredRevenue = filteredJourneys.reduce((sum: number, journey: any) => {
@@ -805,23 +838,56 @@ export default function FinancialManagement() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Financial Management</h1>
-          <div className="mt-2">
-            <label htmlFor="licensePlateFilter" className="text-sm font-medium text-gray-700 mr-3">Filter by License Plate:</label>
-            <select
-              id="licensePlateFilter"
-              value={selectedLicensePlateFilter}
-              onChange={(e) => setSelectedLicensePlateFilter(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Vehicles</option>
-              {journeys && journeys.map((j: any) => j.licensePlate).filter((plate: string, index: number, arr: string[]) => 
-                plate && arr.indexOf(plate) === index
-              ).map((plate: string) => (
-                <option key={plate} value={plate}>
-                  {plate}
-                </option>
-              ))}
-            </select>
+          <div className="mt-2 flex flex-wrap gap-4 items-center">
+            <div>
+              <label htmlFor="licensePlateFilter" className="text-sm font-medium text-gray-700 mr-3">Filter by License Plate:</label>
+              <select
+                id="licensePlateFilter"
+                value={selectedLicensePlateFilter}
+                onChange={(e) => setSelectedLicensePlateFilter(e.target.value)}
+                className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Vehicles</option>
+                {journeys && journeys.map((j: any) => j.licensePlate).filter((plate: string, index: number, arr: string[]) => 
+                  plate && arr.indexOf(plate) === index
+                ).map((plate: string) => (
+                  <option key={plate} value={plate}>
+                    {plate}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="monthFilter" className="text-sm font-medium text-gray-700 mr-3">Filter by Month:</label>
+              <select
+                id="monthFilter"
+                value={selectedMonthFilter}
+                onChange={(e) => setSelectedMonthFilter(e.target.value)}
+                className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Months</option>
+                {(() => {
+                  const months = new Set<string>();
+                  journeys?.forEach((journey: any) => {
+                    if (journey.startTime) {
+                      const date = new Date(journey.startTime);
+                      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                      months.add(monthKey);
+                    }
+                  });
+                  return Array.from(months).sort().reverse().map((monthKey) => {
+                    const [year, month] = monthKey.split('-');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1, 1).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long' 
+                    });
+                    return (
+                      <option key={monthKey} value={monthKey}>{monthName}</option>
+                    );
+                  });
+                })()}
+              </select>
+            </div>
           </div>
         </div>
         <div className="flex items-center space-x-3">
