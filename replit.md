@@ -134,6 +134,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **June 30, 2025**: Fixed Excel export to match journey history date filtering - now exports all journeys within selected month/date range
 - **June 30, 2025**: Removed recalculate financials feature - cleaned up all related components and API endpoints
 - **June 30, 2025**: Month filter functionality added to Financial Management tab for better time-based expense analysis
 - **June 30, 2025**: Removed repair functionality - cleaned up expense repair components and API endpoints

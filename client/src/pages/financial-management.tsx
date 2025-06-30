@@ -197,45 +197,69 @@ export default function FinancialManagement() {
 
   const handleExportToExcel = async (startDate?: string, endDate?: string) => {
     try {
-      const dateRange = startDate && endDate ? ` (${startDate} to ${endDate})` : "";
+      let dateRange = "";
+      if (startDate && endDate) {
+        dateRange = ` (${startDate} to ${endDate})`;
+      } else if (selectedMonthFilter !== "all") {
+        dateRange = ` (${selectedMonthFilter})`;
+      }
+      
       toast({
         title: "Exporting Data",
-        description: `Preparing separate Excel files for each vehicle${dateRange}...`,
+        description: `Preparing Excel report with current filters${dateRange}...`,
       });
 
-      // Calculate filtering for export
-      const journeysForExport = journeys?.filter((journey: any) => 
-        selectedLicensePlateFilter === "all" || journey.licensePlate === selectedLicensePlateFilter
-      ) || [];
+      // Use the same filtering logic as the displayed data
+      let filteredJourneys = journeys || [];
+      let filteredExpenses = combinedExpenses || [];
 
-      const expensesForExport = combinedExpenses?.filter((expense: any) => 
-        journeysForExport.some((journey: any) => journey.id === expense.journeyId)
-      ) || [];
+      // Apply license plate filter
+      if (selectedLicensePlateFilter !== "all") {
+        filteredJourneys = filteredJourneys.filter((journey: any) => 
+          journey.licensePlate === selectedLicensePlateFilter
+        );
+      }
 
-      // Use current filtered data for export
-      const journeysData = journeysForExport;
-      let expensesData = expensesForExport;
+      // Apply month filter (same as displayed data)
+      if (selectedMonthFilter !== "all") {
+        filteredJourneys = filteredJourneys.filter((journey: any) => {
+          const journeyDate = new Date(journey.startTime);
+          const journeyMonth = journeyDate.toISOString().slice(0, 7); // YYYY-MM format
+          return journeyMonth === selectedMonthFilter;
+        });
+
+        filteredExpenses = filteredExpenses.filter((expense: any) => {
+          const expenseDate = new Date(expense.timestamp);
+          const expenseMonth = expenseDate.toISOString().slice(0, 7); // YYYY-MM format
+          return expenseMonth === selectedMonthFilter;
+        });
+      }
+
+      // Filter expenses to only include those from the filtered journeys
+      filteredExpenses = filteredExpenses.filter((expense: any) => 
+        filteredJourneys.some((journey: any) => journey.id === expense.journeyId)
+      );
       
       // Filter toll expenses for non-admin users
       if (user?.role !== 'admin') {
-        expensesData = expensesData.filter((expense: any) => expense.category !== 'toll');
+        filteredExpenses = filteredExpenses.filter((expense: any) => expense.category !== 'toll');
       }
 
-      // Filter data by date range if provided
-      let finalJourneys = journeysData;
-      let finalExpenses = expensesData;
+      // Apply custom date range filter if provided (overrides month filter)
+      let finalJourneys = filteredJourneys;
+      let finalExpenses = filteredExpenses;
       
       if (startDate || endDate) {
         const start = startDate ? new Date(startDate) : new Date(0);
         const end = endDate ? new Date(endDate) : new Date();
         end.setHours(23, 59, 59, 999); // Include the entire end date
         
-        finalJourneys = journeysData.filter((journey: any) => {
+        finalJourneys = filteredJourneys.filter((journey: any) => {
           const journeyDate = new Date(journey.startTime);
           return journeyDate >= start && journeyDate <= end;
         });
         
-        finalExpenses = expensesData.filter((expense: any) => {
+        finalExpenses = filteredExpenses.filter((expense: any) => {
           const expenseDate = new Date(expense.timestamp);
           return expenseDate >= start && expenseDate <= end;
         });
