@@ -134,6 +134,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **June 30, 2025**: Removed recalculate financials feature - cleaned up all related components and API endpoints
 - **June 30, 2025**: Month filter functionality added to Financial Management tab for better time-based expense analysis
 - **June 30, 2025**: Removed repair functionality - cleaned up expense repair components and API endpoints
 - **June 25, 2025**: License plate filter added to journey history with month filter defaulting to current date

@@ -179,31 +179,7 @@ export default function FinancialManagement() {
     },
   });
 
-  const recalculateFinancialsMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/admin/recalculate-financials");
-    },
-    onSuccess: (data: any) => {
-      toast({
-        title: "Financials Recalculated",
-        description: `Updated ${data.summary?.totalUpdated || 0} journeys with corrected revenue, expenses, and net profit calculations.`,
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/expenses/all"] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Recalculation Failed",
-        description: error.message || "Failed to recalculate financial totals",
-        variant: "destructive",
-      });
-    },
-  });
 
-  const handleRecalculateFinancials = () => {
-    recalculateFinancialsMutation.mutate();
-  };
 
 
 
@@ -919,20 +895,6 @@ export default function FinancialManagement() {
           </div>
         </div>
         <div className="flex items-center space-x-3">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRecalculateFinancials}
-            className="text-green-600 border-green-600 hover:bg-green-50"
-            disabled={recalculateFinancialsMutation.isPending}
-          >
-            {recalculateFinancialsMutation.isPending ? (
-              <RotateCcw className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <RotateCcw className="w-4 h-4 mr-2" />
-            )}
-            Recalculate Financials
-          </Button>
           <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
             <Download className="w-4 h-4 mr-2" />
             Export to Excel
