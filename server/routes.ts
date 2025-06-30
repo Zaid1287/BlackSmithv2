@@ -11,51 +11,7 @@ import path from "path";
 
 const JWT_SECRET = process.env.JWT_SECRET || "blacksmith-traders-secret";
 
-// Helper function to generate realistic expense breakdown
-function generateRealisticExpenses(totalAmount: number, journeyId: number) {
-  const expenses = [];
-  const categories = [
-    { name: 'fuel', percentage: 0.45, description: 'Fuel expenses' },
-    { name: 'food', percentage: 0.15, description: 'Food and accommodation' },
-    { name: 'loading', percentage: 0.25, description: 'Loading charges' },
-    { name: 'maintenance', percentage: 0.10, description: 'Vehicle maintenance' },
-    { name: 'miscellaneous', percentage: 0.05, description: 'Miscellaneous expenses' }
-  ];
 
-  let remainingAmount = totalAmount;
-  
-  for (let i = 0; i < categories.length; i++) {
-    const category = categories[i];
-    let amount;
-    
-    if (i === categories.length - 1) {
-      // Last category gets remaining amount
-      amount = remainingAmount;
-    } else {
-      // Calculate amount with some variation (±20%)
-      const baseAmount = totalAmount * category.percentage;
-      const variation = baseAmount * 0.2 * (Math.random() - 0.5);
-      amount = Math.round(baseAmount + variation);
-      
-      // Ensure we don't exceed remaining amount
-      amount = Math.min(amount, remainingAmount - 100); // Leave at least 100 for last category
-    }
-    
-    if (amount > 0) {
-      expenses.push({
-        journeyId,
-        amount: amount.toString(),
-        description: category.description,
-        category: category.name,
-        timestamp: new Date(),
-        isCompanySecret: false
-      });
-      remainingAmount -= amount;
-    }
-  }
-  
-  return expenses;
-}
 
 // Middleware to verify JWT token
 const authenticateToken = async (req: any, res: any, next: any) => {
@@ -487,67 +443,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Repair endpoint to fix journeys with missing expense records
-  app.post("/api/admin/repair-expense-discrepancies", authenticateToken, requireAdmin, async (req, res) => {
-    try {
-      console.log("Starting expense discrepancy repair...");
-      
-      // Find journeys with missing or mismatched expense records
-      const problematicJourneys = await storage.getAllJourneys();
-      const repairResults = [];
-      
-      for (const journey of problematicJourneys) {
-        if (!journey.totalExpenses || parseFloat(journey.totalExpenses.toString()) <= 0) {
-          continue; // Skip journeys with no expenses
-        }
-        
-        // Check existing expenses for this journey
-        const existingExpenses = await storage.getExpensesByJourney(journey.id);
-        const existingTotal = existingExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-        const expectedTotal = parseFloat(journey.totalExpenses.toString());
-        
-        // If there's a discrepancy, create realistic expense breakdown
-        if (existingExpenses.length === 0 || Math.abs(existingTotal - expectedTotal) > 1) {
-          console.log(`Repairing journey ${journey.id} - Expected: ${expectedTotal}, Found: ${existingTotal}`);
-          
-          // Delete existing expenses if any
-          if (existingExpenses.length > 0) {
-            await db.delete(expenses).where(eq(expenses.journeyId, journey.id));
-          }
-          
-          // Create realistic expense breakdown
-          const expenseBreakdown = generateRealisticExpenses(expectedTotal, journey.id);
-          
-          for (const expense of expenseBreakdown) {
-            await storage.createExpense(expense);
-          }
-          
-          repairResults.push({
-            journeyId: journey.id,
-            destination: journey.destination,
-            licensePlate: journey.licensePlate,
-            expectedTotal: expectedTotal,
-            previousTotal: existingTotal,
-            newExpenseCount: expenseBreakdown.length,
-            status: 'repaired'
-          });
-        }
-      }
-      
-      console.log(`Repair completed. Fixed ${repairResults.length} journeys.`);
-      res.json({
-        message: `Successfully repaired ${repairResults.length} journeys`,
-        repairedJourneys: repairResults,
-        summary: {
-          totalRepaired: repairResults.length,
-          status: 'completed'
-        }
-      });
-    } catch (error) {
-      console.error("Repair error:", error);
-      res.status(500).json({ message: "Failed to repair expense discrepancies" });
-    }
-  });
+
 
   // Salary management routes
   app.get("/api/salaries", authenticateToken, async (req, res) => {

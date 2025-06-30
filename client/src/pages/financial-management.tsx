@@ -179,31 +179,7 @@ export default function FinancialManagement() {
     },
   });
 
-  const repairExpenseDiscrepanciesMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/admin/repair-expense-discrepancies");
-    },
-    onSuccess: (data: any) => {
-      toast({
-        title: "Expense Repair Complete",
-        description: `Fixed ${data.summary?.totalRepaired || 0} journeys with missing expense records.`,
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/expenses/all"] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Repair Failed",
-        description: error.message || "Failed to repair expense discrepancies",
-        variant: "destructive",
-      });
-    },
-  });
 
-  const handleRepairExpenseDiscrepancies = () => {
-    repairExpenseDiscrepanciesMutation.mutate();
-  };
 
   const handleResetConfirm = () => {
     if (confirmationText === "RESET FINANCIAL DATA") {
@@ -917,15 +893,6 @@ export default function FinancialManagement() {
           </div>
         </div>
         <div className="flex items-center space-x-3">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRepairExpenseDiscrepancies}
-            className="text-blue-600 border-blue-600 hover:bg-blue-50"
-          >
-            <Shield className="w-4 h-4 mr-2" />
-            Fix Missing Expenses
-          </Button>
           <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
             <Download className="w-4 h-4 mr-2" />
             Export to Excel
