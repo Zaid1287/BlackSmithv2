@@ -579,6 +579,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recalculate financial totals for all journeys
+  app.post("/api/admin/recalculate-financials", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      console.log("Starting financial recalculation...");
+      
+      const allJourneys = await storage.getAllJourneys();
+      const recalculationResults = [];
+      
+      for (const journey of allJourneys) {
+        // Get all expenses for this journey
+        const journeyExpenses = await storage.getExpensesByJourney(journey.id);
+        
+        // Calculate total expenses
+        const calculatedExpenseTotal = journeyExpenses.reduce((sum, expense) => {
+          return sum + parseFloat(expense.amount);
+        }, 0);
+        
+        // Get current totals from journey record
+        const currentExpenseTotal = parseFloat(journey.totalExpenses?.toString() || '0');
+        const revenue = parseFloat(journey.pouch?.toString() || '0'); // pouch represents revenue
+        
+        // Calculate net profit
+        const netProfit = revenue - calculatedExpenseTotal;
+        
+        // Update journey if there's a discrepancy or missing net profit
+        if (Math.abs(currentExpenseTotal - calculatedExpenseTotal) > 0.01 || 
+            !journey.netProfit || 
+            Math.abs(parseFloat(journey.netProfit?.toString() || '0') - netProfit) > 0.01) {
+          
+          await db.update(journeys)
+            .set({
+              totalExpenses: calculatedExpenseTotal.toFixed(2),
+              netProfit: netProfit.toFixed(2)
+            })
+            .where(eq(journeys.id, journey.id));
+          
+          recalculationResults.push({
+            journeyId: journey.id,
+            destination: journey.destination,
+            licensePlate: journey.licensePlate,
+            revenue: revenue,
+            oldExpenseTotal: currentExpenseTotal,
+            newExpenseTotal: calculatedExpenseTotal,
+            netProfit: netProfit,
+            status: 'updated'
+          });
+        }
+      }
+      
+      console.log(`Recalculation completed. Updated ${recalculationResults.length} journeys.`);
+      res.json({
+        message: `Successfully recalculated financials for ${recalculationResults.length} journeys`,
+        updatedJourneys: recalculationResults,
+        summary: {
+          totalUpdated: recalculationResults.length,
+          totalJourneys: allJourneys.length,
+          status: 'completed'
+        }
+      });
+    } catch (error) {
+      console.error("Recalculation error:", error);
+      res.status(500).json({ message: "Failed to recalculate financial totals" });
+    }
+  });
+
   // EMI management routes (Admin only)
   app.get("/api/emi", authenticateToken, requireAdmin, async (req, res) => {
     try {
