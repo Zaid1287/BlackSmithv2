@@ -1,10 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { db } from "./db";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { insertUserSchema, insertVehicleSchema, insertJourneySchema, insertExpenseSchema, insertSalaryPaymentSchema, insertEmiPaymentSchema } from "@shared/schema";
+import { insertUserSchema, insertVehicleSchema, insertJourneySchema, insertExpenseSchema, insertSalaryPaymentSchema, insertEmiPaymentSchema, journeys, expenses } from "@shared/schema";
 import { z } from "zod";
+import { eq, sql } from "drizzle-orm";
 import path from "path";
 
 const JWT_SECRET = process.env.JWT_SECRET || "blacksmith-traders-secret";
@@ -436,6 +438,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to debug expenses" });
+    }
+  });
+
+  // Diagnostic endpoint to find journeys with missing expense records
+  app.get("/api/admin/diagnose-expense-discrepancy", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const result = await db
+        .select({
+          journeyId: journeys.id,
+          licensePlate: journeys.licensePlate,
+          destination: journeys.destination,
+          totalExpenses: journeys.totalExpenses,
+          expenseCount: sql<number>`COUNT(${expenses.id})`,
+          calculatedTotal: sql<number>`COALESCE(SUM(CAST(${expenses.amount} AS DECIMAL)), 0)`
+        })
+        .from(journeys)
+        .leftJoin(expenses, eq(journeys.id, expenses.journeyId))
+        .groupBy(journeys.id, journeys.licensePlate, journeys.destination, journeys.totalExpenses)
+        .having(sql`(${journeys.totalExpenses} > 0 AND COUNT(${expenses.id}) = 0) OR 
+                   (${journeys.totalExpenses} != COALESCE(SUM(CAST(${expenses.amount} AS DECIMAL)), 0))`);
+      
+      res.json({
+        discrepancies: result,
+        summary: {
+          totalDiscrepancies: result.length,
+          message: result.length > 0 ? 
+            "Found journeys with expense discrepancies" : 
+            "No expense discrepancies found"
+        }
+      });
+    } catch (error) {
+      console.error("Diagnostic error:", error);
+      res.status(500).json({ message: "Failed to diagnose expense discrepancies" });
     }
   });
 
