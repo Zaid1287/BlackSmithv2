@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { TrendingUp, DollarSign, Download, RotateCcw, BarChart3, PieChart, TrendingDown, Shield, ChevronDown, ChevronUp } from "lucide-react";
+import { TrendingUp, DollarSign, Download, RotateCcw, BarChart3, PieChart, TrendingDown, Shield } from "lucide-react";
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { getAuthHeaders } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
@@ -23,7 +23,7 @@ export default function FinancialManagement() {
   const { t } = useLanguage();
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [confirmationText, setConfirmationText] = useState("");
-  const [expandedJourneys, setExpandedJourneys] = useState<Set<number>>(new Set());
+
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [exportStartDate, setExportStartDate] = useState("");
   const [exportEndDate, setExportEndDate] = useState("");
@@ -1118,17 +1118,6 @@ export default function FinancialManagement() {
                         return !excludedCategories.includes(exp.category);
                       })
                       .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
-                    const isExpanded = expandedJourneys.has(journey.id);
-                    
-                    const toggleExpanded = () => {
-                      const newExpanded = new Set(expandedJourneys);
-                      if (isExpanded) {
-                        newExpanded.delete(journey.id);
-                      } else {
-                        newExpanded.add(journey.id);
-                      }
-                      setExpandedJourneys(newExpanded);
-                    };
                     
                     return (
                       <div key={journey.id} className="border rounded-lg p-4 bg-gray-50">
@@ -1148,64 +1137,10 @@ export default function FinancialManagement() {
                                 journeyId={journey.id} 
                                 journeyData={journey} 
                               />
-                              {journeyExpenses.length > 0 && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={toggleExpanded}
-                                  className="h-6 px-2 text-xs"
-                                >
-                                  {isExpanded ? (
-                                    <>
-                                      <ChevronUp className="w-3 h-3 mr-1" />
-                                      Less
-                                    </>
-                                  ) : (
-                                    <>
-                                      <ChevronDown className="w-3 h-3 mr-1" />
-                                      More
-                                    </>
-                                  )}
-                                </Button>
-                              )}
                             </div>
                           </div>
                         </div>
-                        
-                        {journeyExpenses.length > 0 && isExpanded && (
-                          <div className="space-y-2 max-h-48 overflow-y-auto">
-                            {journeyExpenses
-                              .filter((expense: any) => {
-                                const excludedCategories = ['other', 'hyd_inward', 'top_up'];
-                                if (user?.role !== 'admin') {
-                                  excludedCategories.push('toll');
-                                }
-                                return !excludedCategories.includes(expense.category);
-                              })
-                              .map((expense: any) => (
-                              <div key={expense.id} className="flex items-center justify-between text-sm bg-white p-2 rounded">
-                                <div>
-                                  <span className="font-medium">
-                                    {getTranslatedCategory(expense.category)}
-                                  </span>
-                                  {expense.description && (
-                                    <p className="text-xs text-gray-500 mt-1">{expense.description}</p>
-                                  )}
-                                </div>
-                                <div className="text-right">
-                                  <span className="font-semibold">₹{parseFloat(expense.amount).toLocaleString()}</span>
-                                  <p className="text-xs text-gray-500">{new Date(expense.timestamp).toLocaleDateString()}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        
-                        {journeyExpenses.length === 0 && (
-                          <div className="text-center py-2">
-                            <p className="text-xs text-gray-400">No expenses recorded for this journey</p>
-                          </div>
-                        )}
+
                       </div>
                     );
                   })}
