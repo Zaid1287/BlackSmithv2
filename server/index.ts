@@ -2,8 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
-// Memory optimization for 10 concurrent users
-process.env.NODE_OPTIONS = '--max-old-space-size=256';
+// Memory optimization for production deployment
+process.env.NODE_OPTIONS = '--max-old-space-size=512';
 
 const app = express();
 
@@ -11,7 +11,7 @@ const app = express();
 app.use((req, res, next) => {
   const used = process.memoryUsage();
   const memMB = Math.round(used.heapUsed / 1024 / 1024);
-  if (memMB > 200) {
+  if (memMB > 400) {
     console.warn(`High memory usage: ${memMB}MB`);
   }
   next();

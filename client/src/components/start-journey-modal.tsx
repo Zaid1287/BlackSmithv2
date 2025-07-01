@@ -147,26 +147,63 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
     createJourneyMutation.mutate(data);
   };
 
+  const compressImage = (file: File, maxWidth: number = 800, quality: number = 0.7): Promise<string> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calculate new dimensions
+        const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressedDataUrl = canvas.toBlob((blob) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob!);
+        }, 'image/jpeg', quality);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const handlePhotoCapture = () => {
-    // Create a file input element
+    if (photos.length >= 3) {
+      toast({
+        title: "Photo limit reached",
+        description: "Maximum 3 photos allowed per journey",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.capture = 'environment'; // Prefer camera on mobile
+    input.capture = 'environment';
     
-    input.onchange = (event) => {
+    input.onchange = async (event) => {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const result = e.target?.result as string;
-          setPhotos(prev => [...prev, result]);
+        try {
+          const compressedImage = await compressImage(file, 800, 0.6);
+          setPhotos(prev => [...prev, compressedImage]);
           toast({
             title: "Photo added",
-            description: "Photo uploaded successfully"
+            description: "Photo compressed and uploaded successfully"
           });
-        };
-        reader.readAsDataURL(file);
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to process photo",
+            variant: "destructive"
+          });
+        }
       }
     };
     
