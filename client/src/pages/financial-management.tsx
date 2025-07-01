@@ -1106,8 +1106,8 @@ export default function FinancialManagement() {
                 
                 <div className="h-96 overflow-y-auto space-y-4 pr-2">
                   {filteredJourneys?.map((journey: any) => {
-                    // Get expenses for this journey from allExpenses
-                    const journeyExpenses = allExpenses?.filter((expense: any) => expense.journeyId === journey.id) || [];
+                    // Get expenses for this journey from filteredExpenses (same as journey breakdown modal)
+                    const journeyExpenses = filteredExpenses?.filter((expense: any) => expense.journeyId === journey.id) || [];
                     const totalJourneyExpenses = journeyExpenses
                       .filter((exp: any) => {
                         const excludedCategories = ['hyd_inward', 'top_up'];
