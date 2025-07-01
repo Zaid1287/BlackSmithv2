@@ -14,6 +14,7 @@ import { apiRequest } from "@/lib/queryClient";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useLanguage } from "@/contexts/LanguageContext";
+import JourneyExpenseBreakdown from "@/components/journey-expense-breakdown";
 
 export default function FinancialManagement() {
   const { user } = useAuth();
@@ -1142,26 +1143,32 @@ export default function FinancialManagement() {
                               ₹{totalJourneyExpenses.toLocaleString()}
                             </p>
                             <p className="text-xs text-gray-500">{journeyExpenses.length} expenses</p>
-                            {journeyExpenses.length > 0 && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={toggleExpanded}
-                                className="mt-1 h-6 px-2 text-xs"
-                              >
-                                {isExpanded ? (
-                                  <>
-                                    <ChevronUp className="w-3 h-3 mr-1" />
-                                    Show Less
-                                  </>
-                                ) : (
-                                  <>
-                                    <ChevronDown className="w-3 h-3 mr-1" />
-                                    View More
-                                  </>
-                                )}
-                              </Button>
-                            )}
+                            <div className="flex items-center gap-1 mt-1">
+                              <JourneyExpenseBreakdown 
+                                journeyId={journey.id} 
+                                journeyData={journey} 
+                              />
+                              {journeyExpenses.length > 0 && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={toggleExpanded}
+                                  className="h-6 px-2 text-xs"
+                                >
+                                  {isExpanded ? (
+                                    <>
+                                      <ChevronUp className="w-3 h-3 mr-1" />
+                                      Less
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ChevronDown className="w-3 h-3 mr-1" />
+                                      More
+                                    </>
+                                  )}
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                         
