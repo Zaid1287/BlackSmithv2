@@ -1,0 +1,729 @@
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+6:35:02 AM [express] serving on port 5000
+6:35:11 AM [express] POST /api/init 200 in 662ms :: {"message":"Initialization complete"}
+
+6:35:12 AM [express] GET /api/auth/me 304 in 1204ms :: {"user":{"id":2,"username":"driver","password…
+6:35:12 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":2,"username":"driver","password":"…
+6:35:12 AM [express] GET /api/auth/me 304 in 6ms :: {"user":{"id":2,"username":"driver","password":"…
+6:35:12 AM [express] GET /api/auth/me 304 in 6ms :: {"user":{"id":2,"username":"driver","password":"…
+6:35:12 AM [express] GET /api/journeys/active 304 in 18ms :: [{"id":74,"driverId":10,"vehicleId":1,"…
+6:35:12 AM [express] GET /api/vehicles 304 in 12ms :: [{"id":6,"licensePlate":"TG16T2760","model":"E…
+6:35:22 AM [express] GET /api/journeys/active 304 in 8ms :: [{"id":74,"driverId":10,"vehicleId":1,"l…
+6:35:32 AM [express] GET /api/journeys/active 304 in 34ms :: [{"id":74,"driverId":10,"vehicleId":1,"…
+Journey creation error: error: column "revenue" of relation "journeys" does not exist
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.createJourney (file:///opt/render/project/src/dist/index.js:276:26)
+    at async file:///opt/render/project/src/dist/index.js:909:23 {
+  length: 129,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '214',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1066',
+  routine: 'checkInsertTargets'
+}
+6:35:40 AM [express] POST /api/journeys 500 in 66ms :: {"message":"Failed to create journey","error"…
+Journey creation error: error: column "revenue" of relation "journeys" does not exist
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.createJourney (file:///opt/render/project/src/dist/index.js:276:26)
+    at async file:///opt/render/project/src/dist/index.js:909:23 {
+  length: 129,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '214',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1066',
+  routine: 'checkInsertTargets'
+}
+6:35:41 AM [express] POST /api/journeys 500 in 23ms :: {"message":"Failed to create journey","error"…
+Journey creation error: error: column "revenue" of relation "journeys" does not exist
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.createJourney (file:///opt/render/project/src/dist/index.js:276:26)
+    at async file:///opt/render/project/src/dist/index.js:909:23 {
+  length: 129,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '214',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1066',
+  routine: 'checkInsertTargets'
+}
+6:35:41 AM [express] POST /api/journeys 500 in 29ms :: {"message":"Failed to create journey","error"…
+Journey creation error: error: column "revenue" of relation "journeys" does not exist
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.createJourney (file:///opt/render/project/src/dist/index.js:276:26)
+    at async file:///opt/render/project/src/dist/index.js:909:23 {
+  length: 129,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '214',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1066',
+  routine: 'checkInsertTargets'
+}
+6:35:41 AM [express] POST /api/journeys 500 in 26ms :: {"message":"Failed to create journey","error"…
+6:35:42 AM [express] GET /api/journeys/active 304 in 24ms :: [{"id":74,"driverId":10,"vehicleId":1,"…
+6:37:11 AM [express] GET /api/journeys/active 304 in 33ms :: [{"id":74,"driverId":10,"vehicleId":1,"…
+6:37:23 AM [express] GET /api/auth/me 304 in 34ms :: {"user":{"id":2,"username":"driver","password":…
+6:37:23 AM [express] POST /api/init 200 in 36ms :: {"message":"Initialization complete"}
+6:37:23 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":2,"username":"driver","password":"…
+6:37:23 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":2,"username":"driver","password":"…
+6:37:23 AM [express] GET /api/journeys/active 304 in 4ms :: [{"id":74,"driverId":10,"vehicleId":1,"l…
+6:37:23 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":2,"username":"driver","password":"…
+6:37:23 AM [express] GET /api/vehicles 304 in 6ms :: [{"id":6,"licensePlate":"TG16T2760","model":"EI…
+6:37:24 AM [express] POST /api/init 200 in 3ms :: {"message":"Initialization complete"}
+6:37:27 AM [express] POST /api/auth/login 200 in 291ms :: {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX…
+6:37:27 AM [express] GET /api/auth/me 200 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:27 AM [express] GET /api/auth/me 304 in 5ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:27 AM [express] GET /api/emi 304 in 31ms :: []
+6:37:27 AM [express] GET /api/dashboard/financial 304 in 49ms :: {"revenue":739376,"expenses":611209…
+6:37:27 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:27 AM [express] GET /api/vehicles 304 in 5ms :: [{"id":6,"licensePlate":"TG16T2760","model":"EI…
+6:37:27 AM [express] GET /api/expenses/all 304 in 35ms :: [{"id":599,"journeyId":73,"category":"load…
+Fetching journeys for user: admin (role: admin)
+Fetching journeys for user: admin (role: admin)
+Admin query returned 39 journeys
+6:37:27 AM [express] GET /api/journeys 200 in 11ms :: [{"id":74,"driverId":10,"vehicleId":1,"license…
+Admin query returned 39 journeys
+6:37:27 AM [express] GET /api/journeys 200 in 100ms :: [{"id":74,"driverId":10,"vehicleId":1,"licens…
+6:37:27 AM [express] GET /api/journeys/74/expenses 304 in 97ms :: [{"id":588,"journeyId":74,"categor…
+6:37:27 AM [express] GET /api/journeys/73/expenses 304 in 6ms :: [{"id":599,"journeyId":73,"category…
+6:37:27 AM [express] GET /api/journeys/72/expenses 304 in 5ms :: [{"id":554,"journeyId":72,"category…
+6:37:27 AM [express] GET /api/journeys/71/expenses 304 in 6ms :: [{"id":576,"journeyId":71,"category…
+6:37:27 AM [express] GET /api/journeys/70/expenses 304 in 5ms :: [{"id":568,"journeyId":70,"category…
+6:37:28 AM [express] GET /api/journeys/69/expenses 304 in 6ms :: [{"id":566,"journeyId":69,"category…
+6:37:28 AM [express] GET /api/journeys/68/expenses 304 in 5ms :: [{"id":506,"journeyId":68,"category…
+6:37:28 AM [express] GET /api/journeys/67/expenses 304 in 5ms :: [{"id":536,"journeyId":67,"category…
+6:37:28 AM [express] GET /api/journeys/65/expenses 304 in 6ms :: [{"id":577,"journeyId":65,"category…
+6:37:28 AM [express] GET /api/journeys/64/expenses 304 in 5ms :: [{"id":545,"journeyId":64,"category…
+6:37:28 AM [express] GET /api/journeys/63/expenses 304 in 6ms :: [{"id":582,"journeyId":63,"category…
+6:37:28 AM [express] GET /api/journeys/61/expenses 304 in 5ms :: [{"id":487,"journeyId":61,"category…
+6:37:28 AM [express] GET /api/journeys/60/expenses 304 in 6ms :: [{"id":519,"journeyId":60,"category…
+6:37:28 AM [express] GET /api/journeys/59/expenses 304 in 10ms :: [{"id":471,"journeyId":59,"categor…
+6:37:28 AM [express] GET /api/journeys/58/expenses 304 in 6ms :: [{"id":463,"journeyId":58,"category…
+6:37:28 AM [express] GET /api/journeys/57/expenses 304 in 6ms :: []
+6:37:29 AM [express] GET /api/journeys/56/expenses 304 in 44ms :: [{"id":449,"journeyId":56,"categor…
+6:37:29 AM [express] GET /api/journeys/55/expenses 304 in 6ms :: [{"id":443,"journeyId":55,"category…
+6:37:29 AM [express] GET /api/journeys/54/expenses 304 in 5ms :: [{"id":435,"journeyId":54,"category…
+6:37:29 AM [express] GET /api/journeys/53/expenses 304 in 7ms :: [{"id":426,"journeyId":53,"category…
+6:37:29 AM [express] GET /api/journeys/52/expenses 304 in 6ms :: [{"id":454,"journeyId":52,"category…
+6:37:29 AM [express] GET /api/journeys/51/expenses 304 in 6ms :: [{"id":404,"journeyId":51,"category…
+6:37:29 AM [express] GET /api/journeys/50/expenses 304 in 6ms :: [{"id":406,"journeyId":50,"category…
+6:37:29 AM [express] GET /api/dashboard/stats 304 in 13ms :: {"vehicles":{"total":"6","available":"4…
+6:37:29 AM [express] GET /api/journeys/49/expenses 304 in 5ms :: [{"id":475,"journeyId":49,"category…
+6:37:29 AM [express] GET /api/journeys/48/expenses 304 in 5ms :: [{"id":390,"journeyId":48,"category…
+6:37:29 AM [express] GET /api/journeys/47/expenses 304 in 5ms :: [{"id":383,"journeyId":47,"category…
+6:37:29 AM [express] GET /api/journeys/46/expenses 304 in 5ms :: [{"id":450,"journeyId":46,"category…
+6:37:30 AM [express] GET /api/journeys/45/expenses 304 in 6ms :: [{"id":374,"journeyId":45,"category…
+6:37:30 AM [express] GET /api/journeys/44/expenses 304 in 6ms :: [{"id":356,"journeyId":44,"category…
+6:37:30 AM [express] GET /api/journeys/43/expenses 304 in 6ms :: [{"id":345,"journeyId":43,"category…
+6:37:30 AM [express] GET /api/journeys/42/expenses 304 in 7ms :: [{"id":485,"journeyId":42,"category…
+6:37:30 AM [express] GET /api/journeys/41/expenses 304 in 6ms :: [{"id":333,"journeyId":41,"category…
+6:37:30 AM [express] GET /api/journeys/40/expenses 304 in 6ms :: [{"id":326,"journeyId":40,"category…
+6:37:30 AM [express] GET /api/journeys/39/expenses 304 in 6ms :: [{"id":497,"journeyId":39,"category…
+6:37:30 AM [express] GET /api/journeys/38/expenses 304 in 6ms :: [{"id":294,"journeyId":38,"category…
+6:37:30 AM [express] GET /api/journeys/37/expenses 304 in 6ms :: [{"id":580,"journeyId":37,"category…
+6:37:30 AM [express] GET /api/journeys/36/expenses 304 in 5ms :: [{"id":284,"journeyId":36,"category…
+6:37:30 AM [express] GET /api/journeys/35/expenses 304 in 6ms :: [{"id":307,"journeyId":35,"category…
+6:37:30 AM [express] GET /api/journeys/34/expenses 304 in 5ms :: [{"id":268,"journeyId":34,"category…
+6:37:33 AM [express] GET /api/users 304 in 6ms :: [{"id":11,"username":"Farju","password":"$2b$10$Yu…
+6:37:33 AM [express] GET /api/salaries 200 in 4ms :: []
+6:37:35 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:36 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:39 AM [express] GET /api/auth/me 304 in 5ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:39 AM [express] GET /api/auth/me 304 in 5ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 69ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 70ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 5ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 97ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 100ms :: {"user":{"id":1,"username":"admin","password":…
+6:37:40 AM [express] GET /api/auth/me 304 in 10ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 94ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 97ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 9ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 6ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 7ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 7ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 95ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 93ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 7ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 93ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 94ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 5ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 481ms :: {"user":{"id":1,"username":"admin","password":…
+6:37:40 AM [express] GET /api/auth/me 304 in 5ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 92ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 569ms :: {"user":{"id":1,"username":"admin","password":…
+6:37:40 AM [express] GET /api/auth/me 304 in 5ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 501ms :: {"user":{"id":1,"username":"admin","password":…
+6:37:40 AM [express] GET /api/auth/me 304 in 94ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 94ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 92ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:40 AM [express] GET /api/auth/me 304 in 5ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:40 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:44 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 5ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 5ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 5ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 6ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 76ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 74ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 74ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 10ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 87ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 95ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 93ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 93ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 94ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 8ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 8ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 92ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 3ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 88ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 89ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 99ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:47 AM [express] GET /api/auth/me 304 in 94ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 95ms :: {"user":{"id":1,"username":"admin","password":"…
+6:37:47 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":1,"username":"admin","password":"$…
+6:37:48 AM [express] GET /api/auth/me 304 in 98ms :: {"user":{"id":1,"username":"admin","password":"…
+Fetching journeys for user: admin (role: admin)
+Admin query returned 39 journeys
+6:37:52 AM [express] GET /api/journeys 304 in 7ms :: [{"id":74,"driverId":10,"vehicleId":1,"licenseP…
+6:37:52 AM [express] GET /api/expenses/all 304 in 6ms :: [{"id":599,"journeyId":73,"category":"loadi…
+6:37:52 AM [express] GET /api/dashboard/stats 304 in 48ms :: {"vehicles":{"total":"6","available":"4…
+6:37:52 AM [express] GET /api/dashboard/financial 304 in 57ms :: {"revenue":739376,"expenses":611209…
+Fetching journeys for user: admin (role: admin)
+Admin query returned 39 journeys
+6:43:13 AM [express] GET /api/journeys 304 in 31ms :: [{"id":74,"driverId":10,"vehicleId":1,"license…
+6:43:13 AM [express] GET /api/dashboard/stats 304 in 41ms :: {"vehicles":{"total":"6","available":"4…
+6:43:13 AM [express] GET /api/dashboard/financial 304 in 75ms :: {"revenue":739376,"expenses":611209…
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+Error: Connection terminated unexpectedly
+    at Connection.<anonymous> (/opt/render/project/src/node_modules/pg/lib/client.js:136:73)
+    at Object.onceWrapper (node:events:632:28)
+    at Connection.emit (node:events:518:28)
+    at Socket.<anonymous> (/opt/render/project/src/node_modules/pg/lib/connection.js:62:12)
+    at Socket.emit (node:events:530:35)
+    at TCP.<anonymous> (node:net:351:12)
+Emitted 'error' event on BoundPool instance at:
+    at Client.idleListener (/opt/render/project/src/node_modules/pg-pool/index.js:62:10)
+    at Client.emit (node:events:518:28)
+    at Client._handleErrorEvent (/opt/render/project/src/node_modules/pg/lib/client.js:350:10)
+    at Connection.<anonymous> (/opt/render/project/src/node_modules/pg/lib/client.js:154:16)
+    at Object.onceWrapper (node:events:632:28)
+    [... lines matching original stack trace ...]
+    at TCP.<anonymous> (node:net:351:12) {
+  client: Client {
+    _events: [Object: null prototype] { error: [Function (anonymous)] },
+    _eventsCount: 1,
+    _maxListeners: undefined,
+    connectionParameters: ConnectionParameters {
+      user: 'neondb_owner',
+      database: 'neondb',
+      port: 5432,
+      host: 'ep-flat-band-a1x01wyl-pooler.ap-southeast-1.aws.neon.tech',
+      binary: false,
+      options: undefined,
+      ssl: {},
+      client_encoding: '',
+      replication: undefined,
+      isDomainSocket: false,
+      application_name: undefined,
+      fallback_application_name: undefined,
+      statement_timeout: false,
+      lock_timeout: false,
+      idle_in_transaction_session_timeout: false,
+      query_timeout: false,
+      connect_timeout: 10,
+      keepalives: 1,
+      keepalives_idle: 0
+    },
+    user: 'neondb_owner',
+    database: 'neondb',
+    port: 5432,
+    host: 'ep-flat-band-a1x01wyl-pooler.ap-southeast-1.aws.neon.tech',
+    replication: undefined,
+    _Promise: [Function: Promise],
+    _types: TypeOverrides {
+      _types: {
+        getTypeParser: [Function: getTypeParser],
+        setTypeParser: [Function: setTypeParser],
+        arrayParser: { create: [Function: create] },
+        builtins: {
+          BOOL: 16,
+          BYTEA: 17,
+          CHAR: 18,
+          INT8: 20,
+          INT2: 21,
+          INT4: 23,
+          REGPROC: 24,
+          TEXT: 25,
+          OID: 26,
+          TID: 27,
+          XID: 28,
+          CID: 29,
+          JSON: 114,
+          XML: 142,
+          PG_NODE_TREE: 194,
+          SMGR: 210,
+          PATH: 602,
+          POLYGON: 604,
+          CIDR: 650,
+          FLOAT4: 700,
+          FLOAT8: 701,
+          ABSTIME: 702,
+          RELTIME: 703,
+          TINTERVAL: 704,
+          CIRCLE: 718,
+          MACADDR8: 774,
+          MONEY: 790,
+          MACADDR: 829,
+          INET: 869,
+          ACLITEM: 1033,
+          BPCHAR: 1042,
+          VARCHAR: 1043,
+          DATE: 1082,
+          TIME: 1083,
+          TIMESTAMP: 1114,
+          TIMESTAMPTZ: 1184,
+          INTERVAL: 1186,
+          TIMETZ: 1266,
+          BIT: 1560,
+          VARBIT: 1562,
+          NUMERIC: 1700,
+          REFCURSOR: 1790,
+          REGPROCEDURE: 2202,
+          REGOPER: 2203,
+          REGOPERATOR: 2204,
+          REGCLASS: 2205,
+          REGTYPE: 2206,
+          UUID: 2950,
+          TXID_SNAPSHOT: 2970,
+          PG_LSN: 3220,
+          PG_NDISTINCT: 3361,
+          PG_DEPENDENCIES: 3402,
+          TSVECTOR: 3614,
+          TSQUERY: 3615,
+          GTSVECTOR: 3642,
+          REGCONFIG: 3734,
+          REGDICTIONARY: 3769,
+          JSONB: 3802,
+          REGNAMESPACE: 4089,
+          REGROLE: 4096
+        }
+      },
+      text: {},
+      binary: {}
+    },
+    _ending: true,
+    _ended: true,
+    _connecting: false,
+    _connected: true,
+    _connectionError: false,
+    _queryable: false,
+    enableChannelBinding: false,
+    connection: Connection {
+      _events: [Object: null prototype] {
+        newListener: [Function (anonymous)],
+        connect: [Function (anonymous)],
+        sslconnect: [Function (anonymous)],
+        authenticationCleartextPassword: [Function: bound _handleAuthCleartextPassword],
+        authenticationMD5Password: [Function: bound _handleAuthMD5Password],
+        authenticationSASL: [Function: bound _handleAuthSASL],
+        authenticationSASLContinue: [Function: bound _handleAuthSASLContinue] AsyncFunction,
+        authenticationSASLFinal: [Function: bound _handleAuthSASLFinal],
+        backendKeyData: [Function: bound _handleBackendKeyData],
+        error: [Function: bound _handleErrorEvent],
+        errorMessage: [Function: bound _handleErrorMessage],
+        readyForQuery: [Function: bound _handleReadyForQuery],
+        notice: [Function: bound _handleNotice],
+        rowDescription: [Function: bound _handleRowDescription],
+        dataRow: [Function: bound _handleDataRow],
+        portalSuspended: [Function: bound _handlePortalSuspended],
+        emptyQuery: [Function: bound _handleEmptyQuery],
+        commandComplete: [Function: bound _handleCommandComplete],
+        parseComplete: [Function: bound _handleParseComplete],
+        copyInResponse: [Function: bound _handleCopyInResponse],
+        copyData: [Function: bound _handleCopyData],
+        notification: [Function: bound _handleNotification],
+        end: [Function: bound onceWrapper] {
+          listener: [Function (anonymous)]
+        }
+      },
+      _eventsCount: 23,
+      _maxListeners: undefined,
+      stream: <ref *1> TLSSocket {
+        _tlsOptions: {
+          allowHalfOpen: undefined,
+          pipe: false,
+          secureContext: SecureContext { context: SecureContext {} },
+          isServer: false,
+          requestCert: true,
+          rejectUnauthorized: true,
+          session: undefined,
+          ALPNProtocols: undefined,
+          requestOCSP: undefined,
+          enableTrace: undefined,
+          pskCallback: undefined,
+          highWaterMark: undefined,
+          onread: undefined,
+          signal: undefined
+        },
+        _secureEstablished: true,
+        _securePending: false,
+        _newSessionPending: false,
+        _controlReleased: true,
+        secureConnecting: false,
+        _SNICallback: null,
+        servername: 'ep-flat-band-a1x01wyl-pooler.ap-southeast-1.aws.neon.tech',
+        alpnProtocol: false,
+        authorized: true,
+        authorizationError: null,
+        encrypted: true,
+        _events: [Object: null prototype] {
+          close: [Function: onSocketCloseDestroySSL],
+          end: [ [Function: onReadableStreamEnd], [Function (anonymous)] ],
+          error: [Function: reportStreamError],
+          newListener: [ [Function: keylogNewListener], [Function: newListener] ],
+          secure: [Function: onConnectSecure],
+          data: [Function (anonymous)]
+        },
+        _eventsCount: 6,
+        connecting: false,
+        _hadError: false,
+        _parent: Socket {
+          connecting: false,
+          _hadError: false,
+          _parent: null,
+          _host: 'ep-flat-band-a1x01wyl-pooler.ap-southeast-1.aws.neon.tech',
+          _closeAfterHandlingError: false,
+          _events: {
+            close: [Array],
+            error: [Array],
+            prefinish: undefined,
+            finish: undefined,
+            drain: undefined,
+            data: undefined,
+            end: [Function: onReadableStreamEnd],
+            readable: undefined,
+            connect: [Function]
+          },
+          _readableState: ReadableState {
+            highWaterMark: 65536,
+            buffer: [],
+            bufferIndex: 0,
+            length: 0,
+            pipes: [],
+            awaitDrainWriters: null,
+            [Symbol(kState)]: 60303732
+          },
+          _writableState: WritableState {
+            highWaterMark: 65536,
+            length: 0,
+            corked: 0,
+            onwrite: [Function: bound onwrite],
+            writelen: 0,
+            bufferedIndex: 0,
+            pendingcb: 0,
+            [Symbol(kState)]: 17564020,
+            [Symbol(kBufferedValue)]: null,
+            [Symbol(kWriteCbValue)]: null
+          },
+          allowHalfOpen: false,
+          _maxListeners: undefined,
+          _eventsCount: 4,
+          _sockname: null,
+          _pendingData: null,
+          _pendingEncoding: '',
+          server: null,
+          _server: null,
+          autoSelectFamilyAttemptedAddresses: [ '13.228.46.236:5432' ],
+          [Symbol(async_id_symbol)]: 6101,
+          [Symbol(kHandle)]: null,
+          [Symbol(lastWriteQueueSize)]: 0,
+          [Symbol(timeout)]: null,
+          [Symbol(kBuffer)]: null,
+          [Symbol(kBufferCb)]: null,
+          [Symbol(kBufferGen)]: null,
+          [Symbol(shapeMode)]: true,
+          [Symbol(kCapture)]: false,
+          [Symbol(kSetNoDelay)]: true,
+          [Symbol(kSetKeepAlive)]: true,
+          [Symbol(kSetKeepAliveInitialDelay)]: 0,
+          [Symbol(kBytesRead)]: 6121,
+          [Symbol(kBytesWritten)]: 2694
+        },
+        _host: null,
+        _closeAfterHandlingError: false,
+        _readableState: ReadableState {
+          highWaterMark: 65536,
+          buffer: [],
+          bufferIndex: 0,
+          length: 0,
+          pipes: [],
+          awaitDrainWriters: null,
+          [Symbol(kState)]: 194512756
+        },
+        _writableState: WritableState {
+          highWaterMark: 65536,
+          length: 0,
+          corked: 0,
+          onwrite: [Function: bound onwrite],
+          writelen: 0,
+          bufferedIndex: 0,
+          pendingcb: 0,
+          [Symbol(kState)]: 1091450228,
+          [Symbol(kBufferedValue)]: null,
+          [Symbol(kWriteCbValue)]: null
+        },
+        allowHalfOpen: false,
+        _maxListeners: undefined,
+        _sockname: null,
+        _pendingData: null,
+        _pendingEncoding: '',
+        server: undefined,
+        _server: null,
+        ssl: null,
+        _requestCert: true,
+        _rejectUnauthorized: true,
+        write: [Function: writeAfterFIN],
+        [Symbol(alpncallback)]: null,
+        [Symbol(res)]: TLSWrap {
+          _parent: TCP {
+            reading: [Getter/Setter],
+            onconnection: null,
+            [Symbol(owner_symbol)]: [Socket],
+            [Symbol(handle_onclose)]: [Function (anonymous)]
+          },
+          _parentWrap: Socket {
+            connecting: false,
+            _hadError: false,
+            _parent: null,
+            _host: 'ep-flat-band-a1x01wyl-pooler.ap-southeast-1.aws.neon.tech',
+            _closeAfterHandlingError: false,
+            _events: [Object],
+            _readableState: [ReadableState],
+            _writableState: [WritableState],
+            allowHalfOpen: false,
+            _maxListeners: undefined,
+            _eventsCount: 4,
+            _sockname: null,
+            _pendingData: null,
+            _pendingEncoding: '',
+            server: null,
+            _server: null,
+            autoSelectFamilyAttemptedAddresses: [Array],
+            [Symbol(async_id_symbol)]: 6101,
+            [Symbol(kHandle)]: null,
+            [Symbol(lastWriteQueueSize)]: 0,
+            [Symbol(timeout)]: null,
+            [Symbol(kBuffer)]: null,
+            [Symbol(kBufferCb)]: null,
+            [Symbol(kBufferGen)]: null,
+            [Symbol(shapeMode)]: true,
+            [Symbol(kCapture)]: false,
+            [Symbol(kSetNoDelay)]: true,
+            [Symbol(kSetKeepAlive)]: true,
+            [Symbol(kSetKeepAliveInitialDelay)]: 0,
+            [Symbol(kBytesRead)]: 6121,
+            [Symbol(kBytesWritten)]: 2694
+          },
+          _secureContext: SecureContext { context: SecureContext {} },
+          reading: true,
+          onkeylog: [Function: onkeylog],
+          onhandshakestart: [Function: noop],
+          onhandshakedone: [Function (anonymous)],
+          onocspresponse: [Function: onocspresponse],
+          onnewsession: [Function: onnewsessionclient],
+          onerror: [Function: onerror],
+          [Symbol(owner_symbol)]: [Circular *1]
+        },
+        [Symbol(verified)]: true,
+        [Symbol(pendingSession)]: null,
+        [Symbol(async_id_symbol)]: 6117,
+        [Symbol(kHandle)]: null,
+        [Symbol(lastWriteQueueSize)]: 0,
+        [Symbol(timeout)]: null,
+        [Symbol(kBuffer)]: null,
+        [Symbol(kBufferCb)]: null,
+        [Symbol(kBufferGen)]: null,
+        [Symbol(shapeMode)]: true,
+        [Symbol(kCapture)]: false,
+        [Symbol(kSetNoDelay)]: false,
+        [Symbol(kSetKeepAlive)]: false,
+        [Symbol(kSetKeepAliveInitialDelay)]: 0,
+        [Symbol(kBytesRead)]: 2442,
+        [Symbol(kBytesWritten)]: 1793,
+        [Symbol(connect-options)]: {
+          rejectUnauthorized: true,
+          ciphers: 'TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA',
+          checkServerIdentity: [Function: checkServerIdentity],
+          minDHSize: 1024,
+          socket: Socket {
+            connecting: false,
+            _hadError: false,
+            _parent: null,
+            _host: 'ep-flat-band-a1x01wyl-pooler.ap-southeast-1.aws.neon.tech',
+            _closeAfterHandlingError: false,
+            _events: [Object],
+            _readableState: [ReadableState],
+            _writableState: [WritableState],
+            allowHalfOpen: false,
+            _maxListeners: undefined,
+            _eventsCount: 4,
+            _sockname: null,
+            _pendingData: null,
+            _pendingEncoding: '',
+            server: null,
+            _server: null,
+            autoSelectFamilyAttemptedAddresses: [Array],
+            [Symbol(async_id_symbol)]: 6101,
+            [Symbol(kHandle)]: null,
+            [Symbol(lastWriteQueueSize)]: 0,
+            [Symbol(timeout)]: null,
+            [Symbol(kBuffer)]: null,
+            [Symbol(kBufferCb)]: null,
+            [Symbol(kBufferGen)]: null,
+            [Symbol(shapeMode)]: true,
+            [Symbol(kCapture)]: false,
+            [Symbol(kSetNoDelay)]: true,
+            [Symbol(kSetKeepAlive)]: true,
+            [Symbol(kSetKeepAliveInitialDelay)]: 0,
+            [Symbol(kBytesRead)]: 6121,
+            [Symbol(kBytesWritten)]: 2694
+          },
+          servername: 'ep-flat-band-a1x01wyl-pooler.ap-southeast-1.aws.neon.tech',
+          singleUse: true
+        }
+      },
+      _keepAlive: true,
+      _keepAliveInitialDelayMillis: 0,
+      lastBuffer: false,
+      parsedStatements: {},
+      ssl: {},
+      _ending: true,
+      _emitMessage: false,
+      _connecting: true,
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false
+    },
+    queryQueue: [],
+    binary: false,
+    processID: 2814159,
+    secretKey: 1790709262,
+    ssl: {},
+    _connectionTimeoutMillis: 10000,
+    _connectionCallback: null,
+    connectionTimeoutHandle: Timeout {
+      _idleTimeout: -1,
+      _idlePrev: null,
+      _idleNext: null,
+      _idleStart: 498062,
+      _onTimeout: null,
+      _timerArgs: undefined,
+      _repeat: null,
+      _destroyed: true,
+      [Symbol(refed)]: false,
+      [Symbol(kHasPrimitive)]: false,
+      [Symbol(asyncId)]: 6100,
+      [Symbol(triggerId)]: 0,
+      [Symbol(kAsyncContextFrame)]: undefined
+    },
+    saslSession: null,
+    release: [Function (anonymous)],
+    activeQuery: null,
+    readyForQuery: true,
+    hasExecuted: true,
+    _poolUseCount: 14,
+    [Symbol(shapeMode)]: false,
+    [Symbol(kCapture)]: false
+  }
+}
+Node.js v22.14.0
+==> Running 'npm run start'
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+6:43:30 AM [express] serving on port 5000
+6:43:39 AM [express] POST /api/init 200 in 2736ms :: {"message":"Initialization complete"}
+6:43:43 AM [express] POST /api/auth/login 200 in 399ms :: {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX…
+6:43:43 AM [express] GET /api/auth/me 200 in 7ms :: {"user":{"id":2,"username":"driver","password":"…
+6:43:43 AM [express] GET /api/auth/me 304 in 5ms :: {"user":{"id":2,"username":"driver","password":"…
+6:43:43 AM [express] GET /api/journeys/active 200 in 19ms :: [{"id":74,"driverId":10,"vehicleId":1,"…
+6:43:43 AM [express] GET /api/auth/me 304 in 4ms :: {"user":{"id":2,"username":"driver","password":"…
+6:43:43 AM [express] GET /api/vehicles 304 in 13ms :: [{"id":6,"licensePlate":"TG16T2760","model":"E…
+6:43:53 AM [express] GET /api/journeys/active 304 in 63ms :: [{"id":74,"driverId":10,"vehicleId":1,"…
+6:44:03 AM [express] GET /api/journeys/active 304 in 32ms :: [{"id":74,"driverId":10,"vehicleId":1,"…

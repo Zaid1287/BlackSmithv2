@@ -134,6 +134,10 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 1, 2025**: Fixed critical journey creation bug - updated insertJourneySchema to exclude auto-calculated fields (revenue, netProfit, currentLocation, speed, distanceCovered)
+- **July 1, 2025**: Added photo compression and 3-photo limit to optimize memory usage for production deployment
+- **July 1, 2025**: Increased memory allocation to 512MB and optimized memory monitoring thresholds for Render deployment
+- **July 1, 2025**: Successfully migrated from Replit Agent to standard Replit environment with PostgreSQL database
 - **June 30, 2025**: Fixed Excel export to match journey history date filtering - now exports all journeys within selected month/date range
 - **June 30, 2025**: Removed recalculate financials feature - cleaned up all related components and API endpoints
 - **June 30, 2025**: Month filter functionality added to Financial Management tab for better time-based expense analysis

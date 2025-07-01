@@ -141,6 +141,11 @@ export const insertJourneySchema = createInsertSchema(journeys).omit({
   endTime: true,
   totalExpenses: true,
   balance: true,
+  revenue: true,
+  netProfit: true,
+  currentLocation: true,
+  speed: true,
+  distanceCovered: true,
 });
 
 export const insertExpenseSchema = createInsertSchema(expenses).omit({
