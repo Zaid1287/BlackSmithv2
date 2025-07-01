@@ -8,6 +8,13 @@
       "when": 1750601993199,
       "tag": "0000_illegal_triton",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1751350585623,
+      "tag": "0001_strange_blackheart",
+      "breakpoints": true
     }
   ]
 }
