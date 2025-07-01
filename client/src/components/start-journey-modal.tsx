@@ -87,6 +87,17 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
 
   const createJourneyMutation = useMutation({
     mutationFn: async (data: JourneyFormData) => {
+      console.log("Creating journey with data:", data);
+      const requestBody = {
+        vehicleId: parseInt(data.vehicleId),
+        licensePlate: data.licensePlate,
+        destination: data.destination,
+        pouch: data.pouch,
+        security: data.security || "0",
+        photos: photos,
+      };
+      console.log("Request body:", requestBody);
+      
       const response = await fetch("/api/journeys", {
         method: "POST",
         headers: {
@@ -94,22 +105,20 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
           ...getAuthHeaders(),
         },
         credentials: "include",
-        body: JSON.stringify({
-          vehicleId: parseInt(data.vehicleId),
-          licensePlate: data.licensePlate,
-          destination: data.destination,
-          pouch: data.pouch,
-          security: data.security || "0",
-          photos: photos,
-        }),
+        body: JSON.stringify(requestBody),
       });
+      
+      console.log("Response status:", response.status);
       
       if (!response.ok) {
         const error = await response.json();
+        console.error("Response error:", error);
         throw new Error(error.message || "Failed to create journey");
       }
       
-      return response.json();
+      const result = await response.json();
+      console.log("Journey created successfully:", result);
+      return result;
     },
     onSuccess: () => {
       toast({
@@ -125,6 +134,7 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
       form.reset();
     },
     onError: (error: any) => {
+      console.error("Journey creation error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to start journey",
