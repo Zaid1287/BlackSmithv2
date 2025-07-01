@@ -318,17 +318,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/journeys", authenticateToken, async (req: any, res) => {
     try {
+      console.log("Journey creation request body:", JSON.stringify(req.body, null, 2));
+      console.log("User from token:", req.user);
+      
       const { photos, ...journeyFields } = req.body;
+      console.log("Journey fields after destructuring:", journeyFields);
+      console.log("Photos length:", photos ? photos.length : 0);
+      
       const journeyData = insertJourneySchema.parse({
         ...journeyFields,
         driverId: req.user.id,
         photos: photos || null,
       });
+      console.log("Parsed journey data:", { ...journeyData, photos: photos ? `${photos.length} photos` : 'no photos' });
+      
       const journey = await storage.createJourney(journeyData);
+      console.log("Journey created successfully:", journey.id);
       res.json(journey);
     } catch (error) {
       console.error("Journey creation error:", error);
+      console.error("Error stack:", error.stack);
       if (error instanceof z.ZodError) {
+        console.error("Zod validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid journey data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create journey", error: error.message });
