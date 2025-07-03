@@ -126,8 +126,8 @@ export default function JourneyExpenseBreakdown({ journeyId, journeyData }: Jour
     return new Date(timestamp).toLocaleString();
   };
 
-  // Calculate total of all expenses (including revenue items)
-  const grandTotal = expenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount || 0), 0);
+  // Calculate total of expenses only (excluding revenue items)
+  const grandTotal = totalExpenses;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -364,23 +364,16 @@ export class DatabaseStorage implements IStorage {
       .where(eq(expenses.journeyId, journeyId));
     
     // Calculate total expenses exactly like the expense breakdown view
-    // Company secrets are excluded from business expenses display
-    // Based on your breakdown image, these are the actual company secret categories:
-    const companySecrets = ['toll', 'HYD Unloading', 'HYD inward', 'NZB Unloading', 'Top Up'];
+    // These are revenue items that should be excluded from expense calculation
+    const revenueCategories = ['hyd_inward', 'top_up'];
     
-    // Calculate ALL expenses first (for debugging)
-    const allExpenses = journeyExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-    
-    // Calculate business expenses (excluding company secrets)
-    const businessExpenses = journeyExpenses.filter(expense => !companySecrets.includes(expense.category));
-    const totalBusinessExpenses = businessExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-    
-    // Log for debugging
-    console.log(`Journey ${journeyId}: Total expenses=${allExpenses}, Business expenses=${totalBusinessExpenses}`);
+    // Calculate business expenses (excluding revenue categories)
+    const businessExpenses = journeyExpenses.filter((expense: any) => !revenueCategories.includes(expense.category));
+    const totalBusinessExpenses = businessExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
     
     // Calculate top-up separately (revenue category that adds to balance)
-    const topUpExpenses = journeyExpenses.filter(expense => expense.category === 'Top Up');
-    const totalTopUp = topUpExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+    const topUpExpenses = journeyExpenses.filter((expense: any) => expense.category === 'top_up');
+    const totalTopUp = topUpExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
     
     // Get journey details to calculate balance
     const [journey] = await db.select().from(journeys).where(eq(journeys.id, journeyId));
@@ -388,7 +381,13 @@ export class DatabaseStorage implements IStorage {
     
     // Calculate balance exactly like expense breakdown: pouch + top_up - business expenses
     const pouch = parseFloat(journey.pouch);
-    const balance = pouch + totalTopUp - totalBusinessExpenses;
+    const security = parseFloat(journey.security || '0');
+    
+    // Only add security to balance if journey is completed
+    const securityAddition = journey.status === 'completed' ? security : 0;
+    const balance = pouch + totalTopUp + securityAddition - totalBusinessExpenses;
+    
+    console.log(`Journey ${journeyId}: Business expenses=${totalBusinessExpenses}, Top-up=${totalTopUp}, Balance=${balance}`);
     
     // Update journey totals with recalculated values
     await db
