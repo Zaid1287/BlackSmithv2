@@ -332,46 +332,38 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateJourneyTotals(journeyId: number): Promise<void> {
-    // Calculate actual expenses (excluding HYD Inward, Top Up, and Toll - company secrets)
-    const [expenseResult] = await db
-      .select({
-        totalExpenses: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
-      })
+    // Get all expenses for this journey (same as expense breakdown view)
+    const journeyExpenses = await db
+      .select()
       .from(expenses)
-      .where(and(
-        eq(expenses.journeyId, journeyId), 
-        not(eq(expenses.category, 'hyd_inward')),
-        not(eq(expenses.category, 'top_up')),
-        not(eq(expenses.category, 'toll'))
-      ));
-
-    // Calculate top-up separately to add to balance
-    const [topUpResult] = await db
-      .select({
-        totalTopUp: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
-      })
-      .from(expenses)
-      .where(and(
-        eq(expenses.journeyId, journeyId), 
-        eq(expenses.category, 'top_up')
-      ));
-
-    const [journey] = await db.select().from(journeys).where(eq(journeys.id, journeyId));
+      .where(eq(expenses.journeyId, journeyId));
     
-    if (journey) {
-      // Ensure all values are properly converted to numbers to avoid string concatenation
-      const pouchAmount = Number(journey.pouch) || 0;
-      const topUpAmount = Number(topUpResult.totalTopUp) || 0;
-      const expenseAmount = Number(expenseResult.totalExpenses) || 0;
-      
-      // Balance = pouch + top_up - actual expenses (security deposit is NOT included in balance)
-      const balance = pouchAmount + topUpAmount - expenseAmount;
-      
-      await db.update(journeys).set({
-        totalExpenses: expenseAmount.toString(),
+    // Calculate total expenses exactly like the expense breakdown view
+    // Company secrets (toll, HYD inward) are excluded from business expenses
+    const companySecrets = ['toll', 'HYD inward'];
+    const businessExpenses = journeyExpenses.filter(expense => !companySecrets.includes(expense.category));
+    const totalBusinessExpenses = businessExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+    
+    // Calculate top-up separately (revenue category that adds to balance)
+    const topUpExpenses = journeyExpenses.filter(expense => expense.category === 'top_up');
+    const totalTopUp = topUpExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+    
+    // Get journey details to calculate balance
+    const [journey] = await db.select().from(journeys).where(eq(journeys.id, journeyId));
+    if (!journey) return;
+    
+    // Calculate balance exactly like expense breakdown: pouch + top_up - business expenses
+    const pouch = parseFloat(journey.pouch);
+    const balance = pouch + totalTopUp - totalBusinessExpenses;
+    
+    // Update journey totals with recalculated values
+    await db
+      .update(journeys)
+      .set({
+        totalExpenses: totalBusinessExpenses.toString(),
         balance: balance.toString(),
-      }).where(eq(journeys.id, journeyId));
-    }
+      })
+      .where(eq(journeys.id, journeyId));
   }
 
   async createSalaryPayment(payment: InsertSalaryPayment): Promise<SalaryPayment> {
