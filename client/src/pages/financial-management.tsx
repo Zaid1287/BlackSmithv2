@@ -812,7 +812,37 @@ export default function FinancialManagement() {
   // Use filtered or total stats based on filter selection (both license plate and month)
   const isFilterApplied = selectedLicensePlateFilter !== "all" || selectedMonthFilter !== "all";
   const totalRevenue = isFilterApplied ? filteredRevenue : parseFloat(financialStats?.revenue?.toString() || "0") || 0;
-  const totalExpenses = isFilterApplied ? filteredTotalExpenses : parseFloat(financialStats?.expenses?.toString() || "0") || 0;
+  
+  // Calculate total expenses by summing all journey-wise expense breakdowns (same logic as View Breakdown buttons)
+  const journeyWiseTotalExpenses = isFilterApplied ? filteredJourneys?.reduce((sum: number, journey: any) => {
+    // Get expenses for this journey from filteredExpenses (same as journey breakdown modal)
+    const journeyExpenses = filteredExpenses?.filter((expense: any) => expense.journeyId === journey.id) || [];
+    const totalJourneyExpenses = journeyExpenses
+      .filter((exp: any) => {
+        const excludedCategories = ['hyd_inward', 'top_up'];
+        if (user?.role !== 'admin') {
+          excludedCategories.push('toll');
+        }
+        return !excludedCategories.includes(exp.category);
+      })
+      .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+    return sum + totalJourneyExpenses;
+  }, 0) || 0 : journeys?.reduce((sum: number, journey: any) => {
+    // Get expenses for this journey from all expenses
+    const journeyExpenses = combinedExpenses?.filter((expense: any) => expense.journeyId === journey.id) || [];
+    const totalJourneyExpenses = journeyExpenses
+      .filter((exp: any) => {
+        const excludedCategories = ['hyd_inward', 'top_up'];
+        if (user?.role !== 'admin') {
+          excludedCategories.push('toll');
+        }
+        return !excludedCategories.includes(exp.category);
+      })
+      .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+    return sum + totalJourneyExpenses;
+  }, 0) || 0;
+  
+  const totalExpenses = journeyWiseTotalExpenses;
   const netProfit = isFilterApplied ? filteredNetProfit : parseFloat(financialStats?.netProfit?.toString() || "0") || 0;
   
   // Calculate breakdown from filtered data
