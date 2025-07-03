@@ -658,11 +658,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allJourneys = await storage.getAllJourneys();
       let updatedCount = 0;
       
+      console.log(`Starting recalculation for ${allJourneys.length} journeys`);
+      
       // Recalculate totals for each journey
       for (const journey of allJourneys) {
+        console.log(`Recalculating journey ${journey.id}: ${journey.destination}`);
         await storage.updateJourneyTotals(journey.id);
         updatedCount++;
       }
+      
+      console.log(`Recalculation complete for ${updatedCount} journeys`);
       
       res.json({ 
         message: `Journey totals recalculated successfully for ${updatedCount} journeys`,
@@ -670,7 +675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Failed to recalculate journey totals:", error);
-      res.status(500).json({ message: "Failed to recalculate journey totals" });
+      res.status(500).json({ message: "Failed to recalculate journey totals", error: error.message });
     }
   });
 

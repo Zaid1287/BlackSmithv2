@@ -339,13 +339,22 @@ export class DatabaseStorage implements IStorage {
       .where(eq(expenses.journeyId, journeyId));
     
     // Calculate total expenses exactly like the expense breakdown view
-    // Company secrets (toll, HYD inward) are excluded from business expenses
-    const companySecrets = ['toll', 'HYD inward'];
+    // Company secrets are excluded from business expenses display
+    // Based on your breakdown image, these are the actual company secret categories:
+    const companySecrets = ['toll', 'HYD Unloading', 'HYD inward', 'NZB Unloading', 'Top Up'];
+    
+    // Calculate ALL expenses first (for debugging)
+    const allExpenses = journeyExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+    
+    // Calculate business expenses (excluding company secrets)
     const businessExpenses = journeyExpenses.filter(expense => !companySecrets.includes(expense.category));
     const totalBusinessExpenses = businessExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
     
+    // Log for debugging
+    console.log(`Journey ${journeyId}: Total expenses=${allExpenses}, Business expenses=${totalBusinessExpenses}`);
+    
     // Calculate top-up separately (revenue category that adds to balance)
-    const topUpExpenses = journeyExpenses.filter(expense => expense.category === 'top_up');
+    const topUpExpenses = journeyExpenses.filter(expense => expense.category === 'Top Up');
     const totalTopUp = topUpExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
     
     // Get journey details to calculate balance
