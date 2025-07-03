@@ -88,6 +88,8 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
   const createJourneyMutation = useMutation({
     mutationFn: async (data: JourneyFormData) => {
       console.log("Creating journey with data:", data);
+      const authHeaders = getAuthHeaders();
+      console.log("Auth headers:", authHeaders);
       const requestBody = {
         vehicleId: parseInt(data.vehicleId),
         licensePlate: data.licensePlate,
@@ -144,6 +146,8 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
   });
 
   const onSubmit = (data: JourneyFormData) => {
+    console.log("Form submitted with data:", data);
+    console.log("Form validation errors:", form.formState.errors);
     createJourneyMutation.mutate(data);
   };
 
