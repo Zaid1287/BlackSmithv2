@@ -141,12 +141,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createJourney(journey: InsertJourney): Promise<Journey> {
+    // Only insert the fields that should be provided during journey creation
+    // Other fields have database defaults or are calculated
+    const insertData = {
+      driverId: journey.driverId,
+      vehicleId: journey.vehicleId,
+      licensePlate: journey.licensePlate,
+      destination: journey.destination,
+      pouch: journey.pouch,
+      security: journey.security || "0",
+      photos: journey.photos || null,
+      // balance is set to pouch amount initially
+      balance: journey.pouch.toString(),
+    };
+
     const [newJourney] = await db
       .insert(journeys)
-      .values({
-        ...journey,
-        balance: journey.pouch.toString(),
-      })
+      .values(insertData)
       .returning();
     
     // Update vehicle status to in_use
