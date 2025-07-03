@@ -767,10 +767,11 @@ export default function FinancialManagement() {
   // EMI payments reduce profit when made, reset tracking prevents adding money back
   const filteredNetProfit = filteredRevenue - filteredTotalExpenses - filteredEmiPayments;
 
-  // Use filtered or total stats based on filter selection
-  const totalRevenue = selectedLicensePlateFilter === "all" ? parseFloat(financialStats?.revenue?.toString() || "0") || 0 : filteredRevenue;
-  const totalExpenses = selectedLicensePlateFilter === "all" ? parseFloat(financialStats?.expenses?.toString() || "0") || 0 : filteredTotalExpenses;
-  const netProfit = selectedLicensePlateFilter === "all" ? parseFloat(financialStats?.netProfit?.toString() || "0") || 0 : filteredNetProfit;
+  // Use filtered or total stats based on filter selection (both license plate and month)
+  const isFilterApplied = selectedLicensePlateFilter !== "all" || selectedMonthFilter !== "all";
+  const totalRevenue = isFilterApplied ? filteredRevenue : parseFloat(financialStats?.revenue?.toString() || "0") || 0;
+  const totalExpenses = isFilterApplied ? filteredTotalExpenses : parseFloat(financialStats?.expenses?.toString() || "0") || 0;
+  const netProfit = isFilterApplied ? filteredNetProfit : parseFloat(financialStats?.netProfit?.toString() || "0") || 0;
   
   // Calculate breakdown from filtered data
   const filteredJourneyRevenue = filteredJourneys.reduce((sum: number, journey: any) => sum + parseFloat(journey.pouch || 0), 0);
@@ -778,16 +779,16 @@ export default function FinancialManagement() {
   const filteredHydInwardRevenue = filteredExpenses.filter((exp: any) => exp.category === 'hyd_inward').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
   const filteredTopUpRevenue = filteredExpenses.filter((exp: any) => exp.category === 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
 
-  // Use filtered or total breakdown based on filter selection
+  // Use filtered or total breakdown based on filter selection (both license plate and month)
   const breakdown = financialStats?.breakdown || {};
-  const journeyRevenue = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.journeyRevenue?.toString() || "0") || 0 : filteredJourneyRevenue;
-  const securityDeposits = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.securityDeposits?.toString() || "0") || 0 : filteredSecurityDeposits;
-  const hydInwardRevenue = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.hydInwardRevenue?.toString() || "0") || 0 : filteredHydInwardRevenue;
-  const topUpRevenue = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.topUpRevenue?.toString() || "0") || 0 : filteredTopUpRevenue;
-  const totalJourneyExpenses = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.journeyExpenses?.toString() || "0") || 0 : filteredTotalExpenses;
+  const journeyRevenue = isFilterApplied ? filteredJourneyRevenue : parseFloat(breakdown.journeyRevenue?.toString() || "0") || 0;
+  const securityDeposits = isFilterApplied ? filteredSecurityDeposits : parseFloat(breakdown.securityDeposits?.toString() || "0") || 0;
+  const hydInwardRevenue = isFilterApplied ? filteredHydInwardRevenue : parseFloat(breakdown.hydInwardRevenue?.toString() || "0") || 0;
+  const topUpRevenue = isFilterApplied ? filteredTopUpRevenue : parseFloat(breakdown.topUpRevenue?.toString() || "0") || 0;
+  const totalJourneyExpenses = isFilterApplied ? filteredTotalExpenses : parseFloat(breakdown.journeyExpenses?.toString() || "0") || 0;
   const salaryPayments = parseFloat(breakdown.salaryPayments?.toString() || "0") || 0; // Salaries are not vehicle-specific
   const salaryDebts = parseFloat(breakdown.salaryDebts?.toString() || "0") || 0; // Salary debts are not vehicle-specific
-  const emiPaymentTotal = selectedLicensePlateFilter === "all" ? parseFloat(breakdown.emiPayments?.toString() || "0") || 0 : filteredEmiPayments;
+  const emiPaymentTotal = isFilterApplied ? filteredEmiPayments : parseFloat(breakdown.emiPayments?.toString() || "0") || 0;
   const tollExpenses = parseFloat(breakdown.tollExpenses?.toString() || "0") || 0; // Toll expenses are not vehicle-specific
 
   // Prepare chart data
