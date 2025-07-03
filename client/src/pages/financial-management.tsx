@@ -201,8 +201,11 @@ export default function FinancialManagement() {
         title: "Journey Totals Recalculated",
         description: data.message || "All journey totals have been recalculated successfully.",
       });
+      // Invalidate all queries to refresh the Total Expenses calculation
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
       queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/expenses/all"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journeys/expenses/all"] });
     },
     onError: (error: any) => {
       toast({
@@ -357,8 +360,17 @@ export default function FinancialManagement() {
       sheetData.push([""], [""], ["DETAILED EXPENSES"], [""]);
       sheetData.push(["Journey ID", "License Plate", "Category", "Amount", "Description", "Date", "Driver"]);
 
-      // Add expense data
+      // Add expense data - filter to match View Breakdown logic
       finalExpenses.forEach((expense: any) => {
+        // Skip revenue categories (same as View Breakdown modals)
+        if (expense.category === 'hyd_inward' || expense.category === 'top_up') {
+          return;
+        }
+        // Skip toll for non-admin users (same as View Breakdown logic)
+        if (user?.role !== 'admin' && expense.category === 'toll') {
+          return;
+        }
+        
         const journey = finalJourneys.find((j: any) => j.id === expense.journeyId);
         sheetData.push([
           expense.journeyId,
@@ -371,9 +383,18 @@ export default function FinancialManagement() {
         ]);
       });
 
-      // Add category-wise summary at the end
+      // Add category-wise summary at the end - filter to match View Breakdown logic
       const categoryTotals: { [key: string]: number } = {};
       finalExpenses.forEach((expense: any) => {
+        // Skip revenue categories (same as View Breakdown modals)
+        if (expense.category === 'hyd_inward' || expense.category === 'top_up') {
+          return;
+        }
+        // Skip toll for non-admin users (same as View Breakdown logic)
+        if (user?.role !== 'admin' && expense.category === 'toll') {
+          return;
+        }
+        
         const category = expense.category.replace('_', ' ').toUpperCase();
         categoryTotals[category] = (categoryTotals[category] || 0) + parseFloat(expense.amount);
       });
@@ -404,7 +425,20 @@ export default function FinancialManagement() {
 
       finalJourneys.forEach((journey: any) => {
         const journeyExpenses = finalExpenses.filter((exp: any) => exp.journeyId === journey.id);
-        const expensesByCategory = journeyExpenses.reduce((acc: any, exp: any) => {
+        // Filter expenses to match View Breakdown logic
+        const filteredJourneyExpenses = journeyExpenses.filter((exp: any) => {
+          // Skip revenue categories (same as View Breakdown modals)
+          if (exp.category === 'hyd_inward' || exp.category === 'top_up') {
+            return false;
+          }
+          // Skip toll for non-admin users (same as View Breakdown logic)
+          if (user?.role !== 'admin' && exp.category === 'toll') {
+            return false;
+          }
+          return true;
+        });
+        
+        const expensesByCategory = filteredJourneyExpenses.reduce((acc: any, exp: any) => {
           acc[exp.category] = (acc[exp.category] || 0) + parseFloat(exp.amount);
           return acc;
         }, {});

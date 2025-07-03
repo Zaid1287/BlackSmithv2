@@ -66,16 +66,38 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
+    if (!db) {
+      console.warn("Database not connected - returning undefined for development");
+      return undefined;
+    }
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
+    if (!db) {
+      console.warn("Database not connected - returning undefined for development");
+      return undefined;
+    }
     const [user] = await db.select().from(users).where(eq(users.username, username));
     return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    if (!db) {
+      // Return a mock user for development mode
+      const hashedPassword = await bcrypt.hash(insertUser.password, 10);
+      return {
+        id: 1,
+        username: insertUser.username,
+        name: insertUser.name,
+        role: insertUser.role || 'driver',
+        password: hashedPassword,
+        salary: insertUser.salary || '0',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      } as User;
+    }
     const hashedPassword = await bcrypt.hash(insertUser.password, 10);
     const [user] = await db
       .insert(users)
