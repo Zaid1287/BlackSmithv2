@@ -154,6 +154,18 @@ export default function FinancialManagement() {
     },
   });
 
+  const { data: salaryData = [] } = useQuery({
+    queryKey: ["/api/salaries"],
+    queryFn: async () => {
+      const response = await fetch("/api/salaries", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch salary payments");
+      return response.json();
+    },
+  });
+
   // Combine all expense sources based on user role
   const combinedExpenses = user?.role === 'admin' ? allExpenses : userRoleExpenses;
 
@@ -286,7 +298,7 @@ export default function FinancialManagement() {
         ["Total Expenses", totalExpenses],
         ["Net Profit", netProfit],
         ["Security Deposits", securityDeposits],
-        ["Salary Payments", salaryPayments],
+        ["Salary Payments", salaryPaymentsFromBreakdown],
         ["EMI Payments", emiPaymentTotal],
         ["HYD Inward Revenue", hydInwardRevenue],
         ["Top-up Revenue", topUpRevenue],
@@ -482,7 +494,7 @@ export default function FinancialManagement() {
         ["Total Expenses", totalExpenses],
         ["Net Profit", netProfit],
         ["Security Deposits", securityDeposits],
-        ["Salary Payments", salaryPayments],
+        ["Salary Payments", salaryPaymentsFromBreakdown],
         ["EMI Payments", emiPaymentTotal],
         [""],
         [""],
@@ -764,8 +776,13 @@ export default function FinancialManagement() {
       .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
   })();
 
+  // Calculate salary adjustments (subtract payments, add debts)
+  const salaryPaymentsFromBreakdownTotal = salaryData.filter((payment: any) => payment.amount > 0).reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
+  const salaryDebtsFromBreakdownTotal = salaryData.filter((payment: any) => payment.amount < 0).reduce((sum: number, payment: any) => sum + Math.abs(parseFloat(payment.amount)), 0);
+  const salaryAdjustment = -salaryPaymentsFromBreakdownTotal + salaryDebtsFromBreakdownTotal;
+
   // EMI payments reduce profit when made, reset tracking prevents adding money back
-  const filteredNetProfit = filteredRevenue - filteredTotalExpenses - filteredEmiPayments;
+  const filteredNetProfit = filteredRevenue - filteredTotalExpenses - filteredEmiPayments + salaryAdjustment;
 
   // Use filtered or total stats based on filter selection (both license plate and month)
   const isFilterApplied = selectedLicensePlateFilter !== "all" || selectedMonthFilter !== "all";
@@ -786,8 +803,8 @@ export default function FinancialManagement() {
   const hydInwardRevenue = isFilterApplied ? filteredHydInwardRevenue : parseFloat(breakdown.hydInwardRevenue?.toString() || "0") || 0;
   const topUpRevenue = isFilterApplied ? filteredTopUpRevenue : parseFloat(breakdown.topUpRevenue?.toString() || "0") || 0;
   const totalJourneyExpenses = isFilterApplied ? filteredTotalExpenses : parseFloat(breakdown.journeyExpenses?.toString() || "0") || 0;
-  const salaryPayments = parseFloat(breakdown.salaryPayments?.toString() || "0") || 0; // Salaries are not vehicle-specific
-  const salaryDebts = parseFloat(breakdown.salaryDebts?.toString() || "0") || 0; // Salary debts are not vehicle-specific
+  const salaryPaymentsFromBreakdown = parseFloat(breakdown.salaryPaymentsFromBreakdown?.toString() || "0") || 0; // Salaries are not vehicle-specific
+  const salaryDebtsFromBreakdown = parseFloat(breakdown.salaryDebtsFromBreakdown?.toString() || "0") || 0; // Salary debts are not vehicle-specific
   const emiPaymentTotal = isFilterApplied ? filteredEmiPayments : parseFloat(breakdown.emiPayments?.toString() || "0") || 0;
   const tollExpenses = parseFloat(breakdown.tollExpenses?.toString() || "0") || 0; // Toll expenses are not vehicle-specific
 
@@ -852,7 +869,7 @@ export default function FinancialManagement() {
   // Add salary payments and EMI payments as separate categories
   const expenseChartData = [
     ...expenseBreakdownData,
-    ...(salaryPayments > 0 ? [{ name: 'Salary Payments', value: salaryPayments, color: '#374151' }] : []),
+    ...(salaryPaymentsFromBreakdown > 0 ? [{ name: 'Salary Payments', value: salaryPaymentsFromBreakdown, color: '#374151' }] : []),
     ...(emiPaymentTotal > 0 ? [{ name: 'EMI Payments', value: emiPaymentTotal, color: '#1f2937' }] : [])
   ];
 
@@ -1044,7 +1061,7 @@ export default function FinancialManagement() {
                   </div>
                   <div className="flex justify-between">
                     <span>Salary Payments:</span>
-                    <span>₹{salaryPayments.toLocaleString()}</span>
+                    <span>₹{salaryPaymentsFromBreakdown.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>EMI Payments:</span>
@@ -1075,13 +1092,13 @@ export default function FinancialManagement() {
                   </div>
                   <div className="flex justify-between">
                     <span>Total Costs:</span>
-                    <span>₹{(totalExpenses + salaryPayments + emiPaymentTotal + tollExpenses - salaryDebts).toLocaleString()}</span>
+                    <span>₹{(totalExpenses + salaryPaymentsFromBreakdown + emiPaymentTotal + tollExpenses - salaryDebtsFromBreakdown).toLocaleString()}</span>
                   </div>
                   
-                  {salaryDebts > 0 && (
+                  {salaryDebtsFromBreakdown > 0 && (
                     <div className="flex justify-between text-green-200">
                       <span>Salary Debts:</span>
-                      <span>+₹{salaryDebts.toLocaleString()}</span>
+                      <span>+₹{salaryDebtsFromBreakdown.toLocaleString()}</span>
                     </div>
                   )}
                 </div>

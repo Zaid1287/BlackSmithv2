@@ -134,6 +134,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 3, 2025**: Fixed net profit calculation discrepancy between admin dashboard and financial management tab - added salary adjustments to match backend calculation
 - **July 1, 2025**: Fixed critical journey creation bug - updated insertJourneySchema to exclude auto-calculated fields (revenue, netProfit, currentLocation, speed, distanceCovered)
 - **July 1, 2025**: Added photo compression and 3-photo limit to optimize memory usage for production deployment
 - **July 1, 2025**: Increased memory allocation to 512MB and optimized memory monitoring thresholds for Render deployment
