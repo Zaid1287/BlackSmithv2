@@ -126,6 +126,9 @@ export default function JourneyExpenseBreakdown({ journeyId, journeyData }: Jour
     return new Date(timestamp).toLocaleString();
   };
 
+  // Calculate total of all expenses
+  const totalExpenses = expenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount || 0), 0);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -136,9 +139,14 @@ export default function JourneyExpenseBreakdown({ journeyId, journeyData }: Jour
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Calculator className="w-5 h-5" />
-            Journey Expense Breakdown - ID: {journeyId}
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Calculator className="w-5 h-5" />
+              Journey Expense Breakdown - ID: {journeyId}
+            </div>
+            <div className="text-lg font-bold text-blue-600">
+              Total: ₹{totalExpenses.toLocaleString()}
+            </div>
           </DialogTitle>
         </DialogHeader>
         
