@@ -261,6 +261,15 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
               )}
             />
 
+            {/* Hidden field for license plate */}
+            <FormField
+              control={form.control}
+              name="licensePlate"
+              render={({ field }) => (
+                <input type="hidden" {...field} />
+              )}
+            />
+
             <FormField
               control={form.control}
               name="destination"
