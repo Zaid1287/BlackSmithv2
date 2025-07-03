@@ -192,38 +192,18 @@ export default function FinancialManagement() {
     },
   });
 
-  const recalculateMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/admin/recalculate-journey-totals");
-    },
-    onSuccess: (data: any) => {
-      toast({
-        title: "Journey Totals Recalculated",
-        description: data.message || "All journey totals have been recalculated successfully.",
-      });
-      // Invalidate all queries to refresh the Total Expenses calculation
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/expenses/all"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/journeys/expenses/all"] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Recalculation Failed",
-        description: error.message || "Failed to recalculate journey totals",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   const comprehensiveRecalculateMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("POST", "/api/admin/recalculate-all-financials");
     },
     onSuccess: (data: any) => {
+      const totalExpenses = data.totalExpenses || 0;
+      const affectedJourneys = data.affectedJourneys || 0;
       toast({
         title: "Financial Recalculation Complete",
-        description: data.message || `Total expenses recalculated: ₹${data.totalExpenses?.toLocaleString()} across ${data.affectedJourneys} journeys`,
+        description: data.message || `Total expenses recalculated: ₹${totalExpenses.toLocaleString()} across ${affectedJourneys} journeys`,
       });
       // Invalidate all financial queries to refresh all calculations
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
@@ -243,10 +223,6 @@ export default function FinancialManagement() {
 
 
 
-
-  const handleRecalculateJourneyTotals = () => {
-    recalculateMutation.mutate();
-  };
 
   const handleComprehensiveRecalculation = () => {
     comprehensiveRecalculateMutation.mutate();
@@ -1059,16 +1035,7 @@ export default function FinancialManagement() {
             <Download className="w-4 h-4 mr-2" />
             Export to Excel
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleRecalculateJourneyTotals}
-            disabled={recalculateMutation.isPending}
-            className="text-blue-600 border-blue-600 hover:bg-blue-50"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            {recalculateMutation.isPending ? 'Recalculating...' : 'Recalculate Journey Totals'}
-          </Button>
+
           <Button 
             variant="outline" 
             size="sm"
