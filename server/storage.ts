@@ -62,6 +62,9 @@ export interface IStorage {
   
   // Update journey totals method
   updateJourneyTotals(journeyId: number): Promise<void>;
+  
+  // Comprehensive financial recalculation method
+  recalculateAllFinancials(): Promise<{ totalExpenses: number; affectedJourneys: number; message: string }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -750,6 +753,55 @@ export class DatabaseStorage implements IStorage {
       if (activeJourneysWithVehicle.length === 0) {
         await this.updateVehicleStatus(journey.vehicleId, 'available');
       }
+    }
+  }
+
+  async recalculateAllFinancials(): Promise<{ totalExpenses: number; affectedJourneys: number; message: string }> {
+    try {
+      // Get all journeys
+      const allJourneys = await this.getAllJourneys();
+      let affectedJourneys = 0;
+      let totalExpensesCalculated = 0;
+
+      console.log(`Starting comprehensive financial recalculation for ${allJourneys.length} journeys`);
+
+      // Recalculate each journey's totals and accumulate total expenses
+      for (const journey of allJourneys) {
+        console.log(`Recalculating journey ${journey.id}: ${journey.destination}`);
+        
+        // Update journey totals (this recalculates totalExpenses for the journey)
+        await this.updateJourneyTotals(journey.id);
+        
+        // Get the updated journey to access the recalculated totalExpenses
+        const [updatedJourney] = await db.select().from(journeys).where(eq(journeys.id, journey.id));
+        if (updatedJourney) {
+          const journeyExpenses = parseFloat(updatedJourney.totalExpenses || '0');
+          totalExpensesCalculated += journeyExpenses;
+          affectedJourneys++;
+        }
+      }
+
+      // Get all direct expenses (not journey-specific) for complete calculation
+      const allExpenses = await this.getAllExpenses();
+      const directExpenses = allExpenses
+        .filter((expense: any) => expense.journeyId === null)
+        .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
+      
+      totalExpensesCalculated += directExpenses;
+
+      console.log(`Comprehensive financial recalculation complete:`);
+      console.log(`- Affected journeys: ${affectedJourneys}`);
+      console.log(`- Total expenses calculated: ₹${totalExpensesCalculated.toLocaleString()}`);
+      console.log(`- Direct expenses: ₹${directExpenses.toLocaleString()}`);
+
+      return {
+        totalExpenses: totalExpensesCalculated,
+        affectedJourneys,
+        message: `Financial recalculation complete: ₹${totalExpensesCalculated.toLocaleString()} total expenses across ${affectedJourneys} journeys`
+      };
+    } catch (error: any) {
+      console.error("Comprehensive financial recalculation failed:", error);
+      throw new Error(`Failed to recalculate all financials: ${error.message}`);
     }
   }
 }

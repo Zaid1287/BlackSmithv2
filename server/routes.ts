@@ -679,6 +679,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Comprehensive financial recalculation endpoint (admin only)
+  app.post("/api/admin/recalculate-all-financials", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      console.log("Starting comprehensive financial recalculation...");
+      
+      const result = await storage.recalculateAllFinancials();
+      
+      console.log("Comprehensive financial recalculation completed successfully");
+      
+      res.json({ 
+        message: result.message,
+        totalExpenses: result.totalExpenses,
+        affectedJourneys: result.affectedJourneys,
+        success: true
+      });
+    } catch (error: any) {
+      console.error("Failed to recalculate all financials:", error);
+      res.status(500).json({ 
+        message: "Failed to recalculate all financials", 
+        error: error.message,
+        success: false
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

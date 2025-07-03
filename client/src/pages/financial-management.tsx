@@ -216,12 +216,40 @@ export default function FinancialManagement() {
     },
   });
 
+  const comprehensiveRecalculateMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/admin/recalculate-all-financials");
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Financial Recalculation Complete",
+        description: data.message || `Total expenses recalculated: ₹${data.totalExpenses?.toLocaleString()} across ${data.affectedJourneys} journeys`,
+      });
+      // Invalidate all financial queries to refresh all calculations
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/expenses/all"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journeys/expenses/all"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Financial Recalculation Failed",
+        description: error.message || "Failed to recalculate all financials",
+        variant: "destructive",
+      });
+    },
+  });
+
 
 
 
 
   const handleRecalculateJourneyTotals = () => {
     recalculateMutation.mutate();
+  };
+
+  const handleComprehensiveRecalculation = () => {
+    comprehensiveRecalculateMutation.mutate();
   };
 
   const handleResetConfirm = () => {
@@ -1040,6 +1068,16 @@ export default function FinancialManagement() {
           >
             <RotateCcw className="w-4 h-4 mr-2" />
             {recalculateMutation.isPending ? 'Recalculating...' : 'Recalculate Journey Totals'}
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleComprehensiveRecalculation}
+            disabled={comprehensiveRecalculateMutation.isPending}
+            className="text-purple-600 border-purple-600 hover:bg-purple-50"
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            {comprehensiveRecalculateMutation.isPending ? 'Recalculating All...' : 'Recalculate All Financials'}
           </Button>
           <Button 
             variant="outline" 
