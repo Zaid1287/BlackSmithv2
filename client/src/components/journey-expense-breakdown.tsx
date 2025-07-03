@@ -126,8 +126,8 @@ export default function JourneyExpenseBreakdown({ journeyId, journeyData }: Jour
     return new Date(timestamp).toLocaleString();
   };
 
-  // Calculate total of all expenses
-  const totalExpenses = expenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount || 0), 0);
+  // Calculate total of all expenses (including revenue items)
+  const grandTotal = expenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount || 0), 0);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -145,7 +145,7 @@ export default function JourneyExpenseBreakdown({ journeyId, journeyData }: Jour
               Journey Expense Breakdown - ID: {journeyId}
             </div>
             <div className="text-lg font-bold text-blue-600">
-              Total: ₹{totalExpenses.toLocaleString()}
+              Total: ₹{grandTotal.toLocaleString()}
             </div>
           </DialogTitle>
         </DialogHeader>
