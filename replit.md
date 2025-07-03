@@ -134,6 +134,8 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 3, 2025**: Added recalculate journey totals functionality - new admin button and API endpoint to fix expense display issues
+- **July 3, 2025**: Fixed Photos button visibility issue - now shows for all journeys regardless of photo existence
 - **July 3, 2025**: Fixed production deployment compatibility by removing netProfit column from journeys table schema - now calculated dynamically
 - **July 3, 2025**: Removed revenue column from journeys table to fix production deployment compatibility
 - **July 3, 2025**: Fixed journey creation authentication and form validation issues

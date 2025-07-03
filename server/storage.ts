@@ -59,6 +59,9 @@ export interface IStorage {
   resetAllFinancialData(): Promise<void>;
   resetSalaryData(): Promise<void>;
   resetEmiData(): Promise<void>;
+  
+  // Update journey totals method
+  updateJourneyTotals(journeyId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -328,7 +331,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(expenses).orderBy(desc(expenses.timestamp)).limit(100);
   }
 
-  private async updateJourneyTotals(journeyId: number): Promise<void> {
+  async updateJourneyTotals(journeyId: number): Promise<void> {
     // Calculate actual expenses (excluding HYD Inward, Top Up, and Toll - company secrets)
     const [expenseResult] = await db
       .select({

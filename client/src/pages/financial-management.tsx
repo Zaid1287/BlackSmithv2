@@ -192,9 +192,34 @@ export default function FinancialManagement() {
     },
   });
 
+  const recalculateMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/admin/recalculate-journey-totals");
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Journey Totals Recalculated",
+        description: data.message || "All journey totals have been recalculated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/financial"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Recalculation Failed",
+        description: error.message || "Failed to recalculate journey totals",
+        variant: "destructive",
+      });
+    },
+  });
 
 
 
+
+
+  const handleRecalculateJourneyTotals = () => {
+    recalculateMutation.mutate();
+  };
 
   const handleResetConfirm = () => {
     if (confirmationText === "RESET FINANCIAL DATA") {
@@ -941,6 +966,16 @@ export default function FinancialManagement() {
           <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
             <Download className="w-4 h-4 mr-2" />
             Export to Excel
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleRecalculateJourneyTotals}
+            disabled={recalculateMutation.isPending}
+            className="text-blue-600 border-blue-600 hover:bg-blue-50"
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            {recalculateMutation.isPending ? 'Recalculating...' : 'Recalculate Journey Totals'}
           </Button>
           <Button 
             variant="outline" 

@@ -651,6 +651,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recalculate all journey totals endpoint (admin only)
+  app.post("/api/admin/recalculate-journey-totals", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      // Get all journeys
+      const allJourneys = await storage.getAllJourneys();
+      let updatedCount = 0;
+      
+      // Recalculate totals for each journey
+      for (const journey of allJourneys) {
+        await storage.updateJourneyTotals(journey.id);
+        updatedCount++;
+      }
+      
+      res.json({ 
+        message: `Journey totals recalculated successfully for ${updatedCount} journeys`,
+        updatedCount 
+      });
+    } catch (error) {
+      console.error("Failed to recalculate journey totals:", error);
+      res.status(500).json({ message: "Failed to recalculate journey totals" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
