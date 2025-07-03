@@ -1181,10 +1181,6 @@ export default function FinancialManagement() {
                             <p className="text-xs text-gray-500 mt-1">Status: {journey.status}</p>
                           </div>
                           <div className="text-right">
-                            <p className={`font-bold text-lg ${totalJourneyExpenses > 0 ? 'text-red-600' : 'text-gray-400'}`}>
-                              ₹{totalJourneyExpenses.toLocaleString()}
-                            </p>
-                            <p className="text-xs text-gray-500">{journeyExpenses.length} expenses</p>
                             <div className="flex items-center gap-1 mt-1">
                               <JourneyExpenseBreakdown 
                                 journeyId={journey.id} 
