@@ -134,6 +134,8 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 3, 2025**: Removed revenue column from journeys table to fix production deployment compatibility
+- **July 3, 2025**: Fixed journey creation authentication and form validation issues
 - **July 3, 2025**: Fixed net profit calculation discrepancy between admin dashboard and financial management tab - added salary adjustments to match backend calculation
 - **July 1, 2025**: Fixed critical journey creation bug - updated insertJourneySchema to exclude auto-calculated fields (revenue, netProfit, currentLocation, speed, distanceCovered)
 - **July 1, 2025**: Added photo compression and 3-photo limit to optimize memory usage for production deployment

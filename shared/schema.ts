@@ -37,7 +37,6 @@ export const journeys = pgTable("journeys", {
   speed: integer("speed").default(0),
   distanceCovered: decimal("distance_covered", { precision: 15, scale: 2 }).default("0"),
   totalExpenses: decimal("total_expenses", { precision: 15, scale: 2 }).default("0"),
-  revenue: decimal("revenue", { precision: 15, scale: 2 }).default("0"),
   netProfit: decimal("net_profit", { precision: 15, scale: 2 }).default("0"),
   balance: decimal("balance", { precision: 15, scale: 2 }).default("0"),
   photos: jsonb("photos"), // Array of base64 photo strings
@@ -141,7 +140,6 @@ export const insertJourneySchema = createInsertSchema(journeys).omit({
   endTime: true,
   totalExpenses: true,
   balance: true,
-  revenue: true,
   netProfit: true,
   currentLocation: true,
   speed: true,

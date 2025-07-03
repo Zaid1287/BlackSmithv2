@@ -2,6 +2,10 @@
 
 echo "Starting deployment process..."
 
+# Push database schema first
+echo "Updating database schema..."
+npm run db:push
+
 # Create dist directory structure
 mkdir -p dist/public
 
