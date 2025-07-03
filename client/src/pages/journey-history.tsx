@@ -242,35 +242,33 @@ export default function JourneyHistory() {
                         />
                         {user?.role === 'admin' && (
                           <>
-                            {journey.photos && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={async () => {
-                                  setSelectedJourneyPhotos(journey);
-                                  setShowPhotosModal(true);
-                                  // Fetch photos only when modal opens
-                                  try {
-                                    const response = await fetch(`/api/journeys/${journey.id}/photos`, {
-                                      headers: getAuthHeaders(),
-                                      credentials: "include",
-                                    });
-                                    if (response.ok) {
-                                      const data = await response.json();
-                                      setJourneyPhotos(data.photos || []);
-                                    }
-                                  } catch (error) {
-                                    console.error("Failed to fetch photos:", error);
-                                    setJourneyPhotos([]);
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={async () => {
+                                setSelectedJourneyPhotos(journey);
+                                setShowPhotosModal(true);
+                                // Fetch photos only when modal opens
+                                try {
+                                  const response = await fetch(`/api/journeys/${journey.id}/photos`, {
+                                    headers: getAuthHeaders(),
+                                    credentials: "include",
+                                  });
+                                  if (response.ok) {
+                                    const data = await response.json();
+                                    setJourneyPhotos(data.photos || []);
                                   }
-                                }}
-                                className="text-xs"
-                                title="View Journey Photos"
-                              >
-                                <Camera className="w-3 h-3 mr-1" />
-                                Photos
-                              </Button>
-                            )}
+                                } catch (error) {
+                                  console.error("Failed to fetch photos:", error);
+                                  setJourneyPhotos([]);
+                                }
+                              }}
+                              className="text-xs"
+                              title="View Journey Photos"
+                            >
+                              <Camera className="w-3 h-3 mr-1" />
+                              Photos
+                            </Button>
                             <Button
                               size="sm"
                               variant="outline"
