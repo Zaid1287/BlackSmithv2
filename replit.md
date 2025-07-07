@@ -134,6 +134,10 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 7, 2025**: Increased photo limit from 3 to 7 photos per journey for better documentation
+- **July 7, 2025**: Removed recalculate button from Financial Management interface for cleaner UI
+- **July 7, 2025**: Fixed view breakdown total calculation to exclude additional revenue items
+- **July 7, 2025**: Fixed backend expense calculation to use correct category names matching frontend
 - **July 3, 2025**: Successfully migrated from Replit Agent to standard Replit environment with full database connectivity
 - **July 3, 2025**: Added comprehensive financial recalculation feature - processes all journey expense breakdowns and updates total expense calculations
 - **July 3, 2025**: Removed individual journey totals recalculation button and replaced with comprehensive financial recalculation

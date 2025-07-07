@@ -1036,16 +1036,7 @@ export default function FinancialManagement() {
             Export to Excel
           </Button>
 
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleComprehensiveRecalculation}
-            disabled={comprehensiveRecalculateMutation.isPending}
-            className="text-purple-600 border-purple-600 hover:bg-purple-50"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            {comprehensiveRecalculateMutation.isPending ? 'Recalculating All...' : 'Recalculate All Financials'}
-          </Button>
+
           <Button 
             variant="outline" 
             size="sm"

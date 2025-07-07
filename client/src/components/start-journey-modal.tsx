@@ -177,10 +177,10 @@ export default function StartJourneyModal({ open, onOpenChange }: StartJourneyMo
   };
 
   const handlePhotoCapture = () => {
-    if (photos.length >= 3) {
+    if (photos.length >= 7) {
       toast({
         title: "Photo limit reached",
-        description: "Maximum 3 photos allowed per journey",
+        description: "Maximum 7 photos allowed per journey",
         variant: "destructive"
       });
       return;
