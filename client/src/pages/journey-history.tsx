@@ -246,17 +246,24 @@ export default function JourneyHistory() {
                               size="sm"
                               variant="outline"
                               onClick={async () => {
+                                console.log("Photos button clicked for journey:", journey.id);
                                 setSelectedJourneyPhotos(journey);
                                 setShowPhotosModal(true);
                                 // Fetch photos only when modal opens
                                 try {
+                                  console.log("Fetching photos from:", `/api/journeys/${journey.id}/photos`);
                                   const response = await fetch(`/api/journeys/${journey.id}/photos`, {
                                     headers: getAuthHeaders(),
                                     credentials: "include",
                                   });
+                                  console.log("Photos response status:", response.status);
                                   if (response.ok) {
                                     const data = await response.json();
+                                    console.log("Photos data received:", data);
                                     setJourneyPhotos(data.photos || []);
+                                  } else {
+                                    console.error("Photos fetch failed with status:", response.status);
+                                    setJourneyPhotos([]);
                                   }
                                 } catch (error) {
                                   console.error("Failed to fetch photos:", error);

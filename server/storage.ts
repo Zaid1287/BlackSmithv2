@@ -253,12 +253,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getJourneyPhotos(id: number): Promise<string[] | null> {
+    console.log(`Storage: Getting photos for journey ${id}`);
     const result = await db
       .select({ photos: journeys.photos })
       .from(journeys)
       .where(eq(journeys.id, id))
       .limit(1);
     
+    console.log(`Storage: Photos result for journey ${id}:`, result[0]?.photos);
     return result[0]?.photos as string[] || null;
   }
 
@@ -352,8 +354,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllExpenses(): Promise<Expense[]> {
-    // Limit to recent 100 expenses for RAM efficiency
-    return await db.select().from(expenses).orderBy(desc(expenses.timestamp)).limit(100);
+    // Limit to recent 50 expenses for better performance on Render
+    return await db.select().from(expenses).orderBy(desc(expenses.timestamp)).limit(50);
   }
 
   async updateJourneyTotals(journeyId: number): Promise<void> {

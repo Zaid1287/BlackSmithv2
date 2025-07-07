@@ -14,12 +14,13 @@ let db: any = null;
 if (process.env.DATABASE_URL && process.env.DATABASE_URL !== "postgresql://placeholder@localhost:5432/placeholder") {
   pool = new Pool({ 
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }, // Always use SSL for Neon
-    max: 5, // Reduce connection pool size for serverless
-    idleTimeoutMillis: 10000, // 10 seconds
-    connectionTimeoutMillis: 10000, // 10 seconds
-    keepAlive: true,
-    keepAliveInitialDelayMillis: 0,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    max: process.env.NODE_ENV === 'production' ? 2 : 5, // Very conservative for Render
+    min: 0, // Allow pool to scale down to 0
+    idleTimeoutMillis: 5000, // 5 seconds - faster cleanup
+    connectionTimeoutMillis: 8000, // 8 seconds
+    keepAlive: false, // Disable keepalive for better connection management
+    allowExitOnIdle: true, // Allow process to exit when idle
   });
   db = drizzle(pool, { schema });
 } else {

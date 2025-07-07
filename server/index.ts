@@ -2,11 +2,48 @@ import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { pool } from "./db";
 
 // Memory optimization for production deployment
 process.env.NODE_OPTIONS = '--max-old-space-size=1024';
 
+// Rate limiting for production
+const requestCounts = new Map();
+const RATE_LIMIT = 100; // requests per minute
+const RATE_WINDOW = 60000; // 1 minute
+
 const app = express();
+
+// Rate limiting middleware for production
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+    const now = Date.now();
+    
+    if (!requestCounts.has(clientIp)) {
+      requestCounts.set(clientIp, { count: 1, windowStart: now });
+    } else {
+      const clientData = requestCounts.get(clientIp);
+      
+      // Reset window if needed
+      if (now - clientData.windowStart > RATE_WINDOW) {
+        clientData.count = 1;
+        clientData.windowStart = now;
+      } else {
+        clientData.count++;
+      }
+      
+      // Check rate limit
+      if (clientData.count > RATE_LIMIT) {
+        return res.status(429).json({ 
+          error: 'Too many requests', 
+          message: 'Rate limit exceeded. Please try again later.' 
+        });
+      }
+    }
+  }
+  next();
+});
 
 // Memory monitoring middleware
 app.use((req, res, next) => {
@@ -14,6 +51,10 @@ app.use((req, res, next) => {
   const memMB = Math.round(used.heapUsed / 1024 / 1024);
   if (memMB > 800) {
     console.warn(`High memory usage: ${memMB}MB`);
+    // Force garbage collection if available
+    if (global.gc) {
+      global.gc();
+    }
   }
   next();
 });
@@ -91,5 +132,45 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+  });
+
+  // Graceful shutdown for better resource cleanup on Render
+  const gracefulShutdown = (signal: string) => {
+    console.log(`Received ${signal}. Starting graceful shutdown...`);
+    
+    server.close(() => {
+      console.log('HTTP server closed.');
+      
+      // Close database pool if it exists
+      if (pool) {
+        pool.end(() => {
+          console.log('Database pool closed.');
+          process.exit(0);
+        });
+      } else {
+        process.exit(0);
+      }
+    });
+    
+    // Force exit if graceful shutdown takes too long
+    setTimeout(() => {
+      console.error('Forced shutdown after timeout');
+      process.exit(1);
+    }, 30000); // 30 second timeout
+  };
+
+  // Listen for shutdown signals
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  
+  // Handle uncaught exceptions
+  process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    gracefulShutdown('uncaughtException');
+  });
+  
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    gracefulShutdown('unhandledRejection');
   });
 })();

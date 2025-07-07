@@ -382,10 +382,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/journeys/:id/photos", authenticateToken, requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      console.log(`Fetching photos for journey ${id}`);
       const photos = await storage.getJourneyPhotos(id);
+      console.log(`Found photos for journey ${id}:`, photos ? photos.length : 'null');
       res.json({ photos });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch journey photos" });
+    } catch (error: any) {
+      console.error(`Failed to fetch photos for journey ${req.params.id}:`, error);
+      res.status(500).json({ message: "Failed to fetch journey photos", error: error.message });
     }
   });
 
