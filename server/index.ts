@@ -4,7 +4,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 // Memory optimization for production deployment
-process.env.NODE_OPTIONS = '--max-old-space-size=512';
+process.env.NODE_OPTIONS = '--max-old-space-size=1024';
 
 const app = express();
 
@@ -12,7 +12,7 @@ const app = express();
 app.use((req, res, next) => {
   const used = process.memoryUsage();
   const memMB = Math.round(used.heapUsed / 1024 / 1024);
-  if (memMB > 400) {
+  if (memMB > 800) {
     console.warn(`High memory usage: ${memMB}MB`);
   }
   next();
