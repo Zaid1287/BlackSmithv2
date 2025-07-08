@@ -883,13 +883,8 @@ export default function FinancialManagement() {
       return false;
     }
     
-    // If we have a month filter, make sure the expense matches the selected month
-    if (selectedMonthFilter !== "all") {
-      const expenseDate = new Date(expense.timestamp);
-      const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
-      return expenseMonth === selectedMonthFilter;
-    }
-    
+    // Don't double-filter by month here - the journey filter already handles the month filtering
+    // The expense belongs to a journey that matches the month filter, so it should be included
     return true;
   }) || [];
   
