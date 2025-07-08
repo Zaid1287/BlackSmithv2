@@ -1,7 +1,27 @@
 import { users, vehicles, journeys, expenses, salaryPayments, emiPayments, emiResetHistory, type User, type InsertUser, type Vehicle, type InsertVehicle, type Journey, type InsertJourney, type Expense, type InsertExpense, type SalaryPayment, type InsertSalaryPayment, type EmiPayment, type InsertEmiPayment } from "@shared/schema";
-import { db } from "./db";
+import { db, safeDb, isConnected } from "./db";
 import { eq, desc, and, sql, not } from "drizzle-orm";
 import bcrypt from "bcrypt";
+
+// Helper function to handle database operations with graceful degradation
+function withDatabase<T>(operation: () => Promise<T>, fallback?: T): Promise<T> {
+  if (!isConnected) {
+    if (fallback !== undefined) {
+      console.warn('Database unavailable, returning fallback value');
+      return Promise.resolve(fallback);
+    }
+    return Promise.reject(new Error('Database unavailable - please try again later'));
+  }
+  
+  return operation().catch(error => {
+    console.error('Database operation failed:', error);
+    if (fallback !== undefined) {
+      console.warn('Using fallback value due to database error');
+      return fallback;
+    }
+    throw new Error('Database operation failed - please try again later');
+  });
+}
 
 export interface IStorage {
   // User methods

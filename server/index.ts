@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { pool } from "./db";
+import { pool, getDatabaseHealth, isConnected } from "./db";
 
 // Memory optimization for production deployment
 process.env.NODE_OPTIONS = '--max-old-space-size=1024';
@@ -11,6 +11,9 @@ process.env.NODE_OPTIONS = '--max-old-space-size=1024';
 const requestCounts = new Map();
 const RATE_LIMIT = 100; // requests per minute
 const RATE_WINDOW = 60000; // 1 minute
+
+// Startup timestamp for uptime tracking
+const startTime = Date.now();
 
 const app = express();
 
@@ -90,6 +93,46 @@ app.use((req, res, next) => {
   });
 
   next();
+});
+
+// Add health check routes BEFORE main route registration
+app.get('/ping', (_req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor((Date.now() - startTime) / 1000)
+  });
+});
+
+app.get('/health', (_req, res) => {
+  const dbHealth = getDatabaseHealth();
+  const memUsage = process.memoryUsage();
+  const uptime = Math.floor((Date.now() - startTime) / 1000);
+  
+  const health = {
+    status: dbHealth.connected ? 'healthy' : 'degraded',
+    database: dbHealth,
+    memory: {
+      used: Math.round(memUsage.heapUsed / 1024 / 1024),
+      total: Math.round(memUsage.heapTotal / 1024 / 1024),
+      external: Math.round(memUsage.external / 1024 / 1024)
+    },
+    uptime,
+    timestamp: new Date().toISOString(),
+    node_env: process.env.NODE_ENV
+  };
+  
+  res.status(dbHealth.connected ? 200 : 503).json(health);
+});
+
+// Simple frontend health check
+app.get('/app-health', (_req, res) => {
+  res.status(200).json({
+    frontend: 'available',
+    backend: 'available', 
+    database: isConnected ? 'connected' : 'disconnected',
+    message: 'Application is running'
+  });
 });
 
 (async () => {
