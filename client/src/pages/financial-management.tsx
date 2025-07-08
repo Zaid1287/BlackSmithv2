@@ -956,6 +956,7 @@ export default function FinancialManagement() {
 
   // Use filtered or total stats based on filter selection (both license plate and month)
   const isFilterApplied = selectedLicensePlateFilter !== "all" || selectedMonthFilter !== "all";
+  // Backend financialStats.revenue already includes all revenue sources: journey + security + HYD Inward + Top Up
   const totalRevenue = isFilterApplied ? filteredRevenue : parseFloat(financialStats?.revenue?.toString() || "0") || 0;
   
   // Calculate total expenses using the filtered journeys' totalExpenses field
