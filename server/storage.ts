@@ -241,8 +241,8 @@ export class DatabaseStorage implements IStorage {
       })
       .from(journeys)
       .leftJoin(users, eq(journeys.driverId, users.id))
-      .orderBy(desc(journeys.startTime))
-      .limit(50); // Higher limit for admin view
+      .orderBy(desc(journeys.startTime));
+      // Removed limit to show all journeys for proper filtering
     
     return result as any[];
   }

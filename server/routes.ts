@@ -80,8 +80,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           name: "Admin User",
           role: "admin",
         });
-        
-        // Create some sample vehicles
+      }
+      
+      // Check if vehicles exist, if not create sample vehicles
+      const existingVehicles = await storage.getAllVehicles();
+      if (existingVehicles.length === 0) {
         await storage.createVehicle({
           licensePlate: "TS16UD1468",
           model: "Tata Ace",
@@ -102,8 +105,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           licensePlate: "TG16T3001",
           model: "Tata 407",
         });
-        
-        // Create sample driver
+      }
+      
+      // Check if driver exists, if not create sample driver
+      const existingDriver = await storage.getUserByUsername("driver");
+      if (!existingDriver) {
         await storage.createUser({
           username: "driver",
           password: "driver123",
@@ -111,6 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: "driver",
         });
       }
+      
       res.json({ message: "Initialization complete" });
     } catch (error) {
       console.error("Initialization error:", error);

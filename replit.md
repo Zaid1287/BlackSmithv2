@@ -134,6 +134,8 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 8, 2025**: Fixed journey query limit issue - removed 50 journey limit to show all journeys for proper month filtering
+- **July 8, 2025**: Fixed financial management month filter double filtering logic
 - **July 8, 2025**: Successfully migrated from Replit Agent to standard Replit environment with user's existing PostgreSQL database - all data preserved and application fully functional
 - **July 7, 2025**: Increased photo limit from 3 to 7 photos per journey for better documentation
 - **July 7, 2025**: Removed recalculate button from Financial Management interface for cleaner UI
