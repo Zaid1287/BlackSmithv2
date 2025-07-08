@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { db } from "./db";
+import { db, getDatabaseHealth } from "./db";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { insertUserSchema, insertVehicleSchema, insertJourneySchema, insertExpenseSchema, insertSalaryPaymentSchema, insertEmiPaymentSchema, journeys, expenses } from "@shared/schema";
@@ -72,6 +72,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize admin user if not exists
   app.post("/api/init", async (req, res) => {
     try {
+      // Wait for database connection with timeout
+      const dbStatus = getDatabaseHealth();
+      if (!dbStatus.connected) {
+        return res.status(500).json({ message: "Database not connected", error: "Database connection not available" });
+      }
+      
       const existingAdmin = await storage.getUserByUsername("admin");
       if (!existingAdmin) {
         await storage.createUser({

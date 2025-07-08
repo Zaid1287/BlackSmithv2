@@ -163,7 +163,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllVehicles(): Promise<Vehicle[]> {
-    return await db.select().from(vehicles).orderBy(desc(vehicles.addedOn));
+    return await withDatabase(async () => {
+      return await db.select().from(vehicles).orderBy(desc(vehicles.addedOn));
+    }, []);
   }
 
   async deleteVehicle(id: number): Promise<void> {
