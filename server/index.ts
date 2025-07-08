@@ -9,7 +9,7 @@ process.env.NODE_OPTIONS = '--max-old-space-size=1024';
 
 // Rate limiting for production
 const requestCounts = new Map();
-const RATE_LIMIT = 100; // requests per minute
+const RATE_LIMIT = 1000; // requests per minute
 const RATE_WINDOW = 60000; // 1 minute
 
 // Startup timestamp for uptime tracking
@@ -51,8 +51,8 @@ app.use((req, res, next) => {
 // Memory monitoring middleware
 app.use((req, res, next) => {
   const used = process.memoryUsage();
-  const memMB = Math.round(used.heapUsed / 1024 / 1024);
-  if (memMB > 800) {
+  const memMB = Math.round(used.heapUsed / 512 / 512);
+  if (memMB > 400) {
     console.warn(`High memory usage: ${memMB}MB`);
     // Force garbage collection if available
     if (global.gc) {
