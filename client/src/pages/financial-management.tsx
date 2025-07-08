@@ -1221,6 +1221,10 @@ export default function FinancialManagement() {
                     <span>Security:</span>
                     <span>₹{securityDeposits.toLocaleString()}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span>Top Up:</span>
+                    <span>₹{topUpRevenue.toLocaleString()}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1281,7 +1285,7 @@ export default function FinancialManagement() {
                   </div>
                   <div className="flex justify-between">
                     <span>Total Costs:</span>
-                    <span>₹{(totalExpenses + salaryPaymentsFromBreakdown + emiPaymentTotal + tollExpenses - salaryDebtsFromBreakdown).toLocaleString()}</span>
+                    <span>₹{totalExpenses.toLocaleString()}</span>
                   </div>
                   
                   {salaryDebtsFromBreakdown > 0 && (
