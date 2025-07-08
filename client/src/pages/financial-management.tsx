@@ -958,21 +958,11 @@ export default function FinancialManagement() {
   const isFilterApplied = selectedLicensePlateFilter !== "all" || selectedMonthFilter !== "all";
   const totalRevenue = isFilterApplied ? filteredRevenue : parseFloat(financialStats?.revenue?.toString() || "0") || 0;
   
-  // Calculate total expenses using the filtered expenses
+  // Calculate total expenses using the filtered journeys' totalExpenses field
   const totalExpenses = isFilterApplied 
-    ? filteredExpenses
-        .filter((exp: any) => {
-          // Exclude revenue categories
-          if (exp.category === 'hyd_inward' || exp.category === 'top_up') {
-            return false;
-          }
-          // For non-admin users, also exclude toll expenses
-          if (user?.role !== 'admin' && exp.category === 'toll') {
-            return false;
-          }
-          return true;
-        })
-        .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount || 0), 0)
+    ? filteredJourneys.reduce((sum: number, journey: any) => {
+        return sum + parseFloat(journey.totalExpenses || 0);
+      }, 0)
     : parseFloat(financialStats?.totalExpenses?.toString() || "0") || 0;
   const netProfit = isFilterApplied ? filteredNetProfit : parseFloat(financialStats?.netProfit?.toString() || "0") || 0;
   
@@ -988,7 +978,11 @@ export default function FinancialManagement() {
   const securityDeposits = isFilterApplied ? filteredSecurityDeposits : parseFloat(breakdown.securityDeposits?.toString() || "0") || 0;
   const hydInwardRevenue = isFilterApplied ? filteredHydInwardRevenue : parseFloat(breakdown.hydInwardRevenue?.toString() || "0") || 0;
   const topUpRevenue = isFilterApplied ? filteredTopUpRevenue : parseFloat(breakdown.topUpRevenue?.toString() || "0") || 0;
-  const totalJourneyExpenses = isFilterApplied ? filteredTotalExpenses : parseFloat(breakdown.journeyExpenses?.toString() || "0") || 0;
+  const totalJourneyExpenses = isFilterApplied 
+    ? filteredJourneys.reduce((sum: number, journey: any) => {
+        return sum + parseFloat(journey.totalExpenses || 0);
+      }, 0)
+    : parseFloat(breakdown.journeyExpenses?.toString() || "0") || 0;
   const salaryPaymentsFromBreakdown = parseFloat(breakdown.salaryPaymentsFromBreakdown?.toString() || "0") || 0; // Salaries are not vehicle-specific
   const salaryDebtsFromBreakdown = parseFloat(breakdown.salaryDebtsFromBreakdown?.toString() || "0") || 0; // Salary debts are not vehicle-specific
   const emiPaymentTotal = isFilterApplied ? filteredEmiPayments : parseFloat(breakdown.emiPayments?.toString() || "0") || 0;
