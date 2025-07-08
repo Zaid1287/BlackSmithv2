@@ -26,6 +26,7 @@ export default function JourneyHistory() {
   const [showPhotosModal, setShowPhotosModal] = useState(false);
   const [selectedJourneyPhotos, setSelectedJourneyPhotos] = useState<any>(null);
   const [journeyPhotos, setJourneyPhotos] = useState<string[]>([]);
+  const [photosLoading, setPhotosLoading] = useState(false);
 
   const { data: journeys = [], isLoading } = useQuery({
     queryKey: ["/api/journeys"],
@@ -249,6 +250,7 @@ export default function JourneyHistory() {
                                 console.log("Photos button clicked for journey:", journey.id);
                                 setSelectedJourneyPhotos(journey);
                                 setShowPhotosModal(true);
+                                setPhotosLoading(true);
                                 // Fetch photos only when modal opens
                                 try {
                                   console.log("Fetching photos from:", `/api/journeys/${journey.id}/photos`);
@@ -268,6 +270,8 @@ export default function JourneyHistory() {
                                 } catch (error) {
                                   console.error("Failed to fetch photos:", error);
                                   setJourneyPhotos([]);
+                                } finally {
+                                  setPhotosLoading(false);
                                 }
                               }}
                               className="text-xs"
@@ -381,7 +385,12 @@ export default function JourneyHistory() {
                 <p><strong>Date:</strong> {new Date(selectedJourneyPhotos.startTime).toLocaleDateString()}</p>
               </div>
               
-              {journeyPhotos && Array.isArray(journeyPhotos) && journeyPhotos.length > 0 ? (
+              {photosLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+                  <p className="text-gray-500">Loading photos...</p>
+                </div>
+              ) : journeyPhotos && Array.isArray(journeyPhotos) && journeyPhotos.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {journeyPhotos.map((photo: string, index: number) => (
                     <div key={index} className="relative aspect-square overflow-hidden rounded-lg border border-gray-200">

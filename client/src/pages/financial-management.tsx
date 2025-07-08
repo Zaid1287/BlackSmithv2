@@ -909,7 +909,10 @@ export default function FinancialManagement() {
     return sum + parseFloat(journey.pouch || 0) + parseFloat(journey.security || 0);
   }, 0) + 
   filteredExpenses
-    .filter((exp: any) => exp.category === 'hyd_inward' || exp.category === 'top_up')
+    .filter((exp: any) => 
+      (exp.category === 'hyd_inward' || exp.category === 'top_up') &&
+      filteredJourneyIds.has(exp.journeyId)
+    )
     .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
     
   // Calculate total expenses, excluding revenue categories and filtering by journey ID
@@ -964,15 +967,19 @@ export default function FinancialManagement() {
     ? filteredJourneys.reduce((sum: number, journey: any) => {
         return sum + parseFloat(journey.totalExpenses || 0);
       }, 0)
-    : parseFloat(financialStats?.totalExpenses?.toString() || "0") || 0;
+    : parseFloat(financialStats?.expenses?.toString() || "0") || 0;
   // Calculate net profit as total revenue - total expenses
   const netProfit = totalRevenue - totalExpenses;
   
   // Calculate breakdown from filtered data
   const filteredJourneyRevenue = filteredJourneys.reduce((sum: number, journey: any) => sum + parseFloat(journey.pouch || 0), 0);
   const filteredSecurityDeposits = filteredJourneys.reduce((sum: number, journey: any) => sum + parseFloat(journey.security || 0), 0);
-  const filteredHydInwardRevenue = filteredExpenses.filter((exp: any) => exp.category === 'hyd_inward').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
-  const filteredTopUpRevenue = filteredExpenses.filter((exp: any) => exp.category === 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+  const filteredHydInwardRevenue = filteredExpenses.filter((exp: any) => 
+    exp.category === 'hyd_inward' && filteredJourneyIds.has(exp.journeyId)
+  ).reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+  const filteredTopUpRevenue = filteredExpenses.filter((exp: any) => 
+    exp.category === 'top_up' && filteredJourneyIds.has(exp.journeyId)
+  ).reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
 
   // Use filtered or total breakdown based on filter selection (both license plate and month)
   const breakdown = financialStats?.breakdown || {};
