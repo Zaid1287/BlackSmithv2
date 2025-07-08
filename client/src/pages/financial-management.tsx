@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,76 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useLanguage } from "@/contexts/LanguageContext";
 import JourneyExpenseBreakdown from "@/components/journey-expense-breakdown";
+
+// Component to handle individual journey expense items with async data fetching
+const JourneyExpenseItem = ({ journey, userRole }: { journey: any, userRole?: string }) => {
+  const [totalExpenses, setTotalExpenses] = useState<number>(0);
+
+  const { data: journeyExpenses, isLoading: isJourneyExpensesLoading } = useQuery({
+    queryKey: ["/api/journeys", journey.id, "expenses"],
+    queryFn: async () => {
+      const response = await fetch(`/api/journeys/${journey.id}/expenses`, {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        throw new Error(`Failed to fetch expenses for journey ${journey.id}: ${await response.text()}`);
+      }
+    },
+    enabled: !!journey.id,
+  });
+
+  useEffect(() => {
+    if (journeyExpenses) {
+      // Filter out revenue items (hyd_inward and top_up) for the total
+      // This matches the logic in the JourneyExpenseBreakdown component
+      const total = journeyExpenses
+        .filter((exp: any) => 
+          exp.category !== 'hyd_inward' && 
+          exp.category !== 'top_up' &&
+          (userRole === 'admin' || exp.category !== 'toll')
+        )
+        .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount || 0), 0);
+      
+      setTotalExpenses(total);
+    }
+  }, [journeyExpenses, userRole]);
+
+  if (isJourneyExpensesLoading) {
+    return (
+      <div className="border rounded-lg p-4 bg-gray-50 animate-pulse">
+        <div className="h-20"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="border rounded-lg p-4 bg-gray-50">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex-1">
+          <h4 className="font-semibold text-base">{journey.startLocation} → {journey.destination}</h4>
+          <p className="text-sm text-gray-600">{journey.licensePlate} • {new Date(journey.startTime).toLocaleDateString()}</p>
+          <p className="text-xs text-gray-500 mt-1">Status: {journey.status}</p>
+        </div>
+        <div className="text-right">
+          <div className="mb-2">
+            <span className="text-sm font-medium text-gray-600">Total:</span>
+            <span className="ml-1 font-semibold text-red-700">₹{totalExpenses.toLocaleString()}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <JourneyExpenseBreakdown 
+              journeyId={journey.id} 
+              journeyData={journey} 
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function FinancialManagement() {
   const { user } = useAuth();
@@ -803,84 +873,112 @@ export default function FinancialManagement() {
     return true;
   }) || [];
 
-  // Filter expenses based on filtered journeys and month filter
+  // First, get all journey IDs that match our current filters
+  const filteredJourneyIds = new Set(filteredJourneys.map((j: any) => j.id));
+  
+  // Filter expenses to only include those from the filtered journeys
   const filteredExpenses = combinedExpenses?.filter((expense: any) => {
-    // First filter by journey inclusion
-    const isInFilteredJourney = filteredJourneys.some((journey: any) => journey.id === expense.journeyId);
-    if (!isInFilteredJourney) {
+    // Check if expense belongs to one of our filtered journeys
+    if (!filteredJourneyIds.has(expense.journeyId)) {
       return false;
     }
     
-    // Month filter for expenses
+    // If we have a month filter, make sure the expense matches the selected month
     if (selectedMonthFilter !== "all") {
       const expenseDate = new Date(expense.timestamp);
       const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
-      if (expenseMonth !== selectedMonthFilter) {
-        return false;
-      }
+      return expenseMonth === selectedMonthFilter;
     }
     
     return true;
   }) || [];
+  
+  console.log('Filtered journeys count:', filteredJourneys.length);
+  console.log('Filtered expenses count:', filteredExpenses.length);
+  console.log('Selected month filter:', selectedMonthFilter);
+  
+  // Log some debug info for the current month filter
+  if (selectedMonthFilter !== "all") {
+    const monthExpenses = filteredExpenses.filter((exp: any) => {
+      const expenseDate = new Date(exp.timestamp);
+      const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
+      return expenseMonth === selectedMonthFilter;
+    });
+    console.log(`Expenses for ${selectedMonthFilter}:`, monthExpenses);
+  }
 
   // Calculate filtered financial stats
+  
+  // Calculate revenue from journeys (pouch + security) and from revenue expenses (hyd_inward, top_up)
   const filteredRevenue = filteredJourneys.reduce((sum: number, journey: any) => {
     return sum + parseFloat(journey.pouch || 0) + parseFloat(journey.security || 0);
-  }, 0) + filteredExpenses.filter((exp: any) => exp.category === 'hyd_inward' || exp.category === 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+  }, 0) + 
+  filteredExpenses
+    .filter((exp: any) => exp.category === 'hyd_inward' || exp.category === 'top_up')
+    .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+    
+  // Calculate total expenses, excluding revenue categories and filtering by journey ID
+  const filteredExpensesTotal = filteredExpenses
+    .filter((exp: any) => 
+      exp.category !== 'hyd_inward' && 
+      exp.category !== 'top_up' &&
+      filteredJourneyIds.has(exp.journeyId)
+    )
+    .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount || 0), 0);
 
-  const filteredTotalExpenses = filteredExpenses.filter((exp: any) => exp.category !== 'hyd_inward' && exp.category !== 'top_up').reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
+  const filteredTotalExpenses = filteredExpensesTotal;
 
   // Calculate filtered EMI payments for the selected vehicle
   const filteredEmiPayments = selectedLicensePlateFilter === "all" ? 0 : (() => {
-    const selectedVehicle = vehicles.find((v: any) => v.licensePlate === selectedLicensePlateFilter);
+    const selectedVehicle = vehicles?.find((v: any) => v.licensePlate === selectedLicensePlateFilter);
     if (!selectedVehicle) return 0;
+    
     return emiPayments
       .filter((payment: any) => payment.vehicleId === selectedVehicle.id)
       .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
   })();
+
+  // Calculate filtered salary payments
+  const filteredSalaryPayments = salaryData?.reduce((sum: number, salary: any) => {
+    if (!salary.amount) return sum;
+    const paymentDate = new Date(salary.paymentDate || salary.createdAt);
+    const paymentMonth = `${paymentDate.getFullYear()}-${String(paymentDate.getMonth() + 1).padStart(2, '0')}`;
+    
+    if (selectedMonthFilter !== "all" && paymentMonth !== selectedMonthFilter) {
+      return sum;
+    }
+    
+    return sum + parseFloat(salary.amount);
+  }, 0) || 0;
 
   // Calculate salary adjustments (subtract payments, add debts)
   const salaryPaymentsFromBreakdownTotal = salaryData.filter((payment: any) => payment.amount > 0).reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
   const salaryDebtsFromBreakdownTotal = salaryData.filter((payment: any) => payment.amount < 0).reduce((sum: number, payment: any) => sum + Math.abs(parseFloat(payment.amount)), 0);
   const salaryAdjustment = -salaryPaymentsFromBreakdownTotal + salaryDebtsFromBreakdownTotal;
 
-  // EMI payments reduce profit when made, reset tracking prevents adding money back
-  const filteredNetProfit = filteredRevenue - filteredTotalExpenses - filteredEmiPayments + salaryAdjustment;
+  // Calculate net profit including all components
+  const filteredNetProfit = filteredRevenue - filteredExpensesTotal - filteredEmiPayments + salaryAdjustment;
 
   // Use filtered or total stats based on filter selection (both license plate and month)
   const isFilterApplied = selectedLicensePlateFilter !== "all" || selectedMonthFilter !== "all";
   const totalRevenue = isFilterApplied ? filteredRevenue : parseFloat(financialStats?.revenue?.toString() || "0") || 0;
   
-  // Calculate total expenses by summing all journey-wise expense breakdowns (same logic as View Breakdown buttons)
-  const journeyWiseTotalExpenses = isFilterApplied ? filteredJourneys?.reduce((sum: number, journey: any) => {
-    // Get expenses for this journey from filteredExpenses (same as journey breakdown modal)
-    const journeyExpenses = filteredExpenses?.filter((expense: any) => expense.journeyId === journey.id) || [];
-    const totalJourneyExpenses = journeyExpenses
-      .filter((exp: any) => {
-        const excludedCategories = ['hyd_inward', 'top_up'];
-        if (user?.role !== 'admin') {
-          excludedCategories.push('toll');
-        }
-        return !excludedCategories.includes(exp.category);
-      })
-      .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
-    return sum + totalJourneyExpenses;
-  }, 0) || 0 : journeys?.reduce((sum: number, journey: any) => {
-    // Get expenses for this journey from all expenses
-    const journeyExpenses = combinedExpenses?.filter((expense: any) => expense.journeyId === journey.id) || [];
-    const totalJourneyExpenses = journeyExpenses
-      .filter((exp: any) => {
-        const excludedCategories = ['hyd_inward', 'top_up'];
-        if (user?.role !== 'admin') {
-          excludedCategories.push('toll');
-        }
-        return !excludedCategories.includes(exp.category);
-      })
-      .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
-    return sum + totalJourneyExpenses;
-  }, 0) || 0;
-  
-  const totalExpenses = journeyWiseTotalExpenses;
+  // Calculate total expenses using the filtered expenses
+  const totalExpenses = isFilterApplied 
+    ? filteredExpenses
+        .filter((exp: any) => {
+          // Exclude revenue categories
+          if (exp.category === 'hyd_inward' || exp.category === 'top_up') {
+            return false;
+          }
+          // For non-admin users, also exclude toll expenses
+          if (user?.role !== 'admin' && exp.category === 'toll') {
+            return false;
+          }
+          return true;
+        })
+        .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount || 0), 0)
+    : parseFloat(financialStats?.totalExpenses?.toString() || "0") || 0;
   const netProfit = isFilterApplied ? filteredNetProfit : parseFloat(financialStats?.netProfit?.toString() || "0") || 0;
   
   // Calculate breakdown from filtered data
@@ -1162,6 +1260,12 @@ export default function FinancialManagement() {
                     <span>EMI Payments:</span>
                     <span>₹{emiPaymentTotal.toLocaleString()}</span>
                   </div>
+                  {salaryDebtsFromBreakdown > 0 && (
+                    <div className="flex justify-between text-green-200">
+                      <span>Salary Debts (deducted):</span>
+                      <span>-₹{salaryDebtsFromBreakdown.toLocaleString()}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1219,40 +1323,13 @@ export default function FinancialManagement() {
                 <p className="text-sm text-gray-500 mb-6">Expenses organized by journey</p>
                 
                 <div className="h-96 overflow-y-auto space-y-4 pr-2">
-                  {filteredJourneys?.map((journey: any) => {
-                    // Get expenses for this journey from filteredExpenses (same as journey breakdown modal)
-                    const journeyExpenses = filteredExpenses?.filter((expense: any) => expense.journeyId === journey.id) || [];
-                    const totalJourneyExpenses = journeyExpenses
-                      .filter((exp: any) => {
-                        const excludedCategories = ['hyd_inward', 'top_up'];
-                        if (user?.role !== 'admin') {
-                          excludedCategories.push('toll');
-                        }
-                        return !excludedCategories.includes(exp.category);
-                      })
-                      .reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0);
-                    
-                    return (
-                      <div key={journey.id} className="border rounded-lg p-4 bg-gray-50">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-base">{journey.startLocation} → {journey.destination}</h4>
-                            <p className="text-sm text-gray-600">{journey.licensePlate} • {new Date(journey.startTime).toLocaleDateString()}</p>
-                            <p className="text-xs text-gray-500 mt-1">Status: {journey.status}</p>
-                          </div>
-                          <div className="text-right">
-                            <div className="flex items-center gap-1 mt-1">
-                              <JourneyExpenseBreakdown 
-                                journeyId={journey.id} 
-                                journeyData={journey} 
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                      </div>
-                    );
-                  })}
+                  {filteredJourneys?.map((journey: any) => (
+                    <JourneyExpenseItem 
+                      key={journey.id} 
+                      journey={journey} 
+                      userRole={user?.role}
+                    />
+                  ))}
                   
                   {(!filteredJourneys || filteredJourneys.length === 0) && (
                     <div className="text-center py-8">
