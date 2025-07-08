@@ -574,13 +574,12 @@ export class DatabaseStorage implements IStorage {
     const allBusinessExpenses = actualTotalExpenses - hydInward - topUp; // Remove revenue categories
     
     // Simplified net profit calculation: Total Revenue - Total Expenses
-    // Total expenses include: all business expenses + salary payments + EMI payments
-    const totalBusinessExpenses = allBusinessExpenses + totalPayments + totalEmiPayments + totalEmiResetAmount - totalDebts;
+    // Only count actual journey and business expenses, not salary/EMI
     const totalRevenueAmount = totalRevenue + totalSecurity + hydInward + topUp;
-    const calculatedNetProfit = totalRevenueAmount - totalBusinessExpenses;
+    const calculatedNetProfit = totalRevenueAmount - allBusinessExpenses;
 
-    // Display actual calculated total expenses
-    const displayExpenses = totalBusinessExpenses;
+    // Display journey expenses only for cleaner calculation
+    const displayExpenses = allBusinessExpenses;
     const displayNetProfit = calculatedNetProfit;
 
     return {
@@ -597,7 +596,7 @@ export class DatabaseStorage implements IStorage {
         securityDeposits: totalSecurity,
         hydInwardRevenue: hydInward,
         topUpRevenue: topUp,
-        journeyExpenses: totalExpenses,
+        journeyExpenses: allBusinessExpenses,
         salaryPayments: totalPayments,
         salaryDebts: totalDebts,
         emiPayments: totalEmiPayments,

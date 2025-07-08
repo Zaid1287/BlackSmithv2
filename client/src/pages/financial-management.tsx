@@ -964,7 +964,8 @@ export default function FinancialManagement() {
         return sum + parseFloat(journey.totalExpenses || 0);
       }, 0)
     : parseFloat(financialStats?.totalExpenses?.toString() || "0") || 0;
-  const netProfit = isFilterApplied ? filteredNetProfit : parseFloat(financialStats?.netProfit?.toString() || "0") || 0;
+  // Calculate net profit as total revenue - total expenses
+  const netProfit = totalRevenue - totalExpenses;
   
   // Calculate breakdown from filtered data
   const filteredJourneyRevenue = filteredJourneys.reduce((sum: number, journey: any) => sum + parseFloat(journey.pouch || 0), 0);
