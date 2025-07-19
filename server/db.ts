@@ -94,6 +94,29 @@ createDatabaseConnection().catch(err => {
   console.error('Failed to initialize database connection:', err);
 });
 
+// Promise-based connection waiter
+export function waitForConnection(timeoutMs = 10000): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (isConnected) {
+      resolve(true);
+      return;
+    }
+    
+    const startTime = Date.now();
+    const checkConnection = () => {
+      if (isConnected) {
+        resolve(true);
+      } else if (Date.now() - startTime > timeoutMs || connectionAttempts >= MAX_CONNECTION_ATTEMPTS) {
+        resolve(false);
+      } else {
+        setTimeout(checkConnection, 100);
+      }
+    };
+    
+    checkConnection();
+  });
+}
+
 // Health check function
 export function getDatabaseHealth(): { connected: boolean; message: string } {
   return {
