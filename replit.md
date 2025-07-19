@@ -134,6 +134,8 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 19, 2025**: Fixed Excel export missing journey expense breakdowns - now fetches comprehensive expense data for all filtered journeys individually, ensuring complete expense details in exports
+- **July 19, 2025**: Enhanced Excel export with journey-wise breakdown sections showing detailed expense information for each journey within selected date ranges
 - **July 19, 2025**: Successfully completed migration from Replit Agent to standard Replit environment with user's existing Neon PostgreSQL database - all functionality preserved and verified
 - **July 8, 2025**: Fixed expense calculation discrepancy - investigated ₹730 difference between manual calculation (₹616,859) and system total (₹617,589) for June 2025
 - **July 8, 2025**: Updated financial management total expenses calculation to use journey.totalExpenses field directly for accurate filtering

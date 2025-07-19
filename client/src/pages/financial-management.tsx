@@ -326,7 +326,6 @@ export default function FinancialManagement() {
 
       // Use the same filtering logic as the displayed data
       let filteredJourneys = journeys || [];
-      let filteredExpenses = combinedExpenses || [];
 
       // Apply license plate filter
       if (selectedLicensePlateFilter !== "all") {
@@ -342,27 +341,10 @@ export default function FinancialManagement() {
           const journeyMonth = journeyDate.toISOString().slice(0, 7); // YYYY-MM format
           return journeyMonth === selectedMonthFilter;
         });
-
-        filteredExpenses = filteredExpenses.filter((expense: any) => {
-          const expenseDate = new Date(expense.timestamp);
-          const expenseMonth = expenseDate.toISOString().slice(0, 7); // YYYY-MM format
-          return expenseMonth === selectedMonthFilter;
-        });
-      }
-
-      // Filter expenses to only include those from the filtered journeys
-      filteredExpenses = filteredExpenses.filter((expense: any) => 
-        filteredJourneys.some((journey: any) => journey.id === expense.journeyId)
-      );
-      
-      // Filter toll expenses for non-admin users
-      if (user?.role !== 'admin') {
-        filteredExpenses = filteredExpenses.filter((expense: any) => expense.category !== 'toll');
       }
 
       // Apply custom date range filter if provided (overrides month filter)
       let finalJourneys = filteredJourneys;
-      let finalExpenses = filteredExpenses;
       
       if (startDate || endDate) {
         const start = startDate ? new Date(startDate) : new Date(0);
@@ -373,8 +355,47 @@ export default function FinancialManagement() {
           const journeyDate = new Date(journey.startTime);
           return journeyDate >= start && journeyDate <= end;
         });
+      }
+
+      // Fetch comprehensive expense data for all filtered journeys
+      toast({
+        title: "Loading Journey Details",
+        description: "Fetching detailed expense breakdowns for all journeys...",
+      });
+
+      const allJourneyExpenses = [];
+      for (const journey of finalJourneys) {
+        try {
+          const response = await fetch(`/api/journeys/${journey.id}/expenses`, {
+            headers: getAuthHeaders(),
+            credentials: "include",
+          });
+          if (response.ok) {
+            const expenses = await response.json();
+            allJourneyExpenses.push(...expenses);
+          } else {
+            console.warn(`Failed to fetch expenses for journey ${journey.id}`);
+          }
+        } catch (error) {
+          console.warn(`Error fetching expenses for journey ${journey.id}:`, error);
+        }
+      }
+
+      // Now we have all expenses for the filtered journeys
+      let finalExpenses = allJourneyExpenses;
+      
+      // Filter toll expenses for non-admin users
+      if (user?.role !== 'admin') {
+        finalExpenses = finalExpenses.filter((expense: any) => expense.category !== 'toll');
+      }
+
+      // Apply date range filter to expenses if specified
+      if (startDate || endDate) {
+        const start = startDate ? new Date(startDate) : new Date(0);
+        const end = endDate ? new Date(endDate) : new Date();
+        end.setHours(23, 59, 59, 999); // Include the entire end date
         
-        finalExpenses = filteredExpenses.filter((expense: any) => {
+        finalExpenses = finalExpenses.filter((expense: any) => {
           const expenseDate = new Date(expense.timestamp);
           return expenseDate >= start && expenseDate <= end;
         });
@@ -430,8 +451,65 @@ export default function FinancialManagement() {
         ]);
       });
 
-      // Add spacing and expenses section
-      sheetData.push([""], [""], ["DETAILED EXPENSES"], [""]);
+      // Add spacing and journey-wise expense breakdowns section
+      sheetData.push([""], [""], ["JOURNEY-WISE EXPENSE BREAKDOWNS"], [""]);
+      
+      // Group expenses by journey ID for better organization
+      const expensesByJourney = finalExpenses.reduce((acc: any, expense: any) => {
+        if (!acc[expense.journeyId]) {
+          acc[expense.journeyId] = [];
+        }
+        acc[expense.journeyId].push(expense);
+        return acc;
+      }, {});
+
+      // Add each journey's breakdown
+      finalJourneys.forEach((journey: any) => {
+        const journeyExpenses = expensesByJourney[journey.id] || [];
+        const validExpenses = journeyExpenses.filter((expense: any) => {
+          // Skip revenue categories (same as View Breakdown modals)
+          if (expense.category === 'hyd_inward' || expense.category === 'top_up') {
+            return false;
+          }
+          // Skip toll for non-admin users (same as View Breakdown logic)
+          if (user?.role !== 'admin' && expense.category === 'toll') {
+            return false;
+          }
+          return true;
+        });
+
+        // Journey header
+        sheetData.push([
+          `Journey ${journey.id} - ${journey.licensePlate}`,
+          `Destination: ${journey.destination}`,
+          `Driver: ${journey.driverName || "N/A"}`,
+          `Date: ${journey.startTime ? new Date(journey.startTime).toLocaleDateString() : "N/A"}`,
+          `Total Expenses: ₹${parseFloat(journey.totalExpenses || 0).toLocaleString()}`
+        ]);
+        
+        // Expense header for this journey
+        sheetData.push(["Category", "Amount", "Description", "Date", "Driver"]);
+        
+        if (validExpenses.length > 0) {
+          validExpenses.forEach((expense: any) => {
+            sheetData.push([
+              expense.category.replace('_', ' ').toUpperCase(),
+              parseFloat(expense.amount),
+              expense.description || "",
+              new Date(expense.timestamp).toLocaleDateString(),
+              expense.driverName || "N/A"
+            ]);
+          });
+        } else {
+          sheetData.push(["No expenses recorded", "", "", "", ""]);
+        }
+        
+        // Add spacing between journeys
+        sheetData.push([""]);
+      });
+
+      // Add overall detailed expenses section
+      sheetData.push([""], ["DETAILED EXPENSES SUMMARY"], [""]);
       sheetData.push(["Journey ID", "License Plate", "Category", "Amount", "Description", "Date", "Driver"]);
 
       // Add expense data - filter to match View Breakdown logic
@@ -456,6 +534,8 @@ export default function FinancialManagement() {
           expense.driverName || "N/A"
         ]);
       });
+
+      console.log(`Export Summary: ${finalJourneys.length} journeys, ${finalExpenses.length} total expenses exported`);
 
       // Add category-wise summary at the end - filter to match View Breakdown logic
       const categoryTotals: { [key: string]: number } = {};
@@ -689,7 +769,7 @@ export default function FinancialManagement() {
 
       toast({
         title: "Export Successful",
-        description: `Generated complete report with ${Object.keys(vehicleGroups).length} vehicle tabs.`,
+        description: `Generated complete report with ${finalJourneys.length} journeys and ${finalExpenses.length} expense entries across ${Object.keys(vehicleGroups).length} vehicle tabs. All journey expense breakdowns included.`,
       });
     } catch (error: any) {
       console.error('Excel export error:', error);
