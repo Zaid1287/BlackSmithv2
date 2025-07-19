@@ -2,6 +2,12 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
+// Clean up DATABASE_URL if it contains psql command prefix
+if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith("psql '") && process.env.DATABASE_URL.endsWith("'")) {
+  process.env.DATABASE_URL = process.env.DATABASE_URL.slice(6, -1); // Remove psql ' prefix and ' suffix
+  console.log("🔧 Cleaned up DATABASE_URL format");
+}
+
 if (!process.env.DATABASE_URL) {
   console.warn("DATABASE_URL not set - using placeholder for development");
   process.env.DATABASE_URL = "postgresql://placeholder@localhost:5432/placeholder";
