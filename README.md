@@ -14,8 +14,8 @@ A comprehensive logistics and expense management system for BlackSmith Traders, 
 ## Quick Start
 
 1. **Login Credentials:**
-   - Admin: `admin` / `admin123`
-   - Driver: `driver` / `driver123`
+   - Admin: `*************`
+   - Driver: `************`
 
 2. **Key Endpoints:**
    - Main App: `/`
