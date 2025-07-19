@@ -134,6 +134,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 19, 2025**: Successfully completed migration from Replit Agent to standard Replit environment with user's existing Neon PostgreSQL database - all functionality preserved and verified
 - **July 8, 2025**: Fixed expense calculation discrepancy - investigated ₹730 difference between manual calculation (₹616,859) and system total (₹617,589) for June 2025
 - **July 8, 2025**: Updated financial management total expenses calculation to use journey.totalExpenses field directly for accurate filtering
 - **July 8, 2025**: Fixed journey query limit issue - removed 50 journey limit to show all journeys for proper month filtering
