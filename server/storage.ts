@@ -412,26 +412,16 @@ export class DatabaseStorage implements IStorage {
         return;
       }
       
-      // Calculate balance exactly like expense breakdown: pouch + security + top_up - business expenses
+      // Calculate balance exactly as specified: pouch + top_up - total_expenses (no security)
       const pouch = parseFloat(journey.pouch);
-      const security = parseFloat(journey.security || '0');
-      
-      // Try both calculations to understand which one matches user expectation
-      const balanceWithSecurity = pouch + security + totalTopUp - totalBusinessExpenses;
-      const balanceWithoutSecurity = pouch + totalTopUp - totalBusinessExpenses;
-      
-      // User expects -2130 for Journey 114, let's see which calculation is closer
-      const balance = balanceWithoutSecurity; // Testing without security first
+      const balance = pouch + totalTopUp - totalBusinessExpenses;
       
       console.log(`=== Journey ${journeyId} Balance Calculation ===`);
       console.log(`- Pouch: ${pouch}`);
-      console.log(`- Security: ${security} (status: ${journey.status})`);  
       console.log(`- Top-up revenue: ${totalTopUp}`);
       console.log(`- Business expenses: ${totalBusinessExpenses}`);
       console.log(`- Current stored balance: ${journey.balance}`);
-      console.log(`- Balance WITH security: ${balanceWithSecurity}`);
-      console.log(`- Balance WITHOUT security: ${balanceWithoutSecurity}`);
-      console.log(`- Using balance: ${balance} (User expects -2130 for Journey 114)`);
+      console.log(`- Calculated balance: ${balance}`);
       console.log(`- Formula: ${pouch} + ${totalTopUp} - ${totalBusinessExpenses} = ${balance}`);
       console.log(`- Business expense breakdown:`, businessExpenses.map(e => `${e.category}: ${e.amount}`));
       
