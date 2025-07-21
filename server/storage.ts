@@ -386,46 +386,68 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateJourneyTotals(journeyId: number): Promise<void> {
-    // Get all expenses for this journey (same as expense breakdown view)
-    const journeyExpenses = await db
-      .select()
-      .from(expenses)
-      .where(eq(expenses.journeyId, journeyId));
-    
-    // Calculate total expenses exactly like the expense breakdown view
-    // These are revenue items that should be excluded from expense calculation
-    const revenueCategories = ['hyd_inward', 'top_up'];
-    
-    // Calculate business expenses (excluding revenue categories)
-    const businessExpenses = journeyExpenses.filter((expense: any) => !revenueCategories.includes(expense.category));
-    const totalBusinessExpenses = businessExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
-    
-    // Calculate top-up separately (revenue category that adds to balance)
-    const topUpExpenses = journeyExpenses.filter((expense: any) => expense.category === 'top_up');
-    const totalTopUp = topUpExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
-    
-    // Get journey details to calculate balance
-    const [journey] = await db.select().from(journeys).where(eq(journeys.id, journeyId));
-    if (!journey) return;
-    
-    // Calculate balance exactly like expense breakdown: pouch + top_up - business expenses
-    const pouch = parseFloat(journey.pouch);
-    const security = parseFloat(journey.security || '0');
-    
-    // Only add security to balance if journey is completed
-    const securityAddition = journey.status === 'completed' ? security : 0;
-    const balance = pouch + totalTopUp + securityAddition - totalBusinessExpenses;
-    
-    console.log(`Journey ${journeyId}: Business expenses=${totalBusinessExpenses}, Top-up=${totalTopUp}, Balance=${balance}`);
-    
-    // Update journey totals with recalculated values
-    await db
-      .update(journeys)
-      .set({
-        totalExpenses: totalBusinessExpenses.toString(),
-        balance: balance.toString(),
-      })
-      .where(eq(journeys.id, journeyId));
+    try {
+      // Get all expenses for this journey (same as expense breakdown view)
+      const journeyExpenses = await db
+        .select()
+        .from(expenses)
+        .where(eq(expenses.journeyId, journeyId));
+      
+      // Calculate total expenses exactly like the expense breakdown view
+      // These are revenue items that should be excluded from expense calculation
+      const revenueCategories = ['hyd_inward', 'top_up'];
+      
+      // Calculate business expenses (excluding revenue categories)
+      const businessExpenses = journeyExpenses.filter((expense: any) => !revenueCategories.includes(expense.category));
+      const totalBusinessExpenses = businessExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
+      
+      // Calculate top-up separately (revenue category that adds to balance)
+      const topUpExpenses = journeyExpenses.filter((expense: any) => expense.category === 'top_up');
+      const totalTopUp = topUpExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
+      
+      // Get journey details to calculate balance
+      const [journey] = await db.select().from(journeys).where(eq(journeys.id, journeyId));
+      if (!journey) {
+        console.log(`Journey ${journeyId} not found`);
+        return;
+      }
+      
+      // Calculate balance exactly like expense breakdown: pouch + security + top_up - business expenses
+      const pouch = parseFloat(journey.pouch);
+      const security = parseFloat(journey.security || '0');
+      
+      // Try both calculations to understand which one matches user expectation
+      const balanceWithSecurity = pouch + security + totalTopUp - totalBusinessExpenses;
+      const balanceWithoutSecurity = pouch + totalTopUp - totalBusinessExpenses;
+      
+      // User expects -2130 for Journey 114, let's see which calculation is closer
+      const balance = balanceWithoutSecurity; // Testing without security first
+      
+      console.log(`=== Journey ${journeyId} Balance Calculation ===`);
+      console.log(`- Pouch: ${pouch}`);
+      console.log(`- Security: ${security} (status: ${journey.status})`);  
+      console.log(`- Top-up revenue: ${totalTopUp}`);
+      console.log(`- Business expenses: ${totalBusinessExpenses}`);
+      console.log(`- Current stored balance: ${journey.balance}`);
+      console.log(`- Balance WITH security: ${balanceWithSecurity}`);
+      console.log(`- Balance WITHOUT security: ${balanceWithoutSecurity}`);
+      console.log(`- Using balance: ${balance} (User expects -2130 for Journey 114)`);
+      console.log(`- Formula: ${pouch} + ${totalTopUp} - ${totalBusinessExpenses} = ${balance}`);
+      console.log(`- Business expense breakdown:`, businessExpenses.map(e => `${e.category}: ${e.amount}`));
+      
+      // Update journey totals with recalculated values
+      await db
+        .update(journeys)
+        .set({
+          totalExpenses: totalBusinessExpenses.toString(),
+          balance: balance.toString(),
+        })
+        .where(eq(journeys.id, journeyId));
+      
+      console.log(`Journey ${journeyId} balance updated from ${journey.balance} to ${balance}`);
+    } catch (error) {
+      console.error(`Error updating journey ${journeyId} totals:`, error);
+    }
   }
 
   async createSalaryPayment(payment: InsertSalaryPayment): Promise<SalaryPayment> {

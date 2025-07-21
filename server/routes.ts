@@ -695,31 +695,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint to show journey 114 data and calculation
+  app.get("/api/debug/journey-114", async (req, res) => {
+    try {
+      const journey = await storage.getJourneyById(114);
+      const expenses = await storage.getJourneyExpenses(114);
+      
+      if (!journey) {
+        return res.status(404).json({ message: "Journey 114 not found" });
+      }
+      
+      // Manual calculation to debug
+      const revenueCategories = ['hyd_inward', 'top_up'];
+      const businessExpenses = expenses.filter(expense => !revenueCategories.includes(expense.category));
+      const totalBusinessExpenses = businessExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+      const topUpExpenses = expenses.filter(expense => expense.category === 'top_up');
+      const totalTopUp = topUpExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+      
+      const pouch = parseFloat(journey.pouch);
+      const security = parseFloat(journey.security || '0');
+      const securityAddition = journey.status === 'completed' ? security : 0;
+      const manualBalance = pouch + totalTopUp + securityAddition - totalBusinessExpenses;
+      
+      res.json({
+        journey: {
+          id: journey.id,
+          pouch: journey.pouch,
+          security: journey.security,
+          status: journey.status,
+          currentBalance: journey.balance,
+          currentTotalExpenses: journey.totalExpenses
+        },
+        expenses: expenses.map(e => ({ category: e.category, amount: e.amount })),
+        calculation: {
+          pouch,
+          security,
+          securityAddition,
+          totalTopUp,
+          totalBusinessExpenses,
+          manualBalance,
+          formula: `${pouch} + ${totalTopUp} + ${securityAddition} - ${totalBusinessExpenses} = ${manualBalance}`
+        }
+      });
+    } catch (error) {
+      console.error("Failed to debug journey 114:", error);
+      res.status(500).json({ message: "Failed to debug journey 114" });
+    }
+  });
+
+  // Test endpoint to trigger recalculation for journey 114 specifically
+  app.post("/api/debug/recalculate-114", async (req, res) => {
+    try {
+      console.log("=== DEBUGGING JOURNEY 114 BALANCE CALCULATION ===");
+      await storage.updateJourneyTotals(114);
+      res.json({ message: "Journey 114 recalculated - check console logs" });
+    } catch (error) {
+      console.error("Failed to recalculate journey 114:", error);
+      res.status(500).json({ message: "Failed to recalculate journey 114" });
+    }
+  });
+
   // Recalculate all journey totals endpoint (admin only)
   app.post("/api/admin/recalculate-journey-totals", authenticateToken, requireAdmin, async (req, res) => {
     try {
-      // Get all journeys
-      const allJourneys = await storage.getAllJourneys();
-      let updatedCount = 0;
+      const { journeyId } = req.body;
       
-      console.log(`Starting recalculation for ${allJourneys.length} journeys`);
-      
-      // Recalculate totals for each journey
-      for (const journey of allJourneys) {
-        console.log(`Recalculating journey ${journey.id}: ${journey.destination}`);
-        await storage.updateJourneyTotals(journey.id);
-        updatedCount++;
+      if (journeyId) {
+        // Recalculate specific journey
+        console.log(`Recalculating journey ${journeyId}`);
+        await storage.updateJourneyTotals(parseInt(journeyId));
+        res.json({ 
+          message: `Journey ${journeyId} totals recalculated successfully`,
+          updatedCount: 1 
+        });
+      } else {
+        // Get all journeys
+        const allJourneys = await storage.getAllJourneys();
+        let updatedCount = 0;
+        
+        console.log(`Starting recalculation for ${allJourneys.length} journeys`);
+        
+        // Recalculate totals for each journey
+        for (const journey of allJourneys) {
+          console.log(`Recalculating journey ${journey.id}: ${journey.destination}`);
+          await storage.updateJourneyTotals(journey.id);
+          updatedCount++;
+        }
+        
+        console.log(`Recalculation complete for ${updatedCount} journeys`);
+        
+        res.json({ 
+          message: `Journey totals recalculated successfully for ${updatedCount} journeys`,
+          updatedCount 
+        });
       }
-      
-      console.log(`Recalculation complete for ${updatedCount} journeys`);
-      
-      res.json({ 
-        message: `Journey totals recalculated successfully for ${updatedCount} journeys`,
-        updatedCount 
-      });
     } catch (error) {
       console.error("Failed to recalculate journey totals:", error);
-      res.status(500).json({ message: "Failed to recalculate journey totals", error: error.message });
+      res.status(500).json({ message: "Failed to recalculate journey totals", error: (error as any).message });
     }
   });
 
