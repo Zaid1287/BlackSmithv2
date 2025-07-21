@@ -375,6 +375,11 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getExpenseById(expenseId: number): Promise<Expense | null> {
+    const result = await db.select().from(expenses).where(eq(expenses.id, expenseId)).limit(1);
+    return result[0] || null;
+  }
+
   async getAllExpenses(): Promise<Expense[]> {
     // Limit to recent 50 expenses for better performance on Render
     return await db.select().from(expenses).orderBy(desc(expenses.timestamp)).limit(50);

@@ -541,7 +541,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { pouch, security } = req.body;
       
       await storage.updateJourneyFinancials(journeyId, { pouch, security });
-      res.json({ message: "Journey financials updated successfully" });
+      
+      // Recalculate journey totals after updating financials
+      await storage.updateJourneyTotals(journeyId);
+      
+      res.json({ message: "Journey financials updated successfully and balance recalculated" });
     } catch (error) {
       console.error("Failed to update journey financials:", error);
       res.status(500).json({ message: "Failed to update journey financials" });
@@ -553,8 +557,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const expenseId = parseInt(req.params.id);
       const { amount, description, category } = req.body;
       
+      // Get the expense first to find the journey ID
+      const expense = await storage.getExpenseById(expenseId);
+      if (!expense) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+      
       await storage.updateExpense(expenseId, { amount, description, category });
-      res.json({ message: "Expense updated successfully" });
+      
+      // Recalculate journey totals after updating expense
+      if (expense.journeyId) {
+        await storage.updateJourneyTotals(expense.journeyId);
+      }
+      
+      res.json({ message: "Expense updated successfully and journey balance recalculated" });
     } catch (error) {
       console.error("Failed to update expense:", error);
       res.status(500).json({ message: "Failed to update expense" });
@@ -565,8 +581,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const expenseId = parseInt(req.params.id);
       
+      // Get the expense first to find the journey ID before deletion
+      const expense = await storage.getExpenseById(expenseId);
+      if (!expense) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+      
       await storage.deleteExpense(expenseId);
-      res.json({ message: "Expense deleted successfully" });
+      
+      // Recalculate journey totals after deleting expense  
+      if (expense.journeyId) {
+        await storage.updateJourneyTotals(expense.journeyId);
+      }
+      
+      res.json({ message: "Expense deleted successfully and journey balance recalculated" });
     } catch (error) {
       console.error("Failed to delete expense:", error);
       res.status(500).json({ message: "Failed to delete expense" });
