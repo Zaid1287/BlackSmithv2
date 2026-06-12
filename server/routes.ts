@@ -14,7 +14,7 @@ import rateLimit from "express-rate-limit";
 // stuffing. 10 attempts / 15 min per IP; successful logins don't count.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 20, // failed attempts per IP per window (successful logins don't count)
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true,

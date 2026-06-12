@@ -82,6 +82,10 @@ export default function ExpenseQuickEntry({ journeyId }: ExpenseQuickEntryProps)
       return response.json();
     },
     onSuccess: (_, variables) => {
+      // The active-journey page keys its expenses query as
+      // ["/api/journeys/expenses", journeyId]; journey-history/breakdown use the
+      // templated string form. Invalidate BOTH so the list actually refreshes.
+      queryClient.invalidateQueries({ queryKey: ["/api/journeys/expenses", journeyId] });
       queryClient.invalidateQueries({ queryKey: [`/api/journeys/${journeyId}/expenses`] });
       queryClient.invalidateQueries({ queryKey: ["/api/journeys/active"] });
       queryClient.invalidateQueries({ queryKey: ["/api/journeys"] });
