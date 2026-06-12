@@ -52,7 +52,9 @@ export default function ActiveJourney() {
   const userActiveJourney = activeJourneys.find((journey: any) => journey.driverId === user?.id);
 
   const { data: expenses = [] } = useQuery({
-    queryKey: ["/api/journeys/expenses", userActiveJourney?.id],
+    // Use the same templated key every other expense view uses so all
+    // add-expense mutations invalidate this list consistently.
+    queryKey: [`/api/journeys/${userActiveJourney?.id}/expenses`],
     queryFn: async () => {
       if (!userActiveJourney?.id) return [];
       const response = await fetch(`/api/journeys/${userActiveJourney.id}/expenses`, {
@@ -181,7 +183,7 @@ export default function ActiveJourney() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <p className="text-sm text-gray-500">{t('revenue')}</p>
                   <p className="font-semibold">₹{parseFloat(userActiveJourney.pouch).toLocaleString()}</p>
@@ -190,7 +192,26 @@ export default function ActiveJourney() {
                   <p className="text-sm text-gray-500">{t('security')}</p>
                   <p className="font-semibold">₹{parseFloat(userActiveJourney.security).toLocaleString()}</p>
                 </div>
+                <div>
+                  <p className="text-sm text-gray-500">Available Balance</p>
+                  <p className={`font-semibold ${parseFloat(userActiveJourney.balance || '0') < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    ₹{parseFloat(userActiveJourney.balance || '0').toLocaleString()}
+                  </p>
+                </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Prominent available-balance banner for the driver */}
+          <Card className={parseFloat(userActiveJourney.balance || '0') < 0 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}>
+            <CardContent className="p-6 flex items-center justify-between">
+              <div className="flex items-center">
+                <DollarSign className={`w-8 h-8 mr-3 ${parseFloat(userActiveJourney.balance || '0') < 0 ? 'text-red-600' : 'text-green-600'}`} />
+                <span className="text-lg font-medium text-gray-700">Available Balance</span>
+              </div>
+              <span className={`text-3xl font-bold ${parseFloat(userActiveJourney.balance || '0') < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                ₹{parseFloat(userActiveJourney.balance || '0').toLocaleString()}
+              </span>
             </CardContent>
           </Card>
 
