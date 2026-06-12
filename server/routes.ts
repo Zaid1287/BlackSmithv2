@@ -8,10 +8,66 @@ import { insertUserSchema, insertVehicleSchema, insertJourneySchema, insertExpen
 import { z } from "zod";
 import { eq, sql } from "drizzle-orm";
 import path from "path";
+import rateLimit from "express-rate-limit";
 
-const JWT_SECRET = process.env.JWT_SECRET || "blacksmith-traders-secret";
+// Strict limiter for credential endpoints to stop brute force / credential
+// stuffing. 10 attempts / 15 min per IP; successful logins don't count.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  message: { message: "Too many login attempts. Please try again in 15 minutes." },
+});
 
+// SECURITY: a hardcoded fallback secret lets anyone forge admin JWTs.
+// Require JWT_SECRET in production; allow a clearly-insecure dev fallback only outside production.
+const JWT_SECRET: string = process.env.JWT_SECRET || (() => {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is required in production');
+  }
+  console.warn('⚠️  JWT_SECRET not set — using an insecure development-only secret.');
+  return 'dev-only-insecure-secret-change-me';
+})();
 
+// Remove the password hash before a user object is ever returned to a client.
+function sanitizeUser<T extends Record<string, any>>(user: T): Omit<T, 'password'> {
+  const { password, ...safe } = user;
+  return safe;
+}
+
+// Parse a numeric route param, rejecting NaN instead of passing it to the DB.
+function parseId(value: string): number | null {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+const MAX_PHOTOS = 7;
+// Keep MAX_PHOTOS * MAX_PHOTO_CHARS under the 12MB express.json limit so an
+// oversized payload fails with a clear 400, not a confusing 413.
+const MAX_PHOTO_CHARS = 1_500_000; // ~1.1MB binary per photo as base64
+
+// Validate the photos payload (array of data-URL strings). Returns the cleaned
+// array, or throws with a client-safe message. Returns null when no photos.
+function validatePhotos(photos: unknown): string[] | null {
+  if (photos == null) return null;
+  if (!Array.isArray(photos)) {
+    throw Object.assign(new Error('photos must be an array'), { status: 400 });
+  }
+  if (photos.length > MAX_PHOTOS) {
+    throw Object.assign(new Error(`A maximum of ${MAX_PHOTOS} photos is allowed`), { status: 400 });
+  }
+  for (const p of photos) {
+    if (typeof p !== 'string' || !p.startsWith('data:image/')) {
+      throw Object.assign(new Error('Each photo must be an image data URL'), { status: 400 });
+    }
+    if (p.length > MAX_PHOTO_CHARS) {
+      throw Object.assign(new Error('A photo exceeds the maximum allowed size'), { status: 400 });
+    }
+  }
+  return photos as string[];
+}
 
 // Middleware to verify JWT token
 const authenticateToken = async (req: any, res: any, next: any) => {
@@ -19,7 +75,6 @@ const authenticateToken = async (req: any, res: any, next: any) => {
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    console.log('No token provided for:', req.path);
     return res.status(401).json({ message: 'Access token required' });
   }
 
@@ -27,13 +82,12 @@ const authenticateToken = async (req: any, res: any, next: any) => {
     const decoded: any = jwt.verify(token, JWT_SECRET);
     const user = await storage.getUser(decoded.userId);
     if (!user) {
-      console.log('User not found for token:', decoded.userId);
       return res.status(401).json({ message: 'Invalid token' });
     }
-    req.user = user;
+    // Never expose the password hash on req.user (it flows into /api/auth/me).
+    req.user = sanitizeUser(user);
     next();
   } catch (error) {
-    console.log('Token verification failed for:', req.path, error);
     return res.status(403).json({ message: 'Invalid token' });
   }
 };
@@ -45,6 +99,22 @@ const requireAdmin = (req: any, res: any, next: any) => {
   }
   next();
 };
+
+// Authorize a driver to act on a journey they own; admins bypass. Returns false
+// (and writes the response) when access is denied so callers can early-return.
+async function authorizeJourneyAccess(req: any, res: any, journeyId: number): Promise<boolean> {
+  if (req.user.role === 'admin') return true;
+  const journey = await storage.getJourneyById(journeyId);
+  if (!journey) {
+    res.status(404).json({ message: 'Journey not found' });
+    return false;
+  }
+  if (journey.driverId !== req.user.id) {
+    res.status(403).json({ message: 'Access denied' });
+    return false;
+  }
+  return true;
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -69,70 +139,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.resolve(process.cwd(), 'client/sw.js'));
   });
 
-  // Initialize admin user if not exists
-  app.post("/api/init", async (req, res) => {
+  // One-time bootstrap. SECURITY: gated behind INIT_SECRET so it can't be
+  // called by anyone, and the admin password comes from the environment
+  // instead of a hardcoded default. No-op once INIT_SECRET is unset.
+  app.post("/api/init", authLimiter, async (req, res) => {
     try {
-      // Wait for database connection with timeout
+      const initSecret = process.env.INIT_SECRET;
+      if (!initSecret) {
+        return res.status(403).json({ message: "Initialization is disabled" });
+      }
+      const provided = req.headers['x-init-secret'] || req.body?.initSecret;
+      if (provided !== initSecret) {
+        return res.status(403).json({ message: "Invalid initialization secret" });
+      }
+
+      const adminPassword = process.env.INIT_ADMIN_PASSWORD;
+      if (!adminPassword) {
+        return res.status(400).json({ message: "INIT_ADMIN_PASSWORD must be set to bootstrap the admin user" });
+      }
+
       const connected = await waitForConnection(8000);
       if (!connected) {
-        return res.status(500).json({ message: "Database not connected", error: "Database connection not available" });
+        return res.status(503).json({ message: "Database not connected" });
       }
-      
+
       const existingAdmin = await storage.getUserByUsername("admin");
       if (!existingAdmin) {
         await storage.createUser({
           username: "admin",
-          password: "admin123",
+          password: adminPassword,
           name: "Admin User",
           role: "admin",
         });
       }
-      
-      // Check if vehicles exist, if not create sample vehicles
+
+      // Seed sample vehicles only if none exist.
       const existingVehicles = await storage.getAllVehicles();
       if (existingVehicles.length === 0) {
-        await storage.createVehicle({
-          licensePlate: "TS16UD1468",
-          model: "Tata Ace",
-        });
-        await storage.createVehicle({
-          licensePlate: "TS16UD1506",
-          model: "Ashok Leyland Dost",
-        });
-        await storage.createVehicle({
-          licensePlate: "TG16T1469",
-          model: "Mahindra Bolero Pickup",
-        });
-        await storage.createVehicle({
-          licensePlate: "TG16T1507",
-          model: "Eicher Pro 1055",
-        });
-        await storage.createVehicle({
-          licensePlate: "TG16T3001",
-          model: "Tata 407",
-        });
+        const seedVehicles = [
+          { licensePlate: "TS16UD1468", model: "Tata Ace" },
+          { licensePlate: "TS16UD1506", model: "Ashok Leyland Dost" },
+          { licensePlate: "TG16T1469", model: "Mahindra Bolero Pickup" },
+          { licensePlate: "TG16T1507", model: "Eicher Pro 1055" },
+          { licensePlate: "TG16T3001", model: "Tata 407" },
+        ];
+        for (const v of seedVehicles) {
+          await storage.createVehicle(v);
+        }
       }
-      
-      // Check if driver exists, if not create sample driver
-      const existingDriver = await storage.getUserByUsername("driver");
-      if (!existingDriver) {
-        await storage.createUser({
-          username: "driver",
-          password: "driver123",
-          name: "Test Driver",
-          role: "driver",
-        });
-      }
-      
+
       res.json({ message: "Initialization complete" });
     } catch (error) {
       console.error("Initialization error:", error);
-      res.status(500).json({ message: "Initialization failed", error: error.message });
+      res.status(500).json({ message: "Initialization failed" });
     }
   });
 
   // Authentication routes
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", authLimiter, async (req, res) => {
     try {
       const { username, password } = req.body;
       
@@ -163,16 +227,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Login error:", error);
-      res.status(500).json({ message: "Login failed", error: error.message });
+      res.status(500).json({ message: "Login failed" });
     }
   });
 
   app.get("/api/auth/me", authenticateToken, (req: any, res) => {
+    // req.user is already sanitized in authenticateToken.
     res.json({ user: req.user });
   });
 
   // User management routes (Admin only)
-  app.get("/api/users", authenticateToken, async (req, res) => {
+  app.get("/api/users", authenticateToken, requireAdmin, async (req, res) => {
     try {
       const users = await storage.getAllUsers();
       res.json(users);
@@ -304,19 +369,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Journey management routes
   app.get("/api/journeys", authenticateToken, async (req: any, res) => {
     try {
-      console.log(`Fetching journeys for user: ${req.user.username} (role: ${req.user.role})`);
       let journeys;
       if (req.user.role === 'admin') {
         journeys = await storage.getAllJourneys();
-        console.log(`Admin query returned ${journeys.length} journeys`);
       } else {
         journeys = await storage.getJourneysByDriver(req.user.id);
-        console.log(`Driver query returned ${journeys.length} journeys for driver ID: ${req.user.id}`);
       }
       res.json(journeys);
     } catch (error) {
       console.error('Journey fetch error:', error);
-      res.status(500).json({ message: "Failed to fetch journeys", error: error.message });
+      res.status(500).json({ message: "Failed to fetch journeys" });
     }
   });
 
@@ -331,37 +393,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/journeys", authenticateToken, async (req: any, res) => {
     try {
-      console.log("Journey creation request body:", JSON.stringify(req.body, null, 2));
-      console.log("User from token:", req.user);
-      
       const { photos, ...journeyFields } = req.body;
-      console.log("Journey fields after destructuring:", journeyFields);
-      console.log("Photos length:", photos ? photos.length : 0);
-      
+
+      // SECURITY: driverId always comes from the authenticated token, never the body.
+      // insertJourneySchema omits photos, so parse() strips them — validate and
+      // attach the photos explicitly afterwards or they never reach the DB.
       const journeyData = insertJourneySchema.parse({
         ...journeyFields,
         driverId: req.user.id,
-        photos: photos || null,
       });
-      console.log("Parsed journey data:", { ...journeyData, photos: photos ? `${photos.length} photos` : 'no photos' });
-      
-      const journey = await storage.createJourney(journeyData);
-      console.log("Journey created successfully:", journey.id);
+      const validatedPhotos = validatePhotos(photos);
+
+      const journey = await storage.createJourney({ ...journeyData, photos: validatedPhotos });
       res.json(journey);
-    } catch (error) {
-      console.error("Journey creation error:", error);
-      console.error("Error stack:", error.stack);
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
-        console.error("Zod validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid journey data", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to create journey", error: error.message });
+      if (error?.status === 400) {
+        return res.status(400).json({ message: error.message });
+      }
+      console.error("Journey creation error:", error);
+      res.status(500).json({ message: "Failed to create journey" });
     }
   });
 
-  app.patch("/api/journeys/:id/complete", authenticateToken, async (req, res) => {
+  app.patch("/api/journeys/:id/complete", authenticateToken, async (req: any, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseId(req.params.id);
+      if (id === null) return res.status(400).json({ message: "Invalid journey id" });
+      if (!(await authorizeJourneyAccess(req, res, id))) return;
       await storage.completeJourney(id);
       res.json({ message: "Journey completed successfully" });
     } catch (error) {
@@ -369,9 +430,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/journeys/:id/location", authenticateToken, async (req, res) => {
+  app.patch("/api/journeys/:id/location", authenticateToken, async (req: any, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseId(req.params.id);
+      if (id === null) return res.status(400).json({ message: "Invalid journey id" });
+      if (!(await authorizeJourneyAccess(req, res, id))) return;
       const { location, speed, distance } = req.body;
       await storage.updateJourneyLocation(id, location, speed, distance);
       res.json({ message: "Location updated successfully" });
@@ -380,15 +443,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/journeys/:id", authenticateToken, requireAdmin, async (req, res) => {
+  app.delete("/api/journeys/:id", authenticateToken, requireAdmin, async (req: any, res) => {
     try {
-      const id = parseInt(req.params.id);
-      console.log(`Admin ${req.user.username} deleting journey ID: ${id}`);
+      const id = parseId(req.params.id);
+      if (id === null) return res.status(400).json({ message: "Invalid journey id" });
       await storage.deleteJourney(id);
       res.json({ message: "Journey deleted successfully" });
     } catch (error) {
       console.error('Journey deletion error:', error);
-      res.status(500).json({ message: "Failed to delete journey", error: error.message });
+      res.status(500).json({ message: "Failed to delete journey" });
     }
   });
 
@@ -408,7 +471,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Expense management routes
   app.get("/api/journeys/:id/expenses", authenticateToken, async (req: any, res) => {
     try {
-      const journeyId = parseInt(req.params.id);
+      const journeyId = parseId(req.params.id);
+      if (journeyId === null) return res.status(400).json({ message: "Invalid journey id" });
+      if (!(await authorizeJourneyAccess(req, res, journeyId))) return;
       const expenses = await storage.getExpensesByJourneyForUser(journeyId, req.user.role);
       res.json(expenses);
     } catch (error) {
@@ -418,26 +483,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/expenses", authenticateToken, async (req: any, res) => {
     try {
-      console.log("Expense creation request body:", req.body);
-      
       // Convert amount to string if it's a number
       const requestBody = {
         ...req.body,
         amount: typeof req.body.amount === 'number' ? req.body.amount.toString() : req.body.amount
       };
-      
+
       const expenseData = insertExpenseSchema.parse(requestBody);
-      console.log("Parsed expense data:", expenseData);
+      // SECURITY: a driver may only add expenses to a journey they own.
+      if (expenseData.journeyId == null) {
+        return res.status(400).json({ message: "journeyId is required" });
+      }
+      if (!(await authorizeJourneyAccess(req, res, expenseData.journeyId))) return;
       const expense = await storage.createExpense(expenseData);
-      console.log("Created expense:", expense);
       res.json(expense);
     } catch (error) {
       console.error("Expense creation error:", error);
       if (error instanceof z.ZodError) {
-        console.error("Validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid expense data", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to create expense", error: error.message });
+      res.status(500).json({ message: "Failed to create expense" });
     }
   });
 
@@ -450,30 +515,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/debug/expenses/:journeyId", authenticateToken, requireAdmin, async (req, res) => {
-    try {
-      const journeyId = parseInt(req.params.journeyId);
-      const allExpenses = await storage.getExpensesByJourney(journeyId);
-      const userFilteredExpenses = await storage.getExpensesByJourneyForUser(journeyId, req.user.role);
-      res.json({
-        journeyId,
-        userRole: req.user.role,
-        allExpenses,
-        userFilteredExpenses,
-        count: {
-          all: allExpenses.length,
-          filtered: userFilteredExpenses.length
-        }
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to debug expenses" });
-    }
-  });
-
-
-
-  // Salary management routes
-  app.get("/api/salaries", authenticateToken, async (req, res) => {
+  // Salary management routes (Admin only — salary data is sensitive financials).
+  // Client-side route gating is not a security control; enforce it on the server.
+  app.get("/api/salaries", authenticateToken, requireAdmin, async (req, res) => {
     try {
       const payments = await storage.getSalaryPayments();
       res.json(payments);
@@ -482,7 +526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/salaries/pay", authenticateToken, async (req, res) => {
+  app.post("/api/salaries/pay", authenticateToken, requireAdmin, async (req, res) => {
     try {
       console.log("Salary payment request body:", req.body);
       
@@ -508,7 +552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/salaries/reset", authenticateToken, async (req, res) => {
+  app.post("/api/salaries/reset", authenticateToken, requireAdmin, async (req, res) => {
     try {
       await storage.resetSalaryData();
       res.json({ message: "Salary data reset successfully" });
@@ -517,22 +561,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update user salary
-  app.put("/api/users/:id", authenticateToken, async (req, res) => {
-    try {
-      const userId = parseInt(req.params.id);
-      const { salary } = req.body;
-      
-      if (!salary || isNaN(parseFloat(salary))) {
-        return res.status(400).json({ message: "Valid salary amount is required" });
-      }
-
-      await storage.updateUserSalary(userId, salary);
-      res.json({ message: "User salary updated successfully" });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to update user salary" });
-    }
-  });
+  // NOTE: salary updates go through the admin-only PUT /api/users/:id/salary
+  // route defined above. A second unguarded PUT /api/users/:id handler used to
+  // live here; it was dead code (shadowed by the earlier admin route) and has
+  // been removed to avoid the appearance of an unprotected salary endpoint.
 
   // Admin editing routes
   app.put("/api/admin/journeys/:id/financials", authenticateToken, requireAdmin, async (req, res) => {
@@ -692,66 +724,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "EMI data reset successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to reset EMI data" });
-    }
-  });
-
-  // Debug endpoint to show journey 114 data and calculation
-  app.get("/api/debug/journey-114", async (req, res) => {
-    try {
-      const journey = await storage.getJourneyById(114);
-      const expenses = await storage.getJourneyExpenses(114);
-      
-      if (!journey) {
-        return res.status(404).json({ message: "Journey 114 not found" });
-      }
-      
-      // Manual calculation to debug
-      const revenueCategories = ['hyd_inward', 'top_up'];
-      const businessExpenses = expenses.filter(expense => !revenueCategories.includes(expense.category));
-      const totalBusinessExpenses = businessExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-      const topUpExpenses = expenses.filter(expense => expense.category === 'top_up');
-      const totalTopUp = topUpExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-      
-      const pouch = parseFloat(journey.pouch);
-      const security = parseFloat(journey.security || '0');
-      const securityAddition = journey.status === 'completed' ? security : 0;
-      const manualBalance = pouch + totalTopUp + securityAddition - totalBusinessExpenses;
-      
-      res.json({
-        journey: {
-          id: journey.id,
-          pouch: journey.pouch,
-          security: journey.security,
-          status: journey.status,
-          currentBalance: journey.balance,
-          currentTotalExpenses: journey.totalExpenses
-        },
-        expenses: expenses.map(e => ({ category: e.category, amount: e.amount })),
-        calculation: {
-          pouch,
-          security,
-          securityAddition,
-          totalTopUp,
-          totalBusinessExpenses,
-          manualBalance,
-          formula: `${pouch} + ${totalTopUp} + ${securityAddition} - ${totalBusinessExpenses} = ${manualBalance}`
-        }
-      });
-    } catch (error) {
-      console.error("Failed to debug journey 114:", error);
-      res.status(500).json({ message: "Failed to debug journey 114" });
-    }
-  });
-
-  // Test endpoint to trigger recalculation for journey 114 specifically
-  app.post("/api/debug/recalculate-114", async (req, res) => {
-    try {
-      console.log("=== DEBUGGING JOURNEY 114 BALANCE CALCULATION ===");
-      await storage.updateJourneyTotals(114);
-      res.json({ message: "Journey 114 recalculated - check console logs" });
-    } catch (error) {
-      console.error("Failed to recalculate journey 114:", error);
-      res.status(500).json({ message: "Failed to recalculate journey 114" });
     }
   });
 

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -39,7 +39,14 @@ export const journeys = pgTable("journeys", {
   totalExpenses: decimal("total_expenses", { precision: 15, scale: 2 }).default("0"),
   balance: decimal("balance", { precision: 15, scale: 2 }).default("0"),
   photos: jsonb("photos"), // Array of base64 photo strings
-});
+}, (table) => ({
+  // getJourneysByDriver: WHERE driver_id ORDER BY start_time DESC
+  driverStartIdx: index("journeys_driver_start_idx").on(table.driverId, table.startTime),
+  // getActiveJourneys / dashboard stats: WHERE status
+  statusIdx: index("journeys_status_idx").on(table.status),
+  // getAllJourneys: ORDER BY start_time DESC
+  startTimeIdx: index("journeys_start_time_idx").on(table.startTime),
+}));
 
 export const expenses = pgTable("expenses", {
   id: serial("id").primaryKey(),
@@ -49,7 +56,13 @@ export const expenses = pgTable("expenses", {
   description: text("description"),
   isCompanySecret: boolean("is_company_secret").default(false), // true for HYD Inward and Toll
   timestamp: timestamp("timestamp").defaultNow(),
-});
+}, (table) => ({
+  // Every expense read filters by journey_id and orders by timestamp DESC;
+  // updateJourneyTotals + getExpensesByJourney both hit this constantly.
+  journeyTimeIdx: index("expenses_journey_time_idx").on(table.journeyId, table.timestamp),
+  // getFinancialStats: SUM(...) FILTER (WHERE category ...)
+  categoryIdx: index("expenses_category_idx").on(table.category),
+}));
 
 export const salaryPayments = pgTable("salary_payments", {
   id: serial("id").primaryKey(),
@@ -60,7 +73,11 @@ export const salaryPayments = pgTable("salary_payments", {
   paidAt: timestamp("paid_at").defaultNow(),
   month: text("month").notNull(),
   year: integer("year").notNull(),
-});
+}, (table) => ({
+  // getSalaryPayments ORDER BY paid_at DESC; per-user filtering in reset logic.
+  userIdx: index("salary_payments_user_idx").on(table.userId),
+  paidAtIdx: index("salary_payments_paid_at_idx").on(table.paidAt),
+}));
 
 export const emiPayments = pgTable("emi_payments", {
   id: serial("id").primaryKey(),
@@ -70,7 +87,11 @@ export const emiPayments = pgTable("emi_payments", {
   status: text("status").notNull().default("pending"), // "pending", "paid", "overdue"
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // getAllEmiPayments ORDER BY created_at DESC; joins/filters by vehicle.
+  vehicleIdx: index("emi_payments_vehicle_idx").on(table.vehicleId),
+  createdAtIdx: index("emi_payments_created_at_idx").on(table.createdAt),
+}));
 
 export const emiResetHistory = pgTable("emi_reset_history", {
   id: serial("id").primaryKey(),

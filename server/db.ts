@@ -31,9 +31,20 @@ async function createDatabaseConnection(): Promise<void> {
   console.log(`Attempting database connection (attempt ${connectionAttempts}/${MAX_CONNECTION_ATTEMPTS})`);
 
   try {
-    pool = new Pool({ 
+    // SECURITY: verify the server certificate in production (prevents MITM on the
+    // DB connection). Neon/Render present valid chains, so this works out of the
+    // box. If a deployment terminates TLS with an untrusted chain, set
+    // DATABASE_SSL_NO_VERIFY=true as a conscious, documented opt-out.
+    const sslConfig = process.env.NODE_ENV === 'production'
+      ? { rejectUnauthorized: process.env.DATABASE_SSL_NO_VERIFY !== 'true' }
+      : false;
+    if (process.env.NODE_ENV === 'production' && process.env.DATABASE_SSL_NO_VERIFY === 'true') {
+      console.warn('⚠️  DATABASE_SSL_NO_VERIFY=true — DB certificate verification is DISABLED.');
+    }
+
+    pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl: sslConfig,
       max: process.env.NODE_ENV === 'production' ? 2 : 5,
       min: 0,
       idleTimeoutMillis: 5000,
