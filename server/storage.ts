@@ -42,11 +42,12 @@ export interface IStorage {
   updateVehicleMonthlyEmi(id: number, monthlyEmi: string): Promise<void>;
   
   // Journey methods
-  createJourney(journey: InsertJourney): Promise<Journey>;
+  createJourney(journey: InsertJourney & { photos?: string[] | null }): Promise<Journey>;
   getAllJourneys(): Promise<Journey[]>;
   getActiveJourneys(): Promise<Journey[]>;
   getJourneysByDriver(driverId: number): Promise<Journey[]>;
   getJourneyPhotos(id: number): Promise<string[] | null>;
+  getJourneyById(id: number): Promise<Journey | undefined>;
   updateJourneyStatus(id: number, status: string): Promise<void>;
   updateJourneyLocation(id: number, location: any, speed: number, distance: number): Promise<void>;
   completeJourney(id: number): Promise<void>;
@@ -134,7 +135,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(desc(users.createdAt));
+    // SECURITY: never select the password hash for list responses.
+    return await db
+      .select({
+        id: users.id,
+        username: users.username,
+        name: users.name,
+        role: users.role,
+        salary: users.salary,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .orderBy(desc(users.createdAt)) as User[];
+  }
+
+  async getJourneyById(id: number): Promise<Journey | undefined> {
+    const [journey] = await db.select().from(journeys).where(eq(journeys.id, id)).limit(1);
+    return journey || undefined;
   }
 
   async updateUser(id: number, data: { username?: string; name?: string; role?: string; password?: string }): Promise<void> {
@@ -190,9 +207,11 @@ export class DatabaseStorage implements IStorage {
     await db.update(vehicles).set({ monthlyEmi }).where(eq(vehicles.id, id));
   }
 
-  async createJourney(journey: InsertJourney): Promise<Journey> {
+  async createJourney(journey: InsertJourney & { photos?: string[] | null }): Promise<Journey> {
     // Only insert the fields that should be provided during journey creation
-    // Other fields have database defaults or are calculated
+    // Other fields have database defaults or are calculated.
+    // NOTE: photos must be passed in explicitly here — insertJourneySchema omits
+    // them, so they are NOT part of InsertJourney and would otherwise be dropped.
     const insertData = {
       driverId: journey.driverId,
       vehicleId: journey.vehicleId,

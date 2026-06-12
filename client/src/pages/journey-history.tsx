@@ -394,9 +394,11 @@ export default function JourneyHistory() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {journeyPhotos.map((photo: string, index: number) => (
                     <div key={index} className="relative aspect-square overflow-hidden rounded-lg border border-gray-200">
-                      <img 
-                        src={photo} 
+                      <img
+                        src={photo}
                         alt={`Journey document ${index + 1}`}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
                         onClick={() => window.open(photo, '_blank')}
                       />
